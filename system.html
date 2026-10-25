@@ -1,0 +1,791 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Customizer System Map</title>
+<style>
+  :root {
+    --bg: #05070d; --surface: #0c111e; --surface-2: #121a2c; --border: rgba(120,160,255,.16);
+    --text: #e6ecff; --muted: #8b97b8; --soft: #c7d0ea; --accent: #7cc4ff; --ok: #4fe3a0; --warn: #ffb547; --bad: #ff7a8a; --line: #5d6b8f;
+    --g-public: #90a4ff; --g-auth: #b48cff; --g-design: #5ee6e6; --g-builder: #7cc4ff; --g-cart: #4fe3a0; --g-account: #ffb547; --g-orders: #ff7ab6; --g-external: #ff8a65;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 112px; }
+  body { margin: 0; background: radial-gradient(ellipse at 50% -10%, #0f1830 0%, var(--bg) 55%) fixed; color: var(--text);
+    font: 15px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  a { color: var(--accent); }
+  code { font: 12px/1.4 ui-monospace, "Cascadia Code", Consolas, monospace; background: rgba(124,196,255,.08); padding: 1px 5px; border-radius: 4px; color: #cfe6ff; word-break: break-word; }
+
+  /* top bar */
+  .topbar { position: sticky; top: var(--appnav-h, 0px); z-index: 20; display: flex; align-items: center; gap: 14px; padding: 10px 24px;
+    background: rgba(5,7,13,.85); backdrop-filter: blur(10px); border-bottom: 1px solid var(--border); overflow-x: auto; }
+  .topbar b { white-space: nowrap; }
+  .topbar nav { display: flex; gap: 4px; }
+  .topbar nav a { color: var(--muted); text-decoration: none; font-size: 13px; padding: 5px 10px; border-radius: 8px; white-space: nowrap; }
+  .topbar nav a:hover, .topbar nav a.active { color: var(--text); background: rgba(124,196,255,.1); }
+  .btn { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; padding: 6px 12px; border-radius: 8px; border: 1px solid var(--border);
+    color: var(--text); text-decoration: none; background: rgba(255,255,255,.04); cursor: pointer; white-space: nowrap; font-family: inherit; }
+  .btn:hover { border-color: var(--accent); }
+  .btn[aria-pressed=true] { background: rgba(124,196,255,.16); border-color: var(--accent); }
+
+  main { max-width: 1240px; margin: 0 auto; padding: 24px 24px 96px; }
+  section { margin-top: 64px; }
+  h1 { font-size: 32px; line-height: 1.2; margin: 18px 0 8px; }
+  h2 { font-size: 24px; margin: 0 0 6px; }
+  h3 { font-size: 13px; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); margin: 0 0 10px; font-weight: 600; }
+  .lead { color: var(--soft); max-width: 820px; margin: 0 0 20px; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 18px 20px; }
+  .muted { color: var(--muted); }
+
+  .kpis { display: grid; grid-template-columns: repeat(6, minmax(0,1fr)); gap: 12px; margin-top: 22px; }
+  .kpi { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 14px 16px; }
+  .kpi b { display: block; font-size: 26px; font-variant-numeric: tabular-nums; }
+  .kpi span { font-size: 11.5px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+
+  /* App map */
+  .map-wrap { position: relative; }
+  .map { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; position: relative; z-index: 1; }
+  .screen { position: relative; z-index: 2; }
+  .group { border: 1px solid var(--border); border-radius: 14px; padding: 12px; background: rgba(12,17,30,.45); }
+  .group h4 { margin: 0 0 10px; font-size: 12.5px; letter-spacing: .06em; text-transform: uppercase; display: flex; align-items: center; gap: 8px; }
+  .group h4 i { width: 10px; height: 10px; border-radius: 50%; background: currentColor; box-shadow: 0 0 10px currentColor; }
+  .screen { display: block; width: 100%; text-align: left; background: var(--surface-2); color: var(--text); border: 1px solid rgba(255,255,255,.06);
+    border-left: 3px solid var(--c); border-radius: 9px; padding: 8px 10px; margin-bottom: 8px; cursor: pointer; font: inherit; transition: transform .12s, border-color .12s; }
+  .screen:hover, .screen.sel { transform: translateX(2px); border-color: var(--c); }
+  .screen.dim { opacity: .3; }
+  .screen b { display: block; font-size: 13.5px; }
+  .screen small { color: var(--muted); font-size: 11.5px; font-family: ui-monospace, Consolas, monospace; word-break: break-all; }
+  .screen.journey { box-shadow: 0 0 0 1px var(--c), 0 0 16px -4px var(--c); }
+  #mapSvg { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+  .map-tools { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; align-items: center; }
+  .map-tools input { flex: 1; min-width: 200px; padding: 7px 10px; border-radius: 8px; border: 1px solid var(--border); background: rgba(0,0,0,.3); color: var(--text); font: inherit; }
+
+  /* Drawer */
+  .drawer { position: fixed; top: 0; right: 0; height: 100%; width: min(440px, 100%); background: #0a0f1b; border-left: 1px solid var(--border);
+    z-index: 40; transform: translateX(100%); transition: transform .2s; overflow-y: auto; padding: 20px 22px 40px; box-shadow: -20px 0 40px rgba(0,0,0,.4); }
+  .drawer.open { transform: none; }
+  .drawer .close { position: sticky; top: 0; float: right; }
+  .drawer h2 { font-size: 20px; margin-top: 6px; }
+  .drawer dl { margin: 14px 0 0; }
+  .drawer dt { font-size: 11.5px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); margin-top: 14px; }
+  .drawer dd { margin: 4px 0 0; color: var(--soft); }
+  .drawer ul { margin: 4px 0 0; padding-left: 18px; }
+
+  /* Builder mock */
+  .bmode { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+  .builder { display: grid; grid-template-columns: 76px 300px minmax(0,1fr); grid-template-rows: auto 1fr; border: 1px solid var(--border);
+    border-radius: 14px; overflow: hidden; background: #0a0f1b; min-height: 560px; }
+  .b-head { grid-column: 1 / -1; display: flex; align-items: center; gap: 8px; padding: 10px 14px; border-bottom: 1px solid var(--border); background: var(--surface-2); flex-wrap: wrap; }
+  .b-head .sp { flex: 1; }
+  .pill { font-size: 12px; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--border); color: var(--soft); background: rgba(255,255,255,.03); cursor: pointer; font-family: inherit; }
+  .pill.cta { background: var(--accent); color: #04121f; border-color: var(--accent); font-weight: 600; }
+  .pill:hover { border-color: var(--accent); }
+  .b-rail { border-right: 1px solid var(--border); padding: 8px 6px; display: flex; flex-direction: column; gap: 4px; background: #0c1220; }
+  .tab { display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 9px 4px; border-radius: 10px; border: 1px solid transparent;
+    background: none; color: var(--muted); font: 11px/1.2 inherit; cursor: pointer; text-align: center; }
+  .tab svg { width: 20px; height: 20px; }
+  .tab:hover { color: var(--text); }
+  .tab.on { color: var(--text); background: rgba(124,196,255,.12); border-color: rgba(124,196,255,.35); }
+  .tab.locked { opacity: .3; }
+  .b-aside { border-right: 1px solid var(--border); padding: 14px; overflow-y: auto; max-height: 640px; }
+  .b-aside h5 { margin: 0 0 4px; font-size: 15px; }
+  .b-aside p { font-size: 13px; color: var(--soft); margin: 6px 0; }
+  .b-aside ul { font-size: 13px; color: var(--soft); padding-left: 18px; margin: 6px 0; }
+  .b-aside .file { font-size: 11.5px; color: var(--muted); margin-top: 10px; }
+  .swatches { display: grid; grid-template-columns: repeat(8, 1fr); gap: 6px; margin: 6px 0 12px; }
+  .sw { aspect-ratio: 1; border-radius: 6px; border: 1px solid rgba(255,255,255,.15); cursor: pointer; }
+  .sw.sel { outline: 2px solid #fff; outline-offset: 1px; }
+  .inuse { display: flex; gap: 6px; flex-wrap: wrap; margin: 6px 0 12px; }
+  .chipc { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; padding: 3px 8px 3px 4px; border-radius: 999px; border: 1px solid var(--border); }
+  .chipc i { width: 16px; height: 16px; border-radius: 50%; display: inline-block; border: 1px solid rgba(255,255,255,.2); }
+  .b-canvas { position: relative; display: grid; grid-template-rows: auto 1fr auto; padding: 12px; background: radial-gradient(circle at 50% 45%, #18233d 0%, #0a0f1b 70%); }
+  .b-canvas .info { font-size: 12px; color: var(--muted); display: flex; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+  .b-canvas .stage { display: grid; place-items: center; }
+  .b-canvas svg.jersey { width: min(300px, 80%); height: auto; filter: drop-shadow(0 18px 30px rgba(0,0,0,.5)); }
+  .thumbs { display: flex; gap: 8px; justify-content: center; flex-wrap: wrap; }
+  .thumb { font-size: 11.5px; padding: 5px 10px; border-radius: 8px; border: 1px solid var(--border); background: rgba(0,0,0,.3); color: var(--soft); cursor: pointer; font-family: inherit; }
+  .thumb.on { border-color: var(--accent); color: var(--text); }
+  .lockbadge { position: absolute; top: 44px; left: 50%; transform: translateX(-50%); background: rgba(255,181,71,.14); border: 1px solid var(--warn);
+    color: var(--warn); font-size: 12px; padding: 4px 10px; border-radius: 999px; display: none; white-space: nowrap; }
+  .builder.reorder .lockbadge { display: block; }
+  .reworkbar { grid-column: 1 / -1; display: none; padding: 8px 14px; background: rgba(255,181,71,.12); color: var(--warn); font-size: 13px; border-bottom: 1px solid rgba(255,181,71,.3); }
+  .builder.rework .reworkbar { display: block; }
+  .classic-note { margin-top: 10px; font-size: 13px; }
+
+  /* Capabilities */
+  .capbar { display: grid; grid-template-columns: 210px minmax(0,1fr) 48px; gap: 10px; align-items: center; font-size: 13px; padding: 5px 0; cursor: pointer; }
+  .capbar .trk { height: 10px; border-radius: 5px; background: rgba(255,255,255,.06); overflow: hidden; }
+  .capbar .trk i { display: block; height: 100%; background: var(--accent); border-radius: 5px; }
+  .capbar:hover span:first-child, .capbar.on span:first-child { color: var(--accent); }
+  .caplist { margin-top: 14px; }
+  .cap { border-top: 1px solid var(--border); padding: 10px 0; }
+  .cap summary { cursor: pointer; list-style: none; display: flex; gap: 10px; align-items: baseline; }
+  .cap summary::-webkit-details-marker { display: none; }
+  .cap .id { font: 12px ui-monospace, Consolas, monospace; color: var(--accent); min-width: 62px; }
+  .cap .brd { font-size: 11px; color: var(--ok); border: 1px solid rgba(79,227,160,.4); border-radius: 999px; padding: 0 7px; margin-left: 6px; }
+  .cap pre { margin: 6px 0 0; padding: 8px; background: rgba(0,0,0,.4); border-radius: 6px; white-space: pre-wrap; word-break: break-word; font: 12px/1.4 ui-monospace, Consolas, monospace; }
+  .cap .ev { font-size: 12px; color: var(--accent); margin-top: 8px; }
+
+  /* Architecture */
+  .figure { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 12px; overflow-x: auto; }
+  .figure svg { display: block; width: 100%; height: auto; min-width: 760px; }
+
+  /* Flows */
+  .flows { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+  .flow { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 16px 18px; }
+  .flow h4 { margin: 0 0 4px; font-size: 16px; }
+  .flow p { margin: 0 0 10px; color: var(--soft); font-size: 13.5px; }
+  .chain { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+  .step { font-size: 12.5px; padding: 5px 9px; border-radius: 8px; background: var(--surface-2); border: 1px solid rgba(255,255,255,.07); }
+  .step.ext { border-color: rgba(255,138,101,.5); }
+  .step.mail { border-color: rgba(255,181,71,.5); }
+  .arrow { color: var(--line); }
+  .flow .foot { font-size: 11.5px; color: var(--muted); margin-top: 10px; font-family: ui-monospace, Consolas, monospace; word-break: break-word; }
+  .legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12px; color: var(--muted); margin-bottom: 12px; }
+  .legend span::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 6px; vertical-align: -1px; border: 1px solid var(--line); }
+  .legend .e::before { border-color: #ff8a65; } .legend .m::before { border-color: #ffb547; }
+
+  /* Tables */
+  .scroll { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; font-size: 11.5px; text-transform: uppercase; letter-spacing: .05em; position: sticky; top: 0; background: var(--surface); }
+  td.y { color: var(--ok); text-align: center; } td.n { color: var(--muted); text-align: center; } td.p { color: var(--warn); text-align: center; }
+  .sev { font-size: 11px; font-weight: 700; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
+  .sev.High { background: rgba(255,122,138,.15); color: var(--bad); }
+  .sev.Broken { background: rgba(255,181,71,.15); color: var(--warn); }
+  .sev.Note { background: rgba(124,196,255,.12); color: var(--accent); }
+  .grid2 { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 14px; }
+  details.routes { border-top: 1px solid var(--border); padding: 10px 0; }
+  details.routes summary { cursor: pointer; font-weight: 600; }
+  details.routes summary span { color: var(--muted); font-weight: 400; font-size: 13px; }
+  footer { margin-top: 72px; font-size: 12px; color: var(--muted); }
+
+  @media (max-width: 1000px) {
+    .map { grid-template-columns: repeat(2, minmax(0,1fr)); }
+    .kpis { grid-template-columns: repeat(3, minmax(0,1fr)); }
+    .builder { grid-template-columns: 64px minmax(0,1fr); }
+    .b-canvas { grid-column: 1 / -1; min-height: 380px; }
+    .flows, .grid2 { grid-template-columns: 1fr; }
+  }
+  @media (max-width: 600px) {
+    main { padding: 16px 16px 72px; }
+    .map { grid-template-columns: 1fr; }
+    .kpis { grid-template-columns: repeat(2, minmax(0,1fr)); }
+    .capbar { grid-template-columns: 130px minmax(0,1fr) 36px; }
+    h1 { font-size: 24px; }
+  }
+</style>
+</head>
+<body>
+<script src="assets/nav.js"></script>
+<header class="topbar">
+  <b>Customizer System Map</b>
+  <nav id="topnav" aria-label="On this page">
+    <a href="#map">App map</a><a href="#builder">Builder</a><a href="#arch">Architecture</a><a href="#flows">Flows</a>
+    <a href="#data">Data</a><a href="#roles">Roles</a><a href="#flags">Flags</a><a href="#risks">Risks</a><a href="#routes">Routes</a>
+  </nav>
+</header>
+
+<main>
+  <div class="muted" style="font-size:12px;margin-top:8px" id="metaLine">Customizer Core</div>
+  <h1>Everything Customizer Core does, on one page</h1>
+  <p class="lead">Customizer Core is a Laravel + Inertia + Vue 3 app. Reps, dealers and customers use it to design uniforms, build carts, get quotes and approvals, and place and track factory orders. The Prolook/QStrike API is the system of record for accounts, saved designs and orders. Click any screen, builder tab or flow to see its routes and code.</p>
+  <div class="kpis" id="kpis"></div>
+
+  <!-- APP MAP -->
+  <section id="map">
+    <h2>App map: every screen</h2>
+    <p class="lead">Screens are grouped by area. <b>Show the main journey</b> draws the path from login to an order on the factory floor and back. Click a screen for its route, controller and what happens there.</p>
+    <div class="map-tools">
+      <button class="btn" id="btnJourney" aria-pressed="true">Show the main journey</button>
+      <input type="search" id="mapSearch" placeholder="Filter screens, e.g. quote, roster, approval…" aria-label="Filter screens">
+    </div>
+    <div class="map-wrap"><svg id="mapSvg" aria-hidden="true"></svg><div class="map" id="mapGrid"></div></div>
+  </section>
+
+  <!-- BUILDER -->
+  <section id="builder">
+    <h2>The builder</h2>
+    <p class="lead">This is a drawn mock-up of the new <b>reskin builder</b> (<code>BuilderReskin.vue</code>). It is used when <code>VITE_FEATURE_BUILDER_RESKIN</code> is on; otherwise the classic <code>Builder.vue</code> loads. Click a tab on the left rail to see what it does. In <b>Customize</b>, the color picker splits colors into Core and Additional. Switch modes to see what reorder lock and rework change.</p>
+    <div class="bmode">
+      <button class="btn" data-mode="normal" aria-pressed="true">New design</button>
+      <button class="btn" data-mode="reorder" aria-pressed="false">Reorder (locked)</button>
+      <button class="btn" data-mode="rework" aria-pressed="false">Rework (Fix Issue)</button>
+      <button class="btn" data-mode="classic" aria-pressed="false">Classic builder</button>
+    </div>
+    <div class="builder" id="builderMock">
+      <div class="b-head">
+        <span class="pill">← Back to Cart</span><span class="pill">↶ Undo</span><span class="pill">↷ Redo</span><span class="pill">Notes ▾</span>
+        <span class="sp"></span><span class="pill">Save</span><span class="pill cta" id="ctaBtn">Add to Cart</span>
+      </div>
+      <div class="reworkbar" id="reworkBar">⚠ Rework: update only what is in the rework notes, then Resolve &amp; Submit.</div>
+      <div class="b-rail" id="rail"></div>
+      <div class="b-aside" id="aside"></div>
+      <div class="b-canvas">
+        <div class="info"><span>Design · Football Jersey (example)</span><span>Show Locations · Side A</span></div>
+        <div class="stage">
+          <svg class="jersey" viewBox="0 0 300 320" aria-label="Jersey preview">
+            <path id="jBody" d="M95 30 L60 45 L10 95 L45 140 L70 120 L70 300 L230 300 L230 120 L255 140 L290 95 L240 45 L205 30 Q150 70 95 30 Z" fill="#1f4fa8" stroke="#0b1530" stroke-width="3"/>
+            <path id="jSleeveL" d="M60 45 L10 95 L45 140 L70 120 Z" fill="#f2f4f8" opacity=".95"/>
+            <path id="jSleeveR" d="M240 45 L290 95 L255 140 L230 120 Z" fill="#f2f4f8" opacity=".95"/>
+            <path id="jCollar" d="M95 30 Q150 70 205 30 L195 26 Q150 58 105 26 Z" fill="#ffb547"/>
+            <rect x="70" y="250" width="160" height="10" fill="#ffb547" opacity=".9"/>
+            <text x="150" y="190" text-anchor="middle" font-size="64" font-weight="800" fill="#f2f4f8" font-family="system-ui">23</text>
+            <text x="150" y="112" text-anchor="middle" font-size="20" font-weight="700" fill="#f2f4f8" font-family="system-ui" letter-spacing="2">TIGERS</text>
+          </svg>
+        </div>
+        <span class="lockbadge">🔒 Jersey design is locked to match the original</span>
+        <div class="thumbs" id="thumbs"></div>
+      </div>
+    </div>
+
+    <div class="grid2" style="margin-top:18px">
+      <div class="card">
+        <h3>Builder requirements proven in code</h3>
+        <p class="muted" style="margin-top:-4px;font-size:13px" id="capIntro">Loading…</p>
+        <div id="capBars"></div>
+      </div>
+      <div class="card">
+        <h3>How a builder session works</h3>
+        <ol style="margin:0;padding-left:20px;font-size:13.5px;color:var(--soft)">
+          <li>The page loads the uniform as <code>normal</code>, <code>saved-design</code>, <code>cart-item</code> or <code>reorder-item</code> (<code>customizerStore.initialize*</code>).</li>
+          <li><code>@qstrike/builder</code> draws the uniform on a PIXI canvas (<code>core/stage/stage.ts</code>) in 2D layers, or as 3D trim shapes.</li>
+          <li>Each edit updates the 10k-line <code>stores/customizer.js</code>. Undo/redo keeps 50 snapshots (reskin only).</li>
+          <li>Thumbnails for each view are captured from the canvas and uploaded to S3 through <code>/api/image/upload</code>.</li>
+          <li><b>Save</b> goes straight to Prolook (<code>/saved_design</code>). <b>Add to Cart</b> runs these checks, then <code>POST /carts/items</code>:
+            <ul>
+              <li>a team is chosen;</li>
+              <li>the minimum team colors are set;</li>
+              <li>logo colors don't conflict;</li>
+              <li>a brand logo color is chosen;</li>
+              <li>sizes and the roster are valid.</li>
+            </ul>
+          </li>
+        </ol>
+      </div>
+    </div>
+    <div class="card" style="margin-top:14px">
+      <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+        <h3 style="margin:0">All builder requirements</h3>
+        <input type="search" id="capSearch" placeholder="Search, e.g. roster, color, logo…" aria-label="Search builder requirements"
+          style="flex:1;min-width:180px;padding:6px 10px;border-radius:8px;border:1px solid var(--border);background:rgba(0,0,0,.3);color:var(--text);font:inherit">
+        <span class="muted" id="capCount" style="font-size:12.5px"></span>
+      </div>
+      <div class="caplist" id="capList"></div>
+    </div>
+  </section>
+
+  <!-- ARCHITECTURE -->
+  <section id="arch">
+    <h2>Architecture</h2>
+    <p class="lead">Every page request goes through Laravel and Inertia. Heavy work runs in job chains: thumbnails, then PDF, then analytics. Live updates use Pusher broadcasts. Partner systems call in through key-protected APIs.</p>
+    <div class="figure">
+      <svg viewBox="0 0 1180 560" role="img" aria-label="Customizer Core architecture" font-family="system-ui, sans-serif" font-size="12.5">
+        <defs>
+          <marker id="a1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#7d8bb0"/></marker>
+          <marker id="a2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#ff8a65"/></marker>
+        </defs>
+        <!-- users -->
+        <g font-size="12"><rect x="20" y="20" width="200" height="520" rx="12" fill="rgba(144,164,255,.06)" stroke="#90a4ff"/>
+          <text x="36" y="46" fill="#e6ecff" font-weight="600" font-size="14">People</text>
+          <g fill="none" stroke="#3a4766"><rect x="36" y="62" width="168" height="44" rx="8"/><rect x="36" y="116" width="168" height="44" rx="8"/><rect x="36" y="170" width="168" height="44" rx="8"/><rect x="36" y="224" width="168" height="44" rx="8"/><rect x="36" y="278" width="168" height="44" rx="8"/><rect x="36" y="332" width="168" height="44" rx="8"/></g>
+          <g fill="#e6ecff"><text x="48" y="82">Sales rep / dealer</text><text x="48" y="136">Customer (end user)</text><text x="48" y="190">Managing rep</text><text x="48" y="244">Product Pro / Brand mgr</text><text x="48" y="298">Coach approver</text><text x="48" y="352">Coach / player / family</text></g>
+          <g fill="#8b97b8" font-size="11"><text x="48" y="98">places orders, reworks</text><text x="48" y="152">builds, requests quotes</text><text x="48" y="206">sees all reps' rework</text><text x="48" y="260">customers, pricing</text><text x="48" y="314">token link, no login</text><text x="48" y="368">team stores</text></g>
+          <text x="36" y="410" fill="#8b97b8" font-size="11.5">Browser: Vue 3 + Inertia</text><text x="36" y="426" fill="#8b97b8" font-size="11.5">PIXI canvas (@qstrike/builder)</text>
+          <text x="36" y="442" fill="#8b97b8" font-size="11.5">Pinia stores · Ziggy routes</text><text x="36" y="458" fill="#8b97b8" font-size="11.5">Laravel Echo over Pusher</text>
+        </g>
+        <!-- laravel -->
+        <rect x="270" y="20" width="520" height="520" rx="12" fill="rgba(79,227,160,.05)" stroke="#4fe3a0"/>
+        <text x="286" y="46" fill="#e6ecff" font-weight="600" font-size="14">Customizer Core · Laravel</text>
+        <g fill="none" stroke="#3a4766">
+          <rect x="286" y="60" width="240" height="120" rx="8"/><rect x="538" y="60" width="236" height="120" rx="8"/>
+          <rect x="286" y="192" width="240" height="132" rx="8"/><rect x="538" y="192" width="236" height="132" rx="8"/>
+          <rect x="286" y="336" width="240" height="190" rx="8"/><rect x="538" y="336" width="236" height="190" rx="8"/>
+        </g>
+        <text x="298" y="80" fill="#e6ecff" font-weight="600">Routes and middleware</text>
+        <g fill="#c7d0ea" font-size="11.5"><text x="298" y="98">web.php · api.php · auth.php</text><text x="298" y="114">team-store-api.php · mail-view.php</text><text x="298" y="130">Integration + TeamDatabase modules</text><text x="298" y="146">auth · role · approval token · no.cache</text><text x="298" y="162">check_hybris_order_status</text></g>
+        <text x="550" y="80" fill="#e6ecff" font-weight="600">Controllers</text>
+        <g fill="#c7d0ea" font-size="11.5"><text x="550" y="98">Pages\ · Action\ · Api\ · TeamStore\</text><text x="550" y="114">CartItemController (3.6k lines)</text><text x="550" y="130">Action\OrderController (orders, quotes)</text><text x="550" y="146">ApprovalController · ChangesLog</text><text x="550" y="162">Gates in AuthServiceProvider</text></g>
+        <text x="298" y="212" fill="#e6ecff" font-weight="600">Queue jobs (default: sync)</text>
+        <g fill="#c7d0ea" font-size="11.5"><text x="298" y="230">LowRes → Thumbnails → PDF → Analytics</text><text x="298" y="246">RegeneratePDF · UpdatePDFSubheader</text><text x="298" y="262">SendActivationLink · SendApprovalLink</text><text x="298" y="278">CheckMOQChanges · SendApprovalWebhook</text><text x="298" y="294">SalesReps / ManagingReps preload</text><text x="298" y="310">FetchCustomersData (Game One)</text></g>
+        <text x="550" y="212" fill="#e6ecff" font-weight="600">Events → listeners → mail</text>
+        <g fill="#c7d0ea" font-size="11.5"><text x="550" y="230">Registered → BindProlookUserId</text><text x="550" y="246">PlaceOrder → order confirmation</text><text x="550" y="262">QuotationCreated → quote emails</text><text x="550" y="278">ChangeRequested → rep email</text><text x="550" y="294">OrderReworked → rep + brand mgr</text><text x="550" y="310">Broadcast: PDF, images, MOQ, Hybris</text></g>
+        <text x="298" y="356" fill="#e6ecff" font-weight="600">Database (MySQL)</text>
+        <g fill="#c7d0ea" font-size="11.5"><text x="298" y="374">users · carts · cart_items · side_b</text><text x="298" y="390">orders · changes_logs · client_information</text><text x="298" y="406">address_books · payment_books</text><text x="298" y="422">team_databases</text><text x="298" y="438">team_stores · products · players</text><text x="298" y="454">ts_carts · ts_cart_items · ts_orders</text><text x="298" y="470">store_orders · payout_histories</text></g>
+        <text x="550" y="356" fill="#e6ecff" font-weight="600">Scheduler</text>
+        <g fill="#c7d0ea" font-size="11.5"><text x="550" y="374">05:00 sync:salesrep (Game One)</text><text x="550" y="390">06:30 sync:customer-salesrep</text><text x="550" y="406">00:05–01:00 Riddell TDB sync</text><text x="550" y="422">06:00 Prevail customers fetch</text><text x="550" y="438">monthly coach payouts</text><text x="550" y="454" fill="#ffb547">(monthly job name is wrong)</text></g>
+        <!-- external -->
+        <text x="840" y="34" fill="#8b97b8" font-size="12" font-weight="600">OUTSIDE SERVICES</text>
+        <g fill="none" stroke="#5d6b8f">
+          <rect x="840" y="44" width="320" height="58" rx="8"/><rect x="840" y="110" width="320" height="58" rx="8"/><rect x="840" y="176" width="155" height="44" rx="8"/><rect x="1005" y="176" width="155" height="44" rx="8"/>
+          <rect x="840" y="228" width="155" height="44" rx="8"/><rect x="1005" y="228" width="155" height="44" rx="8"/><rect x="840" y="280" width="155" height="44" rx="8"/><rect x="1005" y="280" width="155" height="44" rx="8"/>
+          <rect x="840" y="332" width="155" height="44" rx="8"/><rect x="1005" y="332" width="155" height="44" rx="8"/>
+        </g>
+        <rect x="840" y="396" width="320" height="130" rx="8" fill="rgba(255,138,101,.07)" stroke="#ff8a65"/>
+        <text x="852" y="64" fill="#e6ecff" font-weight="600">Prolook / QStrike API (system of record)</text><text x="852" y="82" fill="#c7d0ea" font-size="11.5">accounts · token · saved designs · order/new</text><text x="852" y="96" fill="#c7d0ea" font-size="11.5">update_rejection · return/cancel requests</text>
+        <text x="852" y="130" fill="#e6ecff" font-weight="600">QX7 (brand and catalog data)</text><text x="852" y="148" fill="#c7d0ea" font-size="11.5">users and roles · dealers · styles · colors · prices</text><text x="852" y="162" fill="#c7d0ea" font-size="11.5">ship dates · factory MOQs · discounts · features</text>
+        <g fill="#e6ecff" font-size="12"><text x="852" y="202">Nexio · cards</text><text x="1017" y="202">PDF service</text><text x="852" y="254">Amazon S3</text><text x="1017" y="254">Analytics API</text><text x="852" y="306">Game One · reps</text><text x="1017" y="306">Google Sheets</text><text x="852" y="358">QX Azure · reps</text><text x="1017" y="358">Riddell BRG</text></g>
+        <text x="852" y="418" fill="#e6ecff" font-weight="600">Partners calling IN</text>
+        <g fill="#c7d0ea" font-size="11.5"><text x="852" y="436">Factory: PUT track-status / status (key)</text><text x="852" y="452">Hybris: /api/integration/* (x-api-key)</text><text x="852" y="468">Back office: /api/mail/ship-date, order-shipped</text><text x="852" y="484">Upstream: PUT /api/orders/cancel/{code}</text><text x="852" y="500">Webhook OUT: approval events</text><text x="852" y="516" fill="#8b97b8">Inksoft · Vectorsoft · legacy customizer</text></g>
+        <!-- arrows -->
+        <g fill="none" stroke="#7d8bb0" stroke-width="1.3">
+          <path d="M220 120H282" marker-end="url(#a1)"/><path d="M406 180V188" marker-end="url(#a1)"/><path d="M526 258H534" marker-end="url(#a1)"/>
+          <path d="M790 74H836" marker-end="url(#a1)"/><path d="M790 140H836" marker-end="url(#a1)"/><path d="M790 200H836" marker-end="url(#a1)"/>
+          <path d="M790 252H836" marker-end="url(#a1)"/><path d="M790 304H836" marker-end="url(#a1)"/><path d="M790 356H836" marker-end="url(#a1)"/>
+        </g>
+        <path d="M836 460H794" fill="none" stroke="#ff8a65" stroke-width="1.5" marker-end="url(#a2)"/>
+        <text x="228" y="112" fill="#8b97b8" font-size="11">HTTPS</text>
+      </svg>
+    </div>
+  </section>
+
+  <!-- FLOWS -->
+  <section id="flows">
+    <h2>Business flows</h2>
+    <p class="lead">Every flow in the app besides the main order path, which has its own page. Each card runs from the trigger to the result.</p>
+    <div class="legend"><span>step in the app</span><span class="e">outside service</span><span class="m">email sent</span></div>
+    <div class="flows" id="flowGrid"></div>
+  </section>
+
+  <!-- DATA -->
+  <section id="data">
+    <h2>Data model</h2>
+    <p class="lead">A user owns carts and a cart holds items. Submitting a cart creates one order. Team stores are a separate set of tables with their own carts and orders.</p>
+    <div class="figure">
+      <svg viewBox="0 0 1180 300" role="img" aria-label="Data model" font-family="system-ui, sans-serif" font-size="12.5">
+        <defs><marker id="d1" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#7d8bb0"/></marker></defs>
+        <g fill="none" stroke="#5d6b8f" stroke-width="1.3">
+          <rect x="20" y="40" width="170" height="70" rx="10"/><rect x="260" y="40" width="170" height="70" rx="10"/><rect x="500" y="40" width="200" height="70" rx="10"/>
+          <rect x="260" y="150" width="170" height="70" rx="10"/><rect x="780" y="20" width="180" height="46" rx="10"/><rect x="780" y="76" width="180" height="46" rx="10"/><rect x="780" y="132" width="180" height="46" rx="10"/>
+          <rect x="20" y="150" width="170" height="46" rx="10"/><rect x="20" y="206" width="170" height="46" rx="10"/><rect x="500" y="150" width="200" height="46" rx="10"/>
+          <rect x="1000" y="20" width="160" height="46" rx="10"/><rect x="1000" y="76" width="160" height="46" rx="10"/><rect x="1000" y="132" width="160" height="46" rx="10"/><rect x="1000" y="188" width="160" height="46" rx="10"/>
+        </g>
+        <g fill="none" stroke="#7d8bb0" stroke-width="1.3">
+          <path d="M190 75H256" marker-end="url(#d1)"/><path d="M430 75H496" marker-end="url(#d1)"/><path d="M345 110V146" marker-end="url(#d1)"/>
+          <path d="M700 60H740V43H776" marker-end="url(#d1)"/><path d="M700 75H740V99H776" marker-end="url(#d1)"/><path d="M700 90H730V155H776" marker-end="url(#d1)"/>
+          <path d="M105 110V146" marker-end="url(#d1)"/><path d="M60 110V140H40V206" stroke-dasharray="3 3"/><path d="M600 110V146" marker-end="url(#d1)"/>
+          <path d="M960 43H996" stroke-dasharray="3 3"/>
+        </g>
+        <g fill="#e6ecff" font-weight="600" text-anchor="middle">
+          <text x="105" y="68">users</text><text x="345" y="68">carts</text><text x="600" y="68">cart_items</text><text x="345" y="178">orders</text>
+          <text x="870" y="48">changes_logs</text><text x="870" y="104">cart_items_side_b</text><text x="870" y="160">client_information</text>
+          <text x="105" y="178">address_books</text><text x="105" y="234">payment_books</text><text x="600" y="178">team_databases</text>
+          <text x="1080" y="48">team_stores</text><text x="1080" y="104">ts_carts / items</text><text x="1080" y="160">ts_orders</text><text x="1080" y="216">payout_histories</text>
+        </g>
+        <g fill="#8b97b8" font-size="11" text-anchor="middle">
+          <text x="105" y="88">role · is_managing_rep</text><text x="105" y="102">sales_rep_id · dealer_id</text>
+          <text x="345" y="88">active / completed</text><text x="345" y="102">is_default · add_ons · MOQ</text>
+          <text x="600" y="88">status · order_status</text><text x="600" y="102">builder_customization · pdf_json</text>
+          <text x="345" y="198">pl_order_code · quote_id</text><text x="345" y="212">hybris_order_status · is_rework</text>
+          <text x="870" y="62">fixed · ask_for_changes</text><text x="870" y="174">approver + approval_token</text>
+        </g>
+        <g fill="#8b97b8" font-size="11"><text x="200" y="68">has many</text><text x="440" y="68">has many</text><text x="352" y="134">has one</text></g>
+        <text x="20" y="290" fill="#8b97b8" font-size="11.5">Team-store tables (right) belong to the team store module: coaches sell to players and families and receive payouts (W-9 once year-to-date profit reaches $600).</text>
+      </svg>
+    </div>
+    <div class="card scroll" style="margin-top:14px">
+      <h3>Status values</h3>
+      <table>
+        <tr><th>Field</th><th>Values</th><th>Set by</th></tr>
+        <tr><td><code>carts.status</code></td><td>active · completed (abandoned is filtered but never set)</td><td>order submit, quotation</td></tr>
+        <tr><td><code>cart_items.status</code></td><td>incomplete · complete · pending_approval · approved · change_request</td><td>add to cart, approval flow</td></tr>
+        <tr><td><code>cart_items.order_status</code></td><td>new · order_confirmed · artwork_production · factory_production · on_hold · shipped · pending_return · pending_cancel · returned · cancelled</td><td>submit, factory callbacks, return/cancel requests</td></tr>
+        <tr><td><code>orders.hybris_order_status</code></td><td>pending · success · failed</td><td>submit, Hybris callback</td></tr>
+        <tr><td><code>changes_logs.type</code></td><td>fixed · ask_for_changes · quick_change (issue_type: rework, system_update)</td><td>approver, rep, rework resubmit</td></tr>
+      </table>
+    </div>
+  </section>
+
+  <!-- ROLES -->
+  <section id="roles">
+    <h2>Who can do what</h2>
+    <p class="lead">Roles come from QX7 at login. "Managing rep" is a user flag, not a role. Coach approvers have no account; they get a token link instead.</p>
+    <div class="card scroll">
+      <table id="rolesTable"></table>
+      <p class="muted" style="font-size:12px;margin:10px 0 0">✓ allowed · ◐ limited (see note) · – not available. From Header.vue, the gates in AuthServiceProvider, the stores and the controllers.</p>
+    </div>
+  </section>
+
+  <!-- FLAGS -->
+  <section id="flags">
+    <h2>Feature flags that change the app</h2>
+    <p class="lead">There are two kinds of flags. Build-time <code>VITE_*</code> env flags are baked into the front end. QX7 brand features are read at runtime from <code>/api/brand/details</code>.</p>
+    <div class="card scroll"><table id="flagsTable"></table></div>
+  </section>
+
+  <!-- RISKS -->
+  <section id="risks">
+    <h2>Risks and defects found while mapping</h2>
+    <p class="lead">These came from reading the code; none were run. <b>High</b> means data can be read or changed without login. <b>Broken</b> means the code path cannot work as written.</p>
+    <div class="card scroll"><table id="risksTable"></table></div>
+  </section>
+
+  <!-- ROUTES -->
+  <section id="routes">
+    <h2>Route inventory (key routes per feature)</h2>
+    <p class="lead">These are the routes that matter most in each area. The full list lives in <code>routes/web.php</code>, <code>api.php</code>, <code>auth.php</code>, <code>team-store-api.php</code> and the module route files.</p>
+    <div class="card" id="routesBox"></div>
+  </section>
+
+  <footer>Mapped from the source code at <code>C:/Users/merin/laravel-docker/core/src/customizer-core</code>. The builder requirements come from <code>data/builder-data.js</code> and BRD coverage from <code>data/graph-data.js</code>; the truth-gate hook re-checks both against the real code.</footer>
+</main>
+
+<aside class="drawer" id="drawer" aria-live="polite"></aside>
+
+<script src="data/graph-data.js"></script>
+<script src="data/builder-data.js"></script>
+<script>
+(() => {
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const BRAIN = window.BRAIN_DATA || { meta: {}, requirements: [] };
+const BUILDER = window.BUILDER_DATA || { requirements: [] };
+
+/* ================= DATA ================= */
+const GROUPS = [
+  { id: 'public', name: 'Public & info', color: 'var(--g-public)' },
+  { id: 'auth', name: 'Account access', color: 'var(--g-auth)' },
+  { id: 'design', name: 'Find a design', color: 'var(--g-design)' },
+  { id: 'builder', name: 'Builder', color: 'var(--g-builder)' },
+  { id: 'cart', name: 'Cart, quote & checkout', color: 'var(--g-cart)' },
+  { id: 'orders', name: 'Orders & rework', color: 'var(--g-orders)' },
+  { id: 'account', name: 'My account', color: 'var(--g-account)' },
+  { id: 'external', name: 'Outside callers & links', color: 'var(--g-external)' },
+];
+const S = (id, group, name, route, info) => ({ id, group, name, route, ...info });
+const SCREENS = [
+  S('home', 'public', 'Home', '/', { shot: 'screens/home.png', page: 'Index', ctrl: 'Pages\\IndexController@showIndexPage', does: 'Home banners and "explore more" links.' }),
+  S('catalogs', 'public', 'Catalogs', '/catalogs', { page: 'Catalog', ctrl: 'Pages\\CatalogController', does: 'QX7 catalogs. The nav link is hidden in production.' }),
+  S('info', 'public', 'Info pages', '/about-us · /faqs · /care-guide · /color-chart', { page: 'AboutUs, FAQs, CareGuide, ColorChart', ctrl: 'Pages\\*Controller', does: 'Static brand content. Color Chart lists QX7 sublimated colors.' }),
+  S('legal', 'public', 'Legal documents', '/privacy-policy · /terms-and-conditions · /warranty', { page: 'DocumentLoader', ctrl: 'Route::inertia', does: 'Turns a QX7 legal .docx into HTML in the browser (mammoth).' }),
+  S('contact', 'public', 'Contact us', '/contact-us', { page: 'ContactUs', ctrl: 'Pages\\ContactUsController', does: 'Form that fires ContactUsCreated, which emails customer care and the customer.', mail: true }),
+
+  S('login', 'auth', 'Login', '/login', { shot: 'screens/login.png', page: 'Auth/Login', ctrl: 'Auth\\AuthenticatedSessionController@store', does: 'Checks the password and activation, gets the Prolook token and syncs the QX7 role and dealer. Then redirects to update-password, the profile or the intended page.', ext: ['Prolook', 'QX7'] }),
+  S('register', 'auth', 'Register', '/register', { page: 'Auth/Register', ctrl: 'Auth\\RegisteredUserController@store', does: 'Creates the user and binds the Prolook account, then emails the activation link. It also notifies the chosen dealer or the brand manager.', mail: true, ext: ['Prolook', 'QX7'] }),
+  S('activate', 'auth', 'Activate / set password', '/account-activation/activate · /set-password', { page: 'User/SetPassword', ctrl: 'Action\\AccountActivationController', does: 'The activation link sets email_verified_at. Customers that a dealer created set their first password here.' }),
+  S('password', 'auth', 'Forgot / reset / update password', '/forgot-password · /reset-password · /update-password', { page: 'Auth/ForgotPassword, ResetPassword, UpdatePassword', ctrl: 'PasswordResetLinkController · NewPasswordController · UpdatePasswordController', does: 'Email reset link, reset form, and a forced password update after login.', mail: true }),
+
+  S('sports', 'design', 'Sports', '/sports', { shot: 'screens/sports.png', page: 'Sports/Index', ctrl: 'Pages\\SportController@showSports', does: 'Grid of sport categories.' }),
+  S('designs', 'design', 'Design picker', '/sports/{sport}/designs', { shot: 'screens/designs.png', shotNote: 'Live capture of /sports/football/designs on pre-staging: the page shows "TypeError: Cannot read properties of undefined (reading sportCode)". The football slug was a guess, so the URL may need a different sport value.', page: 'Sports/Designs', ctrl: 'Pages\\SportController@showUniform', does: 'Filter and search styles, set team colors, upload a team logo and share the page. With VITE_FEATURE_DESIGN_PICKER it uses @qstrike/picker.', ext: ['QX7'] }),
+  S('decorations', 'design', 'Decorations', '/sports/{sport}/decorations', { page: 'Sports/Decorations', ctrl: 'Pages\\SportController@showDecoration', does: 'Pick a decoration type.' }),
+
+  S('customizer', 'builder', 'Builder: new item', '/sports/{sport}/customize/{uniform_id}', { page: 'Sports/Customizer', ctrl: 'Pages\\SportController@showCustomizer', does: 'Shows BuilderReskin or the classic Builder, depending on VITE_FEATURE_BUILDER_RESKIN. Reversible uniforms use /reversible_uniform/{id}.', auth: true }),
+  S('savedbuilder', 'builder', 'Builder: saved design', '/saved-designs/{id}/customize', { page: 'SavedDesignCustomizer', ctrl: 'Pages\\SaveDesignController@customize', does: 'Loads a Prolook saved design. Warns if the style changed after the design was shared.', ext: ['Prolook'] }),
+  S('itembuilder', 'builder', 'Builder: edit cart item', '/carts/items/{cartItem}', { page: 'CartItem/Show', ctrl: 'Pages\\CartItemController@show', does: 'Edits an item already in a cart. With ?action=fix-issue it opens in rework mode. /view-only is read-only.' }),
+  S('reorderbuilder', 'builder', 'Builder: reorder', '/customize/{cartItem}/reorder', { page: 'CartItem/ShowReorder, EditReorder', ctrl: 'Pages\\CartItemController@showReorder', does: 'Design is locked. Only the roster (and player names and numbers) can change. /duplicate copies an item.' }),
+
+  S('cart', 'cart', 'Shopping cart', '/shopping-cart', { page: 'ShoppingCart/ShoppingCart', ctrl: 'Pages\\ShoppingCartController', does: 'Line items with MOQ per factory, rename, quick roster edit and app sizes. Send items for approval or request a quote.' }),
+  S('approvaltab', 'cart', 'Approval tab', '/shopping-cart/approval', { page: 'ShoppingCart/ApprovalPage', ctrl: 'ShoppingCartController@showApprovalPage', does: 'Rep-side view of items waiting for the coach to approve.' }),
+  S('quote', 'cart', 'Quote request', '/shopping-cart/{order}/quotation', { page: 'ShoppingCart/RequestSubmitted', ctrl: 'Action\\OrderController@createQuotation', does: 'A customer\'s cart becomes a quote for the sales rep. Both of them get an email.', mail: true }),
+  S('checkout', 'cart', 'Checkout', '/checkout', { page: 'Checkout/Index', ctrl: 'Action\\OrderController@submitOrder', does: 'Reps get the Dealer form: card (Nexio) or terms, then the order goes to Prolook. Customers get the EndUser form, which sends a quote request.', ext: ['Nexio', 'Prolook'] }),
+  S('success', 'cart', 'Order result', '/checkout/success · /unsuccess', { page: 'Checkout/Success, UnsuccessOrder', ctrl: 'CheckoutController', does: 'Hybris brands wait on a pending modal until the Hybris callback says success or failure.' }),
+
+  S('orders', 'orders', 'Orders tracker', '/users/orders', { page: 'User/Order → OrderTrackerNew', ctrl: 'Pages\\UserController@showOrders', does: 'Items in production with status badges, plus item and order drawers. Shows Fix Issue on On Hold items and Reorder Item on others.' }),
+  S('fix', 'orders', 'Rework (Fix Issue)', '/carts/items/{id}?action=fix-issue', { page: 'CartItem/Show (rework mode)', ctrl: 'Pages\\CartItemController@resubmitRejectedItem', does: 'Rejection banner and Issues & Logs, then Resolve & Submit sends the fix to the factory and production resumes.', ext: ['Prolook'] }),
+
+  S('profile', 'account', 'Profile', '/users/profile', { page: 'User/Profile', ctrl: 'Pages\\UserController@showProfile', does: 'Personal info, password, subscription. Dealer and sales-rep assignment widgets, which depend on the role.' }),
+  S('address', 'account', 'Address book', '/users/address', { page: 'User/Address', ctrl: 'Action\\AddressBookController', does: 'Addresses with default shipping and billing. Hidden for brand 5 customers and reps.' }),
+  S('saveddesigns', 'account', 'Saved designs', '/users/saved-designs', { page: 'User/SavedDesign', ctrl: 'Pages\\UserController@showSavedDesigns', does: 'Filter, sort, share, favorite, archive and delete. The data comes from Prolook.', ext: ['Prolook'] }),
+  S('logos', 'account', 'Saved logos', '/users/saved-logos', { page: 'User/SavedLogo', ctrl: 'Pages\\UserController@showSavedLogos', does: 'Inksoft or Vectorsoft logos, depending on the vectorizer feature.' }),
+  S('mycarts', 'account', 'My carts & quotes', '/users/carts', { page: 'User/Cart', ctrl: 'Pages\\UserController@showCarts', does: 'All carts (default, favorite, saved) and the quote requests tab.' }),
+  S('customers', 'account', 'Customers', '/users/customers', { page: 'User/Customers', ctrl: 'Pages\\UserController@showCustomers', does: 'Reps and dealers see their customers and create customer accounts.' }),
+
+  S('coach', 'external', 'Coach approval link', '/approval?approval_token=…', { page: 'ReviewApproval', ctrl: 'Pages\\ApprovalController', does: 'No login needed. The coach reviews, signs and approves, edits the roster, or asks for changes.', mail: true }),
+  S('factory', 'external', 'Factory status calls', 'PUT /api/carts/items/{id}/track-status', { page: '—', ctrl: 'Api\\CartItemController@trackOrderStatus', does: 'The factory updates production status and puts items On Hold, which emails the rep. Checked with a shared key.', mail: true }),
+  S('hybris', 'external', 'Hybris callback', 'POST /api/integration/orders/{code}/hybrisOrderStatus', { page: '—', ctrl: 'Integration\\OrderController@hybrisOrderStatus', does: 'Confirms or fails orders for Hybris brands. On success it fires the order confirmation emails. Checked with x-api-key.' }),
+  S('mails', 'external', 'Ship date & shipped', 'POST /api/mail/ship-date-confirmation · order-shipped', { page: '—', ctrl: 'MailController', does: 'The back office posts ship dates and tracking numbers. The app updates the items and emails the rep and customer.', mail: true }),
+];
+const JOURNEY = [['login', 'designs'], ['designs', 'customizer'], ['customizer', 'cart'], ['cart', 'checkout'], ['checkout', 'success'], ['success', 'orders'], ['factory', 'orders'], ['orders', 'fix'], ['fix', 'orders'], ['orders', 'reorderbuilder'], ['cart', 'coach']];
+
+const TABS = [
+  { id: 'custom', name: 'Custom Pro', icon: 'M4 16l4-4 4 4 8-8M4 4h16v16H4z', title: 'Custom Pro (manual order)',
+    body: '<p>Upload a finished design file (PNG/JPG, or a PDF up to 50 MB) with notes, instead of building the design. The canvas then shows the uploaded file.</p><ul><li>Only shown when <code>VITE_MANUAL_ORDER_FEATURE</code> is on and the style allows manual orders.</li><li>Uses its own color picker (<code>ReskinCustomProColorPickerModal</code>) for a single main body color, split into Core and Additional by <code>is_core</code>.</li></ul>', file: 'BuilderReskin/…/CustomProTab · stores/manual-order.js' },
+  { id: 'details', name: 'Details', icon: 'M12 8h.01M11 12h1v4h1M12 2a10 10 0 100 20 10 10 0 000-20z', title: 'Details',
+    body: '<p>Product information from QX7:</p><ul><li>name</li><li>sizing chart and How to Measure</li><li>intended fit</li><li>materials and decoration</li><li>video</li></ul>', file: 'savedDesignsStore.fetchProductInfo → QX7 product_info' },
+  { id: 'options', name: 'Options', icon: 'M4 6h16M4 12h10M4 18h6', title: 'Options (fabric)',
+    body: '<p>Fabric cards for each body group, with a hover tooltip and any upgrade fee. Manual orders show only the Body group.</p><p><code>VITE_NO_FABRIC_FEATURE</code> allows "no selection".</p>', file: 'core/customizer/fabric.changeFabric' },
+  { id: 'customize', name: 'Customize', icon: 'M12 3a9 9 0 100 18c1 0 2-1 2-2s-1-1-1-2 1-2 2-2h2a4 4 0 004-4c0-4-4-8-9-8z', title: 'Customize (colors and parts)', picker: true,
+    body: '<p><b>Colors in Use</b> chips: click a chip to change that color everywhere, or remove it with replace or remove. Below that, each body part has its own color, and pattern parts have layer colors.</p>', file: 'ReskinActiveColorRow · ReskinParts · Color/ReskinColorPickerModal.vue' },
+  { id: 'apps', name: 'Applications', icon: 'M4 7h16M4 12h16M4 17h10', title: 'Applications (text and logos)',
+    body: '<ul><li>Add Text and Add Logo, grouped by body part; drag to reorder, duplicate or delete.</li><li><b>Editor:</b> font, layout, tailsweep, solid color or pattern, size, position, rotation, opacity, and "apply styling to all".</li><li>Side A/B switch, and duplicate to the other side.</li><li>A limit message shows the price of extra applications.</li></ul>', file: 'ApplicationsTab · ApplicationEditor · ReskinAddText/Logo' },
+  { id: 'roster', name: 'Roster', icon: 'M16 11a4 4 0 10-8 0M4 20a8 8 0 0116 0', title: 'Roster and sizes',
+    body: '<ul><li>Size buttons by category and a player-number grid with ranges.</li><li>Copy or upload a roster.</li><li><b>Roster table:</b> quantity, gamer tag, hemline, inseam, pant cut, sleeve, tag and group IDs.</li><li>Advanced app sizing per size.</li><li>Autosaves and recalculates add-ons.</li></ul><p>During a reorder this is the only tab that stays open.</p>', file: 'RosterTab · RosterTable · stores/roster.js' },
+  { id: 'summary', name: 'Summary', icon: 'M5 12l4 4L19 6', title: 'Summary (price)',
+    body: '<p>Item subtotal: base price (MSRP) plus add-ons (unit price × quantity). The edit pencils jump back to Applications or Options.</p>', file: 'add panel' },
+];
+const CORE = ['#0b1f4b', '#1f4fa8', '#c8102e', '#ffb547', '#f2f4f8', '#111111', '#0b6e3d', '#5c2d91'];
+const ADDL = ['#7cc4ff', '#ff7ab6', '#4fe3a0', '#b48cff', '#ff8a65', '#c6e86b', '#8b97b8', '#6b3e1f', '#e0c38c', '#00a3ad', '#9d2235', '#ffd27a', '#3b3b3b', '#a7a9ac', '#ff5f00', '#004c54'];
+
+const E = (t) => ({ t, k: 'ext' }), M = (t) => ({ t, k: 'mail' });
+const FLOWS = [
+  { title: 'Registration & activation', who: 'New user', steps: ['Register form', 'Create user', E('Prolook bind / quick register'), M('Activation link'), 'Activate', 'Login allowed'], note: 'If the user picked a dealer, that dealer is emailed; otherwise the brand manager. Customers created by a dealer get a set-password link instead.', foot: 'RegisteredUserController@store · BindAccount · SendActivationLink' },
+  { title: 'Forgot / reset / forced password', who: 'Any user', steps: ['Forgot password', M('Reset link'), 'Reset form', 'Password saved', 'Back to login'], note: 'A user who must update the password is sent to /update-password after login. Profile password changes require 8+ characters, mixed case, a number and a symbol.', foot: 'PasswordResetLinkController · NewPasswordController · UpdatePasswordController' },
+  { title: 'Quote request (end user → rep)', who: 'Customer', steps: ['Cart', 'Request quote', 'Order as quotation + quote_id', M('Rep + customer emails'), 'Rep edits quote', 'Quote checkout', E('Prolook order')], note: 'The rep can resend, archive, restore or delete the quote. Deleting it gives the cart back to the owner, who is emailed if someone else deleted it.', foot: 'Action\\OrderController@createQuotation · submitOrderQuotation' },
+  { title: 'Coach approval & change requests', who: 'Rep → coach', steps: ['Send for approval', M('Approval link to coach'), 'Coach reviews (token)', 'Sign & approve', M('Rep: all approved')], note: 'The coach can instead ask for changes. The item becomes change_request and the rep is emailed. The rep fixes it and the item becomes complete again. Hybris brands also send an approval webhook.', foot: 'CartItemController@sendApproval · ApprovalController · ChangesLogController' },
+  { title: 'Payment', who: 'Rep at checkout', steps: ['Pick card or terms', E('Nexio token → process'), 'Save transaction', E('Prolook place order'), 'Success'], note: 'If the Prolook order fails after the card was charged, the Nexio payment is voided and the database changes are rolled back. Terms orders write the IID and PO number into the factory PDF header.', foot: 'Action\\OrderController@payWithNexio · Nexio::void' },
+  { title: 'Hybris brands (pending orders)', who: 'Allowed brands', steps: ['Submit', 'Status: pending', 'Pending modal', E('Hybris callback'), 'Success → emails', 'or Failed → cart restored'], note: 'After 60 seconds with no answer, the page marks the order failed and emails support. Order confirmation emails are delayed until Hybris confirms.', foot: 'CheckHybrisOrderStatus · Integration\\OrderController@hybrisOrderStatus' },
+  { title: 'Minimum order quantity (MOQ)', who: 'Every cart change', steps: ['Item added/changed', 'Group by factory', E('QX7 add-on rules'), 'Min. order fee per factory', 'Broadcast to cart'], note: 'Runs when FEATURE_MOQ_BY_FACTORY is on. The fee applies when a factory\'s total quantity is at or below its MOQ. Cart minimums: 6 items and $69.', foot: 'Services/MinimumOrderQuantity · CheckMOQChanges' },
+  { title: 'Thumbnails → PDF → analytics', who: 'Every save to cart', steps: ['Low-res thumbs', E('S3'), 'Full thumbs', E('PDF service'), E('Analytics')], note: 'Bus::chain runs on add, update and reorder. Rework resubmits use RegeneratePDFJob, which keeps the same PDF id. Order submit updates the PDF factory header.', foot: 'GenerateLowResThumbnailsJob · GenerateThumbnailsJob · GeneratePDFJob · CartItemAnalyticsJob' },
+  { title: 'Saved designs & sharing', who: 'Any signed-in user', steps: ['Builder Save', E('Prolook /saved_design'), 'Saved designs page', M('Share email'), 'Open link in builder', 'Add to cart'], note: 'Nothing is stored locally; Prolook owns saved designs. Archiving an item saves it as archived, then deletes it from the cart.', foot: 'SaveDesignController · ShareDesignController · CartItemController@savedDesign' },
+  { title: 'Sales-rep sync & managing reps', who: 'Scheduler', steps: ['05:00 sync reps', E('Game One'), 'Create/restore reps', M('Rep activation'), '06:30 move customers'], note: 'Removed reps hand their orders and carts to the managing rep, and are deleted from QX7. A Google Sheet lists the managing reps.', foot: 'SalesRepsPreloadedJob · Syncable::syncToData · ProcessCustomerNewSalesRepJob' },
+  { title: 'Return / cancel & order rework', who: 'Customer or upstream', steps: ['Request return/cancel', E('Prolook request'), 'pending_return / pending_cancel', 'Factory status call', 'returned / cancelled'], note: 'Upstream can also cancel a whole order back into a quotation flagged for rework (OrderReworked emails the rep). The confirm and deny links in these emails point to routes that don\'t exist.', foot: 'Api\\CartItemController@requestReturnItem · Api\\OrderController@cancelOrder' },
+  { title: 'Ship dates & shipped', who: 'Back office', steps: [E('POST ship-date-confirmation'), 'Save ship dates', M('Rep + customer'), E('POST order-shipped'), 'Items shipped', M('Tracking email')], note: 'Protected by the sendEmailNotificationKey header.', foot: 'MailController@shipDateConfirmation · orderShipped' },
+  { title: 'Multiple carts', who: 'Reps & customers', steps: ['Create cart', 'Set default', 'Add items', 'Save for later', 'Load another'], note: 'Reps working on someone else\'s cart set it as default through defaulted_by_user_ids. Cart names must be unique for each user and team. Renaming a cart regenerates its PDFs.', foot: 'Pages\\CartController · Cart::createCart · addUserDefault' },
+  { title: 'Team stores (module)', who: 'Coach, players, families', steps: ['Coach creates store', 'Adds products', 'Invites players/family', 'Store orders', 'Monthly payout check', M('W-9 at $600 profit')], note: 'A separate set of tables and APIs (/api/ts/*). The monthly payout schedule uses a command name that doesn\'t exist, so it currently fails.', foot: 'Api\\TeamStoreController · TeamStore\\* · check:order-on-month' },
+];
+
+const ROLE_COLS = ['Build & save designs', 'Add to cart', 'Place order', 'Request quote', 'Order tracker', 'Fix Issue (rework)', 'Customers page', 'Pricing toggle', 'Approve items'];
+const ROLES = [
+  ['Customer (end user)', 'y', 'y', 'n', 'y', 'p', 'n', 'n', 'n', 'p'],
+  ['Sales rep (incl. dealers)', 'y', 'y', 'y', 'n', 'y', 'p', 'y', 'p', 'y'],
+  ['Managing rep (flag)', 'y', 'y', 'y', 'n', 'y', 'y', 'y', 'p', 'y'],
+  ['Product Pro', 'y', 'y', 'p', 'n', 'p', 'n', 'y', 'p', 'p'],
+  ['Brand manager', 'y', 'y', 'p', 'n', 'p', 'n', 'y', 'p', 'p'],
+  ['Coach approver (token, no login)', 'n', 'n', 'n', 'n', 'n', 'n', 'n', 'n', 'y'],
+];
+const ROLE_NOTES = 'Notes: customers see the tracker without On Hold. Reps can only Fix Issue on their own orders (managing reps on all, if ORT_MANAGING_REP_ACCESS). The pricing toggle needs brand feature 9; Dealer Cost is limited to dealers, brand managers and listed reps. Customers approve their own items in the cart. Place order needs the create-order gate: a default cart that is not already submitted.';
+
+const FLAGS = [
+  ['VITE_FEATURE_BUILDER_RESKIN', 'env (build)', 'Uses the new BuilderReskin instead of the classic Builder on every customizer page, and hides the global header there.'],
+  ['ORT (QX7 feature code)', 'QX7 runtime', 'Order tracking: the new Orders tracker, Fix Issue, rework emails.'],
+  ['ORT_MANAGING_REP_ACCESS', 'env (server)', 'Lets managing reps open other reps\' On Hold items.'],
+  ['Feature id 14: vectorizer', 'QX7 runtime', 'Swaps Inksoft for Vectorsoft/Design Studio logo tools and turns on logo color-conflict checks.'],
+  ['Feature id 9: pricing', 'QX7 runtime', 'Shows the Dealer Cost / Retail Cost toggle in the header menu.'],
+  ['PPTNF / PPTLF', 'QX7 runtime', 'Custom team name and custom team logo in the builder.'],
+  ['DSV', 'QX7 runtime', 'App-size vector upload, and DSV roster handling in the PDF.'],
+  ['VITE_FEATURE_TEAM_DATABASE / FEATURE_TEAM_DATABASE', 'env', 'Team picker in the design picker and builder, and team-database sync jobs.'],
+  ['VITE_FEATURE_MOQ_BY_FACTORY / feature_moq_by_factory', 'env', 'Minimum order fee per factory in the cart and cart menu.'],
+  ['VITE_MANUAL_ORDER_FEATURE', 'env (build)', 'Custom Pro (manual order) tab in the builder.'],
+  ['VITE_FEATURE_DESIGN_PICKER', 'env (build)', 'New @qstrike/picker design loader on the designs page.'],
+  ['VITE_NO_FABRIC_FEATURE', 'env (build)', 'Allows "no fabric selection" in Options.'],
+  ['ALLOWED_BRAND_CODE + QX7_BRAND_CODE', 'env (server)', 'Hybris brand: pending order flow, approval webhook, checkout redirects.'],
+  ['QUEUE_CONNECTION (default sync)', 'env (server)', 'With sync, every "queued" job (PDFs, thumbnails, emails) runs inside the web request.'],
+  ['VITE_STAGING_BANNER / DISCLAIMER / VECTORSOFT / OLD_CUSTOMIZER', 'env (build)', 'Banners in the header, and a link to the old customizer.'],
+];
+
+const RISKS = [
+  ['High', 'Order data without login', 'GET /api/orders/{pl_order_code} returns billing and card details (number removed); PUT /api/orders/cancel/{code} turns an order back into a quotation.', 'routes/api.php · Api\\OrderController:277, :296'],
+  ['High', 'Item changes without login', 'PUT /api/carts/items/{item}/cancel (soft delete), PUT /api/carts/items/approve-items, PATCH /api/carts/{cart}/update-factory-moqs, week-rush add-on routes.', 'routes/api.php'],
+  ['High', 'Email previews expose live data', '/mail-view/* has no auth and builds pages from real orders and stores (e.g. initial-order/{order}).', 'routes/mail-view.php'],
+  ['High', 'Open image proxy and uploads', '/api/image/proxy fetches any URL server-side (SSRF risk). /api/image/upload and /fileUpload write to S3 without login. Also /api/scales.', 'ImageUploadController:13, :86, :115'],
+  ['High', 'Delete by GET', 'GET /api/orders/{orderId}/delete deletes a quotation.', 'routes/api.php'],
+  ['High', 'Hard-coded secret defaults', 'INTEGRATION_API_KEY, send_email_notification_key and fallback_password "Password1!" have defaults in config.', 'config/brand.php:39, :51 · Integration config'],
+  ['Broken', 'Return/cancel emails crash', 'They use routes orders.items.confirm-request and deny-show-form, which are not defined anywhere, so each request throws.', 'Api\\CartItemController:600, :666'],
+  ['Broken', 'Monthly payout job never runs', 'The schedule calls check:order-every-month, but the command is check:order-on-month.', 'Console/Kernel.php:53'],
+  ['Broken', 'Approval webhook', 'SendApprovalWebhook calls an instance method statically, which is an Error on PHP 8.', 'Modules/…/SendApprovalWebhook.php:37'],
+  ['Broken', 'Routes to missing methods', 'approval.coach (getCoachApproval), /api/account-activation/set-password, /api/all/users/{email} (private method), payment-book.update / set-default (no action).', 'routes/web.php, api.php'],
+  ['Broken', 'Unregistered middleware', '"api-key" on PUT /api/orders/part-id is not registered in the Kernel.', 'routes/api.php:266'],
+  ['Broken', 'Managing-rep sheet job', 'Uses PHP backticks for the query string, which run a shell command instead of building a string.', 'ManagingRepsPreloadedJob.php:55'],
+  ['Broken', 'Quote email rep', 'Undefined $rep and $shipping, so rep_email always shows "N/A".', 'QuoteRequestNotification.php:50'],
+  ['Broken', 'View-only never passed in', "Customizer.vue and SavedDesignCustomizer.vue provide props.is_view_only, but the prop is isViewOnly, so the value is always undefined.", 'Pages/Sports/Customizer.vue · SavedDesignCustomizer.vue'],
+  ['Broken', 'Update-cart error handler throws', 'The error path calls updateCartItemForm.clearErrors(), which is never defined.', 'Components/Builder/Builder.vue:1063'],
+  ['Note', 'Duplicate page ignores reskin flag', 'CartItem/ShowDuplicate.vue always loads the classic builder.', 'Pages/CartItem/ShowDuplicate.vue'],
+  ['Note', 'Reskin rework differs from the BRD', 'On pre-staging the reskin builder has rework, but it puts Issues & Logs in a "Notes" dropdown (the BRD says an Issues/Logs tab), its notes box is always visible, and the rework banner never shows because reskin pages hide the global header.', 'BuilderReskin/Layout/NotesDropdown.vue'],
+  ['Note', 'Reskin placeholder UI', 'The Customize tab\'s Organization dropdown has hard-coded sample names, and its piping block is static mock markup.', 'CustomizeTab.vue:31 · ReskinParts.vue'],
+  ['Note', 'Color picker uses window.find', 'find(...) is called without being imported, so it falls back to the browser\'s window.find.', 'ReskinColorPickerModal.vue:101'],
+  ['Note', 'Design picker error (live)', 'Opening /sports/football/designs on pre-staging shows "TypeError: Cannot read properties of undefined (reading sportCode)". The football slug was a guess, so check it with a real sport link.', 'Pages/Sports/Designs.vue'],
+  ['Broken', 'Team search filters shifted', 'TeamDBReskin.vue passes the user state code as the count argument of fetchTeams, so the state and zip filters land in the wrong parameters.', 'BuilderReskin/…/TeamDBReskin.vue:560'],
+  ['Note', 'Role string mismatch', 'userStore.isProductPro checks "product pro", but the app uses "product_pro".', 'stores/user.js:85'],
+  ['Note', 'Dead code', 'OrderCancelled is never fired, SaveDesignJob is never dispatched, and nothing sets the "abandoned" cart status.', 'various'],
+];
+
+const ROUTES = [
+  ['Auth & activation', ['GET|POST /login', 'POST /register', 'POST /forgot-password', 'POST /reset-password', 'GET|POST /update-password', 'GET /account-activation/activate', 'PATCH /account-activation/update-password']],
+  ['Catalog & design', ['GET /sports', 'GET /sports/{sport}/designs', 'GET /sports/{sport}/decorations', 'GET /logos/{id}/preview']],
+  ['Builder', ['GET /sports/{s}/customize/{uniform_id}', 'GET …/reversible_uniform/{rid}', 'GET /saved-designs/{id}/customize', 'GET /carts/items/{cartItem}', 'GET /customize/{cartItem}/reorder', 'GET /customize/{cartItem}/duplicate', 'POST /api/image/upload']],
+  ['Carts', ['POST /carts', 'PATCH /carts/{cart}/set-default', 'PATCH /carts/{cart}/name', 'PATCH /carts/{cart}/promoCode', 'DELETE /carts/{cart}', 'PUT /api/carts/{cart}/process-moq-by-factory']],
+  ['Cart items', ['POST /carts/items', 'PUT /carts/items/{cartItem}', 'PATCH /carts/items/{cartItem}/rosters', 'PATCH …/applications', 'POST /carts/items/reorder', 'POST /api/carts/items/{item}/duplicate', 'POST /api/carts/items/{item}/generate-pdf']],
+  ['Approval & changes', ['POST /carts/items/{id}/send-approval', 'POST /carts/{cart}/items/send-all-approval', 'GET /approval?approval_token=', 'POST /approval/approve-items', 'POST /changes-logs/{id}/request-changes', 'PUT /carts/items/{id}/fix-changes']],
+  ['Checkout, orders & quotes', ['GET /checkout', 'POST /orders/submit', 'POST /orders/quotation', 'POST /orders/{order}/submit', 'POST /orders/save-for-later', 'DELETE /orders/{order}/archive', 'POST /orders/{order}/fail-pending']],
+  ['Tracking & rework', ['GET /users/orders', 'GET /api/orders/in-production', 'PUT /api/carts/items/{id}/track-status', 'PUT /api/carts/items/{item}/status', 'POST /carts/items/{id}/resubmit-rejected-item', 'PATCH /api/carts/items/{item}/request-return|cancel']],
+  ['Account', ['GET /users/profile', 'PUT /profile/personal-info', 'PATCH /users/update-dealer', 'PATCH /users/update-team', 'POST /addresses', 'POST /payment-book', 'POST /users/create']],
+  ['Partners (key-protected)', ['POST /api/integration/orders/{code}/hybrisOrderStatus', 'PATCH /api/integration/orders/{code}/rework', 'POST /api/integration/carts/{cart}/submit-order', 'POST /api/mail/ship-date-confirmation', 'POST /api/mail/order-shipped']],
+  ['Team stores (/api/ts)', ['apiResource /api/team-stores', 'apiResource /api/players', 'POST /api/ts/store-orders', 'POST /api/ts/orders', 'GET /api/ts/payouts/details', 'GET /api/ts/admin/payouts/admin-payouts']],
+];
+
+/* ================= HEADER ================= */
+const m = BRAIN.meta || {};
+$('metaLine').textContent = `${m.systemName || 'Customizer Core'}${m.systemBranch ? ' @ ' + m.systemBranch : ''} · mapped from source code${m.verifiedAt ? ' · BRD audit ' + new Date(m.verifiedAt).toLocaleDateString() : ''}`;
+const kpis = [
+  [SCREENS.length, 'screens & entry points'],
+  [TABS.length, 'builder tabs (reskin)'],
+  [BUILDER.requirements.length, 'builder reqs proven'],
+  [`${m.verifiedCount || 0}/${m.extractedCount || 0}`, 'BRD reqs proven'],
+  [FLOWS.length + 1, 'business flows'],
+  [RISKS.filter((r) => r[0] !== 'Note').length, 'risks & defects'],
+];
+$('kpis').innerHTML = kpis.map(([v, l]) => `<div class="kpi"><b>${esc(v)}</b><span>${esc(l)}</span></div>`).join('');
+
+/* ================= DRAWER ================= */
+const drawer = $('drawer');
+function openDrawer(html) {
+  drawer.innerHTML = `<button class="btn close" id="dClose">Close ✕</button>${html}`;
+  drawer.classList.add('open');
+  $('dClose').onclick = closeDrawer;
+}
+function closeDrawer() { drawer.classList.remove('open'); document.querySelectorAll('.screen.sel').forEach((e) => e.classList.remove('sel')); }
+addEventListener('keydown', (e) => { if (e.key === 'Escape') closeDrawer(); });
+
+/* ================= APP MAP ================= */
+const grid = $('mapGrid');
+grid.innerHTML = GROUPS.map((g) => `<div class="group" style="--c:${g.color}"><h4 style="color:${g.color}"><i></i>${esc(g.name)}</h4>
+  ${SCREENS.filter((s) => s.group === g.id).map((s) => `<button class="screen" data-id="${s.id}" style="--c:${g.color}"><b>${esc(s.name)}${s.shot ? ' <span title="Has a live screenshot" style="font-size:11px;color:var(--ok)">● live</span>' : ''}</b><small>${esc(s.route)}</small></button>`).join('')}</div>`).join('');
+const byId = Object.fromEntries(SCREENS.map((s) => [s.id, s]));
+grid.addEventListener('click', (e) => {
+  const b = e.target.closest('.screen'); if (!b) return;
+  document.querySelectorAll('.screen.sel').forEach((x) => x.classList.remove('sel')); b.classList.add('sel');
+  const s = byId[b.dataset.id], g = GROUPS.find((x) => x.id === s.group);
+  const to = JOURNEY.filter(([a]) => a === s.id).map(([, c]) => byId[c].name), from = JOURNEY.filter(([, c]) => c === s.id).map(([a]) => byId[a].name);
+  openDrawer(`<div style="color:${g.color};font-size:12px;text-transform:uppercase;letter-spacing:.06em">${esc(g.name)}</div><h2>${esc(s.name)}</h2>
+    ${s.shot ? `<a href="${s.shot}" target="_blank"><img src="${s.shot}" alt="Live screenshot of ${esc(s.name)}" style="width:100%;border-radius:10px;border:1px solid var(--border);margin-top:10px"></a><div class="muted" style="font-size:11.5px">Live screenshot from customizer-core.test (pre-staging)${s.shotNote ? ' · ' + esc(s.shotNote) : ''}</div>` : ''}<dl><dt>Route</dt><dd><code>${esc(s.route)}</code></dd><dt>Page / component</dt><dd><code>${esc(s.page)}</code></dd>
+    <dt>Handled by</dt><dd><code>${esc(s.ctrl)}</code></dd><dt>What happens</dt><dd>${esc(s.does)}</dd>
+    ${s.ext ? `<dt>Outside services</dt><dd>${s.ext.map(esc).join(', ')}</dd>` : ''}${s.mail ? '<dt>Email</dt><dd>Sends email</dd>' : ''}
+    ${from.length || to.length ? `<dt>Main journey</dt><dd>${from.length ? 'From: ' + from.map(esc).join(', ') + '<br>' : ''}${to.length ? 'Next: ' + to.map(esc).join(', ') : ''}</dd>` : ''}</dl>
+    ${['customizer', 'savedbuilder', 'itembuilder', 'reorderbuilder', 'fix'].includes(s.id) ? '<p><a href="#builder" onclick="document.getElementById(\'drawer\').classList.remove(\'open\')">See the builder mock-up →</a></p>' : ''}
+    ${['login', 'customizer', 'cart', 'checkout', 'orders', 'fix'].includes(s.id) ? '<p><a href="flow.html">Step-by-step in the login → order flow →</a></p>' : ''}`);
+});
+let showJourney = true;
+const svg = $('mapSvg');
+function drawJourney() {
+  const wrap = svg.parentElement.getBoundingClientRect();
+  svg.setAttribute('viewBox', `0 0 ${wrap.width} ${wrap.height}`);
+  document.querySelectorAll('.screen').forEach((e) => e.classList.toggle('journey', showJourney && JOURNEY.some((p) => p.includes(e.dataset.id))));
+  if (!showJourney) { svg.innerHTML = ''; return; }
+  const box = (id) => { const r = grid.querySelector(`[data-id="${id}"]`).getBoundingClientRect(); return { x: r.left - wrap.left, y: r.top - wrap.top, w: r.width, h: r.height }; };
+  let paths = '';
+  JOURNEY.forEach(([a, b], i) => {
+    const A = box(a), B = box(b);
+    const sameCol = Math.abs(A.x - B.x) < 10;
+    let d;
+    if (sameCol) { const x = A.x + A.w - 6, y1 = A.y + A.h / 2, y2 = B.y + B.h / 2; d = `M${x} ${y1} C${x + 40} ${y1}, ${x + 40} ${y2}, ${x} ${y2}`; }
+    else {
+      const right = B.x > A.x;
+      const x1 = right ? A.x + A.w : A.x, x2 = right ? B.x : B.x + B.w, y1 = A.y + A.h / 2, y2 = B.y + B.h / 2, mx = (x1 + x2) / 2;
+      d = `M${x1} ${y1} C${mx} ${y1}, ${mx} ${y2}, ${x2} ${y2}`;
+    }
+    const col = a === 'factory' || b === 'fix' || a === 'fix' ? '#ffb547' : '#7cc4ff';
+    paths += `<path d="${d}" fill="none" stroke="${col}" stroke-width="1.8" stroke-opacity=".8" marker-end="url(#jm${col === '#ffb547' ? 'w' : 'b'})" stroke-dasharray="${a === 'cart' && b === 'coach' ? '5 4' : ''}"><animate attributeName="stroke-dashoffset" from="40" to="0" dur="${2 + i * 0.1}s" repeatCount="indefinite"/></path>`;
+  });
+  svg.innerHTML = `<defs><marker id="jmb" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#7cc4ff"/></marker>
+    <marker id="jmw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto"><path d="M0 0L10 5L0 10z" fill="#ffb547"/></marker></defs>${paths}`;
+}
+$('btnJourney').onclick = (e) => { showJourney = !showJourney; e.currentTarget.setAttribute('aria-pressed', showJourney); drawJourney(); };
+$('mapSearch').addEventListener('input', (e) => {
+  const q = e.target.value.trim().toLowerCase();
+  document.querySelectorAll('.screen').forEach((b) => { const s = byId[b.dataset.id]; b.classList.toggle('dim', !!q && !`${s.name} ${s.route} ${s.does} ${s.page} ${s.ctrl}`.toLowerCase().includes(q)); });
+});
+addEventListener('resize', drawJourney);
+requestAnimationFrame(drawJourney);
+
+/* ================= BUILDER MOCK ================= */
+let activeTab = 'customize', mode = 'normal', selColor = '#1f4fa8';
+const lockedInReorder = (id) => !['roster', 'customize'].includes(id);
+function renderRail() {
+  $('rail').innerHTML = TABS.map((t) => `<button class="tab ${t.id === activeTab ? 'on' : ''} ${mode === 'reorder' && lockedInReorder(t.id) ? 'locked' : ''}" data-tab="${t.id}">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="${t.icon}"/></svg>${esc(t.name)}</button>`).join('');
+}
+function swatchRow(list, label) {
+  return `<div style="font-size:12px;font-weight:600;margin-top:8px">${label}</div><div class="swatches">${list.map((c) => `<div class="sw ${c === selColor ? 'sel' : ''}" data-c="${c}" style="background:${c}" title="${c}"></div>`).join('')}</div>`;
+}
+function renderAside() {
+  const t = TABS.find((x) => x.id === activeTab);
+  let html = `<h5>${esc(t.title)}</h5>`;
+  if (mode === 'reorder' && lockedInReorder(t.id)) html += `<p style="color:var(--warn)">Locked during a reorder: the design must match the original. Only Roster and Customize stay open.</p>`;
+  html += t.body;
+  if (t.picker) {
+    html += `<div style="font-size:12px;font-weight:600;margin-top:10px">Colors in Use</div><div class="inuse">
+      <span class="chipc"><i style="background:${selColor}"></i>Main</span><span class="chipc"><i style="background:#f2f4f8"></i>Sleeves</span><span class="chipc"><i style="background:#ffb547"></i>Trim</span><span class="chipc">＋ Add</span></div>
+      <div class="card" style="padding:10px 12px;background:var(--surface-2)"><div style="font-size:12.5px;font-weight:600">Color picker · <span class="muted" style="font-weight:400">ReskinColorPickerModal</span></div>
+      ${swatchRow(CORE, 'Core Colors')}${swatchRow(ADDL, 'Additional Colors')}
+      <div class="muted" style="font-size:11.5px">Split by each color's <code>core_color</code> flag; the header reads just "Colors" when a brand has none. Up to 15 colors in use, minimum 2 (1 for stock). Click a swatch to recolor the jersey.</div></div>`;
+  }
+  html += `<div class="file">Code: ${esc(t.file)}</div>`;
+  const caps = capsForTab(t.id);
+  if (caps.length) html += `<div class="file" style="margin-top:10px"><a href="#capList" data-capcat="${esc(caps[0].category)}">${caps.length} proven requirement(s) in this area →</a></div>`;
+  $('aside').innerHTML = html;
+}
+const TAB_CATS = { custom: /custom|manual/i, details: /detail|product info|loading/i, options: /fabric|option/i, customize: /color|piping|pattern|part/i, apps: /text|logo|art|application|layer|decorat/i, roster: /roster|size/i, summary: /pric|summary|add-on|moq/i };
+const capsForTab = (id) => BUILDER.requirements.filter((r) => TAB_CATS[id] && TAB_CATS[id].test(r.category || ''));
+function renderThumbs() {
+  const views = ['Front', 'Back', 'Left', 'Right'];
+  $('thumbs').innerHTML = views.map((v, i) => `<button class="thumb ${i === 0 ? 'on' : ''}">${v}</button>`).join('') + '<button class="thumb">Side B ⇄</button>';
+}
+$('rail').addEventListener('click', (e) => { const b = e.target.closest('.tab'); if (!b) return; activeTab = b.dataset.tab; renderRail(); renderAside(); });
+$('aside').addEventListener('click', (e) => {
+  const sw = e.target.closest('.sw');
+  if (sw) { selColor = sw.dataset.c; document.getElementById('jBody').setAttribute('fill', selColor); renderAside(); }
+  const a = e.target.closest('[data-capcat]'); if (a) { $('capSearch').value = a.dataset.capcat; renderCaps(); }
+});
+$('thumbs').addEventListener('click', (e) => { const b = e.target.closest('.thumb'); if (!b) return; document.querySelectorAll('.thumb').forEach((x) => x.classList.toggle('on', x === b)); });
+document.querySelectorAll('.bmode .btn').forEach((b) => b.onclick = () => {
+  mode = b.dataset.mode;
+  document.querySelectorAll('.bmode .btn').forEach((x) => x.setAttribute('aria-pressed', x === b));
+  const mock = $('builderMock');
+  mock.classList.toggle('reorder', mode === 'reorder'); mock.classList.toggle('rework', mode === 'rework');
+  $('ctaBtn').textContent = mode === 'rework' ? 'Resolve & Submit' : mode === 'reorder' ? 'Add Reorder to Cart' : 'Add to Cart';
+  if (mode === 'reorder') activeTab = 'roster';
+  if (mode === 'classic') {
+    $('aside').innerHTML = `<h5>Classic builder (Builder.vue)</h5><p>The canvas is on the left and a vertical panel bar on the right. Its panels:</p>
+      <ul><li><b>Custom Pro</b>: manual order upload</li><li><b>Fabric</b></li><li><b>Color</b>: ColorGroupPanel; one flat color list with no Core/Additional split</li><li><b>Piping</b></li><li><b>Pattern</b></li>
+      <li><b>Text</b>: team name, player name and number, custom text</li><li><b>Logo</b>: Inksoft or Vectorsoft</li><li><b>Add-ons</b></li><li><b>Roster</b>: plus app sizes</li><li><b>Art</b>: design sheet</li>
+      <li><b>Layer</b>: application order</li><li><b>Issues/Logs</b>: rework only</li></ul>
+      <p>Its Footer has <b>Resolve &amp; Submit</b> during rework. The reskin builder has it in the header.</p><div class="file">Code: Components/Builder/Builder.vue · stores/customizer.js panels</div>`;
+    return;
+  }
+  if (mode === 'rework') $('aside').innerHTML = `<h5>Rework mode</h5><p>Opened from <b>Fix Issue</b> with <code>?action=fix-issue</code>, by the item's rep or a managing rep, while the item is On Hold.</p>
+    <ul><li>The rejection banner shows the factory's message.</li><li><b>Issues &amp; Logs</b> tab: the rejection reason, factory images, and a history of earlier reworks.</li><li>Add notes and attachments, then choose "only listed changes" or "additional changes" (which needs a justification).</li>
+    <li><b>Resolve &amp; Submit</b> asks for confirmation (with an agreement checkbox for additional changes), then sends the fix to the factory.</li></ul>
+    <p><b>Reskin builder</b> (the default): Issues and Logs sit in the header's <b>Notes</b> dropdown, and <b>Resolve and Submit</b> is in the header (ReskinResolveAndSubmit modal).</p><p><b>Classic builder</b>: an Issues/Logs panel and the Footer button.</p><div class="file">Code: BuilderReskin/Layout/NotesDropdown.vue · Layout/Header.vue · Modals/ReskinResolveAndSubmit.vue · Builder/Rejection/IssuesAndLogsPanel.vue · Composables/Rejections/useFixIssue.ts</div>`;
+  else { renderAside(); }
+  renderRail();
+});
+
+/* ================= BUILDER CAPABILITIES ================= */
+const caps = BUILDER.requirements;
+const cats = [...new Set(caps.map((r) => r.category || 'Other'))].map((c) => ({ c, n: caps.filter((r) => (r.category || 'Other') === c).length })).sort((a, b) => b.n - a.n);
+const maxN = Math.max(1, ...cats.map((x) => x.n));
+$('capIntro').textContent = caps.length
+  ? `${caps.length} builder requirements, each proven by exact code lines. ${caps.filter((r) => (r.relatedBrd || []).length).length} of them match a BRD requirement. Click a bar to filter the list.`
+  : 'The builder audit hasn\'t produced results yet. Reload this page when it finishes.';
+$('capBars').innerHTML = cats.map((x) => `<div class="capbar" data-cat="${esc(x.c)}"><span>${esc(x.c)}</span><span class="trk"><i style="width:${(x.n / maxN) * 100}%"></i></span><span style="text-align:right;font-variant-numeric:tabular-nums">${x.n}</span></div>`).join('');
+$('capBars').addEventListener('click', (e) => { const b = e.target.closest('.capbar'); if (!b) return; $('capSearch').value = b.dataset.cat; renderCaps(); $('capList').scrollIntoView({ behavior: 'smooth', block: 'start' }); });
+function renderCaps() {
+  const q = $('capSearch').value.trim().toLowerCase();
+  const list = caps.filter((r) => !q || `${r.id} ${r.title} ${r.description} ${r.category} ${(r.evidence || []).map((e) => e.file).join(' ')}`.toLowerCase().includes(q));
+  $('capCount').textContent = caps.length ? `${list.length} of ${caps.length}` : '';
+  document.querySelectorAll('.capbar').forEach((b) => b.classList.toggle('on', q && b.dataset.cat.toLowerCase() === q));
+  $('capList').innerHTML = list.length ? list.map((r) => `<details class="cap"><summary><span class="id">${esc(r.id)}</span><span><b>${esc(r.title)}</b>
+      <span class="muted"> · ${esc(r.category)}</span>${(r.relatedBrd || []).length ? `<span class="brd">BRD ${esc(r.relatedBrd.join(', '))}</span>` : ''}</span></summary>
+      <p style="margin:8px 0 0;color:var(--soft);font-size:13.5px">${esc(r.description)}</p>${r.reasoning ? `<p class="muted" style="font-size:12.5px;margin:4px 0 0">${esc(r.reasoning)}</p>` : ''}
+      ${(r.evidence || []).map((e) => `<div class="ev">${esc(e.file)}:${e.line}</div><pre>${esc(e.snippet)}</pre>`).join('')}</details>`).join('')
+    : `<p class="muted">${caps.length ? 'Nothing matches.' : 'No builder requirements yet.'}</p>`;
+}
+$('capSearch').addEventListener('input', renderCaps);
+
+/* ================= FLOWS ================= */
+$('flowGrid').innerHTML = FLOWS.map((f) => `<div class="flow"><h4>${esc(f.title)}</h4><p><span class="muted">${esc(f.who)}.</span> ${esc(f.note)}</p>
+  <div class="chain">${f.steps.map((s, i) => { const o = typeof s === 'string' ? { t: s } : s; return `${i ? '<span class="arrow">→</span>' : ''}<span class="step ${o.k || ''}">${esc(o.t)}</span>`; }).join('')}</div>
+  <div class="foot">${esc(f.foot)}</div></div>`).join('') +
+  `<div class="flow" style="border-color:rgba(124,196,255,.4)"><h4>Main path: login → order → rework → reorder</h4><p>This one has its own page, with diagrams for each step.</p><a class="btn" href="flow.html">Open the login → order flow →</a></div>`;
+
+/* ================= TABLES ================= */
+const mark = { y: '✓', p: '◐', n: '–' };
+$('rolesTable').innerHTML = `<tr><th>Role</th>${ROLE_COLS.map((c) => `<th style="text-align:center">${esc(c)}</th>`).join('')}</tr>` +
+  ROLES.map(([r, ...v]) => `<tr><td>${esc(r)}</td>${v.map((x) => `<td class="${x}">${mark[x]}</td>`).join('')}</tr>`).join('') +
+  `<tr><td colspan="${ROLE_COLS.length + 1}" class="muted" style="font-size:12.5px">${esc(ROLE_NOTES)}</td></tr>`;
+$('flagsTable').innerHTML = '<tr><th>Flag</th><th>Source</th><th>What it changes</th></tr>' + FLAGS.map(([f, s, w]) => `<tr><td><code>${esc(f)}</code></td><td class="muted">${esc(s)}</td><td>${esc(w)}</td></tr>`).join('');
+$('risksTable').innerHTML = '<tr><th>Type</th><th>Issue</th><th>Details</th><th>Where</th></tr>' + RISKS.map(([s, t, d, w]) => `<tr><td><span class="sev ${s}">${s}</span></td><td><b>${esc(t)}</b></td><td>${esc(d)}</td><td><code>${esc(w)}</code></td></tr>`).join('');
+$('routesBox').innerHTML = ROUTES.map(([g, list]) => `<details class="routes"><summary>${esc(g)} <span>· ${list.length} key routes</span></summary><div style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px">${list.map((r) => `<code>${esc(r)}</code>`).join('')}</div></details>`).join('');
+
+/* ================= NAV ================= */
+const navLinks = [...document.querySelectorAll('#topnav a')];
+const obs = new IntersectionObserver((es) => es.forEach((e) => { if (e.isIntersecting) navLinks.forEach((a) => a.classList.toggle('active', a.getAttribute('href') === '#' + e.target.id)); }), { rootMargin: '-35% 0px -60% 0px' });
+document.querySelectorAll('main section[id]').forEach((s) => obs.observe(s));
+
+renderRail(); renderAside(); renderThumbs(); renderCaps();
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,545 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>System Flow</title>
+<style>
+  :root {
+    --bg: #05070d;
+    --surface: #0c111e;
+    --surface-2: #111829;
+    --border: rgba(120, 160, 255, 0.16);
+    --text: #e6ecff;
+    --muted: #8b97b8;
+    --accent: #7cc4ff;
+    --ok: #4fe3a0;
+    --warn: #ffb547;
+    --line: #5d6b8f;
+    --grid: rgba(139, 151, 184, 0.25);
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 64px; }
+  body { margin: 0; background: radial-gradient(ellipse at 50% -10%, #0f1830 0%, var(--bg) 55%) fixed; color: var(--text);
+    font: 15px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  a { color: var(--accent); }
+  code { font: 12.5px/1.4 ui-monospace, "Cascadia Code", Consolas, monospace; background: rgba(124,196,255,.08);
+    padding: 1px 5px; border-radius: 4px; color: #cfe6ff; word-break: break-word; }
+
+  .layout { display: grid; grid-template-columns: 240px minmax(0, 1fr); gap: 32px; max-width: 1180px; margin: 0 auto; padding: 24px 24px 80px; }
+  nav { position: sticky; top: calc(var(--appnav-h, 0px) + 16px); align-self: start; }
+  nav ol { list-style: none; margin: 0; padding: 0; }
+  nav li a { display: block; padding: 6px 10px; border-radius: 8px; color: var(--muted); text-decoration: none; font-size: 14px; border-left: 2px solid transparent; }
+  nav li a:hover { color: var(--text); background: rgba(255,255,255,.04); }
+  nav li a.active { color: var(--text); border-left-color: var(--accent); background: rgba(124,196,255,.08); }
+  nav .label { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 0 0 6px 10px; }
+
+  header.hero h1 { font-size: 30px; line-height: 1.2; margin: 6px 0 8px; }
+  header.hero p { color: var(--muted); margin: 0; max-width: 720px; }
+  .meta { font-size: 12px; color: var(--muted); margin-bottom: 4px; }
+
+  /* Pipeline */
+  .pipeline { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; margin: 28px 0 8px; }
+  .stage { position: relative; text-decoration: none; color: var(--text); background: var(--surface); border: 1px solid var(--border);
+    border-radius: 12px; padding: 12px 12px 10px; transition: border-color .15s, transform .15s; }
+  .stage:hover { border-color: var(--accent); transform: translateY(-2px); }
+  .stage .n { font-size: 11px; color: var(--muted); letter-spacing: .06em; }
+  .stage b { display: block; font-size: 14px; margin: 2px 0 8px; line-height: 1.3; }
+  .stage .cov { display: block; font-size: 11.5px; color: var(--muted); }
+  .stage .bar { display: block; height: 4px; border-radius: 2px; background: rgba(255,255,255,.08); margin-top: 4px; overflow: hidden; }
+  .stage .bar i { display: block; height: 100%; background: var(--ok); }
+  .stage:not(:last-child)::after { content: "›"; position: absolute; right: -10px; top: 50%; transform: translateY(-50%); color: var(--line); font-size: 18px; }
+  .stage.warn { border-color: rgba(255,181,71,.45); }
+
+  section { margin-top: 56px; }
+  section > h2 { font-size: 22px; margin: 0 0 6px; display: flex; align-items: baseline; gap: 10px; }
+  section > h2 .num { font-size: 13px; color: var(--accent); font-weight: 600; }
+  .lead { color: #c7d0ea; margin: 0 0 18px; max-width: 760px; }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 18px 20px; margin: 16px 0; }
+  .card h3 { margin: 0 0 10px; font-size: 13px; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); font-weight: 600; }
+  .figure { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 12px; margin: 16px 0; overflow-x: auto; }
+  .figure svg { display: block; width: 100%; height: auto; min-width: 640px; }
+  .caption { font-size: 12px; color: var(--muted); margin: 6px 4px 0; }
+
+  ol.steps { margin: 0; padding-left: 22px; }
+  ol.steps > li { margin: 6px 0; padding-left: 4px; }
+  ol.steps ul { margin: 4px 0; padding-left: 18px; color: #c7d0ea; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { color: var(--muted); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: .05em; }
+  tr:last-child td { border-bottom: none; }
+  .scroll { overflow-x: auto; }
+
+  .files { display: flex; flex-wrap: wrap; gap: 6px; }
+  .files code { font-size: 12px; }
+
+  .brd { border-left: 3px solid var(--ok); }
+  .brd .chips { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
+  .chip { font-size: 12.5px; padding: 3px 10px; border-radius: 999px; border: 1px solid var(--border); background: rgba(255,255,255,.03); }
+  .chip b { color: var(--ok); font-variant-numeric: tabular-nums; }
+  .chip.zero b { color: var(--muted); }
+  details summary { cursor: pointer; color: var(--accent); font-size: 13.5px; }
+  details ul { margin: 8px 0 0; padding-left: 18px; font-size: 13.5px; }
+  details li { margin: 3px 0; }
+  .empty { color: var(--muted); font-size: 13.5px; }
+  .note { font-size: 13.5px; color: var(--muted); border-left: 3px solid var(--warn); padding: 4px 0 4px 12px; margin: 12px 0; }
+
+  footer { margin-top: 64px; font-size: 12px; color: var(--muted); }
+
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; padding: 16px 16px 64px; gap: 8px; }
+    nav { position: static; }
+    nav ol { display: flex; flex-wrap: wrap; gap: 4px; }
+    nav li a { border-left: none; border: 1px solid var(--border); font-size: 13px; padding: 4px 10px; }
+    .pipeline { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .stage::after { display: none; }
+    header.hero h1 { font-size: 24px; }
+  }
+</style>
+</head>
+<body>
+<script src="assets/nav.js"></script>
+<div class="layout">
+  <nav aria-label="Sections">
+    <p class="label">On this page</p>
+    <ol id="toc">
+      <li><a href="#overview">Overview</a></li>
+      <li><a href="#login">1 · Login</a></li>
+      <li><a href="#builder">2 · Customizer</a></li>
+      <li><a href="#checkout">3 · Cart &amp; order</a></li>
+      <li><a href="#tracking">4 · Order tracking</a></li>
+      <li><a href="#rework">5 · On Hold &amp; rework</a></li>
+      <li><a href="#reorder">6 · Reorder</a></li>
+      <li><a href="#data">Data model</a></li>
+    </ol>
+  </nav>
+
+  <main>
+    <header class="hero" id="top">
+      <div class="meta" id="metaLine">Customizer Core</div>
+      <h1>From login to order: how Customizer Core works</h1>
+      <p>A sales rep logs in, designs an item, places the order, and tracks it through the factory. If the factory rejects the item, the rep fixes it and resubmits. Click a stage to jump to it. The green bars show how much of each stage's BRD is proven in code.</p>
+      <div class="pipeline" id="pipeline"></div>
+    </header>
+
+    <!-- OVERVIEW -->
+    <section id="overview">
+      <h2>System at a glance</h2>
+      <p class="lead">The browser runs a Vue 3 + Inertia front end. The Laravel app handles pages, carts and orders, and talks to the factory's Prolook API. Saved designs are the one exception: they go from the browser straight to Prolook.</p>
+      <div class="figure">
+        <svg viewBox="0 0 960 470" role="img" aria-label="System architecture of Customizer Core" font-family="system-ui, sans-serif" font-size="13">
+          <defs>
+            <marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#7d8bb0"/></marker>
+            <marker id="arw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#ffb547"/></marker>
+          </defs>
+          <!-- Browser -->
+          <rect x="20" y="40" width="230" height="300" rx="12" fill="rgba(124,196,255,.06)" stroke="#7cc4ff" stroke-width="1.5"/>
+          <text x="36" y="66" fill="#e6ecff" font-weight="600" font-size="14">Browser</text>
+          <text x="36" y="84" fill="#8b97b8" font-size="12">Vue 3 + Inertia pages</text>
+          <g fill="none" stroke="#3a4766"><rect x="36" y="100" width="198" height="34" rx="8"/><rect x="36" y="142" width="198" height="34" rx="8"/><rect x="36" y="184" width="198" height="34" rx="8"/><rect x="36" y="226" width="198" height="34" rx="8"/><rect x="36" y="268" width="198" height="34" rx="8"/></g>
+          <g fill="#e6ecff" font-size="12.5"><text x="48" y="122">Auth/Login</text><text x="48" y="164">Sports/Customizer (Builder)</text><text x="48" y="206">ShoppingCart · Checkout</text><text x="48" y="248">User/Order (Order tracker)</text><text x="48" y="290">Builder in rework mode</text></g>
+          <text x="36" y="326" fill="#8b97b8" font-size="11.5">Roles: sales rep, dealer, customer…</text>
+
+          <!-- Laravel -->
+          <rect x="330" y="40" width="300" height="400" rx="12" fill="rgba(79,227,160,.05)" stroke="#4fe3a0" stroke-width="1.5"/>
+          <text x="346" y="66" fill="#e6ecff" font-weight="600" font-size="14">Customizer Core · Laravel</text>
+          <text x="346" y="84" fill="#8b97b8" font-size="12">routes/web.php · routes/api.php</text>
+          <g fill="none" stroke="#3a4766"><rect x="346" y="100" width="268" height="96" rx="8"/><rect x="346" y="206" width="268" height="72" rx="8"/><rect x="346" y="288" width="268" height="72" rx="8"/><rect x="346" y="370" width="268" height="54" rx="8"/></g>
+          <text x="358" y="120" fill="#e6ecff" font-weight="600" font-size="12.5">Controllers</text>
+          <g fill="#c7d0ea" font-size="11.5"><text x="358" y="138">AuthenticatedSessionController</text><text x="358" y="154">SportController · CartItemController</text><text x="358" y="170">OrderController · UserController</text><text x="358" y="186">Api\CartItemController (factory)</text></g>
+          <text x="358" y="226" fill="#e6ecff" font-weight="600" font-size="12.5">Queue jobs</text>
+          <g fill="#c7d0ea" font-size="11.5"><text x="358" y="244">Thumbnails → GeneratePDFJob</text><text x="358" y="260">RegeneratePDFJob · CartItemAnalyticsJob</text></g>
+          <text x="358" y="308" fill="#e6ecff" font-weight="600" font-size="12.5">Database</text>
+          <g fill="#c7d0ea" font-size="11.5"><text x="358" y="326">users · carts · cart_items · orders</text><text x="358" y="342">changes_logs · client_informations</text></g>
+          <text x="358" y="390" fill="#e6ecff" font-weight="600" font-size="12.5">Mail</text>
+          <text x="358" y="408" fill="#c7d0ea" font-size="11.5">OrderOnHoldNotification → sales rep</text>
+
+          <!-- External -->
+          <text x="712" y="30" fill="#8b97b8" font-size="12" font-weight="600">EXTERNAL SERVICES</text>
+          <g fill="none" stroke="#5d6b8f"><rect x="712" y="40" width="228" height="62" rx="8"/><rect x="712" y="112" width="228" height="44" rx="8"/><rect x="712" y="166" width="228" height="44" rx="8"/><rect x="712" y="220" width="228" height="44" rx="8"/><rect x="712" y="274" width="228" height="44" rx="8"/></g>
+          <rect x="712" y="354" width="228" height="62" rx="8" fill="rgba(255,181,71,.08)" stroke="#ffb547" stroke-width="1.5"/>
+          <text x="724" y="62" fill="#e6ecff" font-weight="600" font-size="12.5">Prolook / QStrike API</text>
+          <text x="724" y="80" fill="#c7d0ea" font-size="11.5">token · order/new · update_rejection</text>
+          <text x="724" y="95" fill="#c7d0ea" font-size="11.5">saved designs</text>
+          <text x="724" y="139" fill="#e6ecff" font-size="12.5"><tspan font-weight="600">QX7</tspan><tspan fill="#c7d0ea" font-size="11.5"> · user info and role</tspan></text>
+          <text x="724" y="193" fill="#e6ecff" font-size="12.5"><tspan font-weight="600">Nexio</tspan><tspan fill="#c7d0ea" font-size="11.5"> · card payments</tspan></text>
+          <text x="724" y="247" fill="#e6ecff" font-size="12.5"><tspan font-weight="600">Amazon S3</tspan><tspan fill="#c7d0ea" font-size="11.5"> · rework attachments</tspan></text>
+          <text x="724" y="301" fill="#e6ecff" font-size="12.5"><tspan font-weight="600">Azure</tspan><tspan fill="#c7d0ea" font-size="11.5"> · reorder lookup</tspan></text>
+          <text x="724" y="378" fill="#e6ecff" font-weight="600" font-size="12.5">Factory production site</text>
+          <text x="724" y="396" fill="#c7d0ea" font-size="11.5">PUT track-status (incl. on_hold)</text>
+
+          <!-- Arrows -->
+          <g fill="none" stroke="#7d8bb0" stroke-width="1.3">
+            <path d="M250 160H326" marker-end="url(#ar)"/>
+            <path d="M630 72H708" marker-end="url(#ar)"/>
+            <path d="M630 134H708" marker-end="url(#ar)"/>
+            <path d="M630 188H708" marker-end="url(#ar)"/>
+            <path d="M630 242H708" marker-end="url(#ar)"/>
+            <path d="M630 296H708" marker-end="url(#ar)"/>
+            <path d="M140 40V20H900V36" stroke-dasharray="5 4" marker-end="url(#ar)"/>
+          </g>
+          <path d="M708 386H634" fill="none" stroke="#ffb547" stroke-width="1.5" marker-end="url(#arw)"/>
+          <text x="258" y="150" fill="#8b97b8" font-size="11.5">Inertia</text>
+          <text x="262" y="14" fill="#8b97b8" font-size="11.5">saved designs go straight from the browser to Prolook</text>
+          <text x="642" y="456" fill="#8b97b8" font-size="11.5">Factory calls in; the app emails the rep</text>
+        </svg>
+      </div>
+      <p class="caption">Traced from the code in <code>C:/Users/merin/laravel-docker/core/src/customizer-core</code>. Paths below are relative to that folder.</p>
+    </section>
+
+    <!-- 1 LOGIN -->
+    <section id="login">
+      <h2><span class="num">STEP 1</span>Login and session</h2>
+      <p class="lead">Users log in with email and password. Each login fetches a Prolook API token and the user's role from QX7; there is no SSO.</p>
+      <div class="card">
+        <h3>What happens</h3>
+        <ol class="steps">
+          <li><code>GET /login</code> shows the <code>Auth/Login</code> page.</li>
+          <li><code>POST /login</code> → <code>AuthenticatedSessionController@store</code>:
+            <ul>
+              <li>checks the credentials and rejects accounts that were never activated (<code>email_verified_at</code> is empty);</li>
+              <li><code>Prolook::generateSessionToken</code> stores <code>pl_access_token</code> in the session;</li>
+              <li><code>QX7::getAllUserInformationByEmail</code> sets the role;</li>
+              <li>updates <code>last_login</code>.</li>
+            </ul>
+          </li>
+          <li>The user lands on one of these pages:
+            <ul>
+              <li>the update-password page, if the password must change;</li>
+              <li>the profile page, if a sales rep's details are incomplete;</li>
+              <li>the page they came from;</li>
+              <li>otherwise the home page <code>/</code>.</li>
+            </ul>
+          </li>
+          <li><code>HandleInertiaRequests</code> shares data with every page, including <code>rejected_order_items_count</code>, the red badge on the Orders menu. The count is cached for 5 minutes and is always 0 for customers.</li>
+        </ol>
+      </div>
+      <div class="card scroll">
+        <h3>Roles from QX7</h3>
+        <table>
+          <tr><th>QX7 position</th><th>App role</th></tr>
+          <tr><td>Customer</td><td><code>customer</code>, the "end user"</td></tr>
+          <tr><td>Sales Rep, or a dealer or brand user who can place orders</td><td><code>sales_rep</code></td></tr>
+          <tr><td>Owner</td><td><code>admin</code></td></tr>
+          <tr><td>Product Pro</td><td><code>product_pro</code></td></tr>
+          <tr><td>Brand Manager</td><td><code>brand_manager</code></td></tr>
+        </table>
+        <p class="note">"Managing rep" is a flag on the user (<code>users.is_managing_rep</code>), not a role. The login code never sets <code>dealer</code>, so dealers log in as <code>sales_rep</code>.</p>
+      </div>
+      <div class="files"><code>routes/auth.php</code><code>app/Http/Controllers/Auth/AuthenticatedSessionController.php</code><code>app/Http/Middleware/HandleInertiaRequests.php</code><code>app/Models/User.php</code></div>
+      <div class="card brd" data-areas=""></div>
+    </section>
+
+    <!-- 2 BUILDER -->
+    <section id="builder">
+      <h2><span class="num">STEP 2</span>Building an item in the customizer</h2>
+      <p class="lead">The user picks a sport and style, then designs the item in the builder. They can save it as a design or add it to a cart.</p>
+      <div class="card">
+        <h3>What happens</h3>
+        <ol class="steps">
+          <li><strong>Pick a style:</strong> <code>GET /sports/{sports}/designs</code>, then <code>GET /sports/{sports}/customize/{uniform_id}</code> (<code>SportController@showCustomizer</code>). Reversible uniforms use <code>sports.customize_reversible</code>.</li>
+          <li><strong>Builder:</strong> the <code>builderReskinEnabled</code> flag picks <code>BuilderReskin</code> or the older <code>Builder</code>. It has a canvas and side panels: custom, fabric, color, piping, pattern, logo, roster, art, add-ons, text, layer and, during rework, issues.</li>
+          <li><strong>Colors:</strong> <code>ReskinColorPickerModal.vue</code> splits the palette by each color's <code>core_color</code> flag:
+            <ul>
+              <li><strong>Core Colors</strong> on top;</li>
+              <li><strong>Additional Colors</strong> below;</li>
+              <li>just <strong>Colors</strong> when the brand has no core colors.</li>
+            </ul>
+          </li>
+          <li><strong>Save a design:</strong> Save &amp; Share posts <code>/saved_design</code> straight to the Prolook API with the user's token, skipping Laravel. <code>GET /saved-designs/{id}/customize</code> reopens a saved design.</li>
+          <li><strong>Edit a cart item:</strong> <code>GET /carts/items/{cartItem}</code> opens the builder on that item.</li>
+        </ol>
+        <p class="note">The admin toggle that sets <code>core_color</code> (Colors By Brand page) is not in this repo; only the picker side is.</p>
+      </div>
+      <div class="files"><code>resources/js/Pages/Sports/Customizer.vue</code><code>resources/js/Components/Builder/Builder.vue</code><code>resources/js/Components/BuilderReskin/Color/ReskinColorPickerModal.vue</code><code>resources/js/api/saved-designs.js</code></div>
+      <div class="card brd" data-areas="Core Colors"></div>
+    </section>
+
+    <!-- 3 CHECKOUT -->
+    <section id="checkout">
+      <h2><span class="num">STEP 3</span>Cart and placing the order</h2>
+      <p class="lead">Adding to the cart saves a <code>cart_items</code> row and starts jobs that make thumbnails and the factory PDF. Placing the order sends the cart to Prolook and closes it.</p>
+      <div class="figure">
+        <svg viewBox="0 0 960 150" role="img" aria-label="Order submission steps" font-family="system-ui, sans-serif" font-size="12.5">
+          <defs><marker id="ar2" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#7d8bb0"/></marker></defs>
+          <g fill="none" stroke="#3a4766" stroke-width="1.3">
+            <rect x="12" y="40" width="140" height="70" rx="10"/><rect x="170" y="40" width="140" height="70" rx="10"/><rect x="328" y="40" width="140" height="70" rx="10"/>
+            <rect x="486" y="40" width="140" height="70" rx="10"/><rect x="644" y="40" width="140" height="70" rx="10"/>
+          </g>
+          <rect x="802" y="40" width="146" height="70" rx="10" fill="rgba(79,227,160,.08)" stroke="#4fe3a0" stroke-width="1.5"/>
+          <g fill="none" stroke="#7d8bb0" stroke-width="1.3"><path d="M152 75H166" marker-end="url(#ar2)"/><path d="M310 75H324" marker-end="url(#ar2)"/><path d="M468 75H482" marker-end="url(#ar2)"/><path d="M626 75H640" marker-end="url(#ar2)"/><path d="M784 75H798" marker-end="url(#ar2)"/></g>
+          <g fill="#e6ecff" text-anchor="middle" font-weight="600">
+            <text x="82" y="68">Add to cart</text><text x="240" y="68">Checkout</text><text x="398" y="68">Create order</text><text x="556" y="68">Pay (card)</text><text x="714" y="68">Send to Prolook</text><text x="875" y="68">Cart completed</text>
+          </g>
+          <g fill="#8b97b8" text-anchor="middle" font-size="11">
+            <text x="82" y="88">POST /carts/items</text><text x="240" y="88">GET /checkout</text><text x="398" y="88">orders row</text><text x="556" y="88">Nexio</text><text x="714" y="88">api/order/new</text><text x="875" y="88">items: order_status new</text>
+            <text x="82" y="102">+ thumbnails, PDF jobs</text><text x="240" y="102">rep: orders.submit</text><text x="398" y="102">permission check</text><text x="556" y="102">voided if a step fails</text><text x="714" y="102">stores pl_order_code</text><text x="875" y="102">→ checkout success</text>
+          </g>
+          <text x="12" y="24" fill="#8b97b8" font-size="12">A sales rep places an order. An end user sends a quote request (orders.quotation) instead.</text>
+        </svg>
+      </div>
+      <div class="card">
+        <h3>What happens</h3>
+        <ol class="steps">
+          <li><strong>Add to cart</strong>: <code>SelectCart.vue</code> posts <code>POST /carts/items</code> (<code>CartItemController@store</code>).
+            <ul>
+              <li>Finds or creates the cart: the default cart, a new cart or a Team DB cart.</li>
+              <li>Creates the <code>cart_items</code> row, plus <code>cart_items_side_b</code> for reversible items.</li>
+              <li>Queues the jobs in order: low-res thumbnails, then full thumbnails, then <code>GeneratePDFJob</code>, then <code>CartItemAnalyticsJob</code>.</li>
+              <li>Marks the item <code>complete</code> if it has a design, a roster and application sizes, otherwise <code>incomplete</code>.</li>
+            </ul>
+          </li>
+          <li><strong>Cart page</strong>: <code>GET /shopping-cart</code>. The roster is edited via <code>PATCH /carts/items/{cartItem}/rosters</code>.</li>
+          <li><strong>Submit</strong>: <code>POST /orders/submit</code> (<code>Action\OrderController@submitOrder</code>):
+            <ul>
+              <li>checks permission and validates the payment method (card or terms) and the sales rep;</li>
+              <li>creates the order and charges the card with Nexio, if paying by card;</li>
+              <li>sends the order to Prolook <code>api/order/new</code> and stores <code>pl_order_code</code>;</li>
+              <li>marks the cart <code>completed</code>;</li>
+              <li>sets each item's <code>order_status = new</code>, <code>order_code</code> and <code>order_item_id</code>, then sets temporary ship dates.</li>
+            </ul>
+            If any step fails, the payment is voided and the database changes are rolled back.
+          </li>
+        </ol>
+      </div>
+      <div class="files"><code>app/Http/Controllers/Pages/CartItemController.php</code><code>app/Http/Controllers/Action/OrderController.php</code><code>app/ApiClient/Prolook.php</code><code>resources/js/Components/Checkout/Dealer.vue</code></div>
+      <div class="card brd" data-areas=""></div>
+    </section>
+
+    <!-- 4 TRACKING -->
+    <section id="tracking">
+      <h2><span class="num">STEP 4</span>Order tracking</h2>
+      <p class="lead">After submission, the factory reports each item's progress to the app. The Orders page shows the current status as a badge.</p>
+      <div class="figure">
+        <svg viewBox="0 0 760 330" role="img" aria-label="Items move left to right; On Hold sends them back for rework" font-family="system-ui, sans-serif" font-size="12.5">
+          <defs>
+            <marker id="sa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#7d8bb0"/></marker>
+            <marker id="sw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#ffb547"/></marker>
+          </defs>
+          <text x="28" y="34" fill="#e6ecff" font-size="15" font-weight="600">Items move left to right; On Hold sends them back for rework</text>
+          <text x="28" y="56" fill="#8b97b8" font-size="11.5">Statuses in cart_items.order_status_details, as shown on the Orders page</text>
+          <g fill="none" stroke="#5d6b8f" stroke-width="1.25">
+            <rect x="28" y="86" width="104" height="48" rx="8"/><rect x="148" y="86" width="104" height="48" rx="8"/><rect x="268" y="86" width="104" height="48" rx="8"/>
+            <rect x="388" y="86" width="104" height="48" rx="8"/><rect x="508" y="86" width="104" height="48" rx="8"/><rect x="628" y="86" width="104" height="48" rx="8"/>
+          </g>
+          <g fill="none" stroke="#7d8bb0" stroke-width="1.25"><path d="M132 110H144" marker-end="url(#sa)"/><path d="M252 110H264" marker-end="url(#sa)"/><path d="M372 110H384" marker-end="url(#sa)"/><path d="M492 110H504" marker-end="url(#sa)"/><path d="M612 110H624" marker-end="url(#sa)"/></g>
+          <g fill="#e6ecff" text-anchor="middle">
+            <text x="80" y="114">Submitted</text>
+            <text x="200" y="106">Order</text><text x="200" y="122">Confirmed</text>
+            <text x="320" y="106">Artwork</text><text x="320" y="122">Production</text>
+            <text x="440" y="106">Factory</text><text x="440" y="122">Production</text>
+            <text x="560" y="114">Shipped</text><text x="680" y="114">Delivered</text>
+          </g>
+          <g fill="none" stroke="#ffb547" stroke-width="1.25">
+            <path d="M340 134V150H420V134"/><path d="M380 150V222" marker-end="url(#sw)"/>
+            <path d="M310 250H290V138" marker-end="url(#sw)"/><path d="M450 250H470V138" marker-end="url(#sw)"/>
+          </g>
+          <g fill="#8b97b8" font-size="11.5">
+            <text x="388" y="182">factory</text><text x="388" y="197">rejects item</text>
+            <text x="282" y="196" text-anchor="end">resubmitted:</text><text x="282" y="211" text-anchor="end">artwork issue</text>
+            <text x="478" y="196">resubmitted:</text><text x="478" y="211">factory issue</text>
+          </g>
+          <rect x="310" y="226" width="140" height="48" rx="8" fill="rgba(255,181,71,.14)" stroke="#ffb547" stroke-width="2"/>
+          <text x="380" y="254" text-anchor="middle" fill="#e6ecff" font-weight="600">On Hold</text>
+          <text x="380" y="300" text-anchor="middle" fill="#8b97b8" font-size="11.5">Hidden from end users; they see the production status</text>
+        </svg>
+      </div>
+      <div class="card">
+        <h3>What happens</h3>
+        <ol class="steps">
+          <li><strong>Orders page</strong>: <code>GET /users/orders</code>. With the <code>orderTrackingEnabled</code> flag on, it shows <code>OrderTrackerNew.vue</code>, which loads rows from <code>GET /api/orders/in-production</code>.</li>
+          <li><strong>Drawers</strong>: clicking a row opens <strong>ItemView</strong>. Clicking the status badge opens <strong>OrderView</strong>.</li>
+          <li><strong>Factory updates</strong>: <code>PUT /api/carts/items/{order_item_id}/track-status</code> (<code>Api\CartItemController@trackOrderStatus</code>). The route has no login; it checks a shared <code>key</code>. Updates are saved in <code>order_status_details</code> with row locking.</li>
+          <li>An update for an earlier step is stored but does not move the item backwards.</li>
+        </ol>
+      </div>
+      <div class="files"><code>resources/js/Components/Orders/Dealer/OrderTrackerNew.vue</code><code>resources/js/Components/Orders/OrderTracking/OrderStatus.vue</code><code>app/Http/Controllers/Api/CartItemController.php</code><code>app/Models/CartItem.php</code></div>
+      <div class="card brd" data-areas="Rework Visibility"></div>
+    </section>
+
+    <!-- 5 REWORK -->
+    <section id="rework">
+      <h2><span class="num">STEP 5</span>On Hold and rework</h2>
+      <p class="lead">When the factory rejects an item, the sales rep fixes the design in the builder and resubmits it. The item then goes back into production.</p>
+      <div class="figure">
+        <svg viewBox="0 0 760 470" role="img" aria-label="A rejected item goes factory to rep and back in seven calls" font-family="system-ui, sans-serif" font-size="12.5">
+          <defs>
+            <marker id="qa" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#7d8bb0"/></marker>
+            <marker id="qw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#ffb547"/></marker>
+            <marker id="qg" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#4fe3a0"/></marker>
+          </defs>
+          <text x="24" y="32" fill="#e6ecff" font-size="15" font-weight="600">A rejected item goes factory to rep and back in seven calls</text>
+          <g fill="none" stroke="#5d6b8f" stroke-width="1.25"><rect x="24" y="52" width="200" height="40" rx="8"/><rect x="280" y="52" width="200" height="40" rx="8"/><rect x="536" y="52" width="200" height="40" rx="8"/></g>
+          <g fill="#e6ecff" font-weight="600" text-anchor="middle"><text x="124" y="77">Sales rep · browser</text><text x="380" y="77">Customizer Core · Laravel</text><text x="636" y="77">Factory · Prolook API</text></g>
+          <g stroke="rgba(139,151,184,.35)" stroke-width="1.25" stroke-dasharray="4 4"><line x1="124" x2="124" y1="92" y2="440"/><line x1="380" x2="380" y1="92" y2="440"/><line x1="636" x2="636" y1="92" y2="440"/></g>
+          <g fill="none" stroke-width="1.4">
+            <path d="M636 130H384" stroke="#ffb547" marker-end="url(#qw)"/>
+            <path d="M380 176H128" stroke="#7d8bb0" marker-end="url(#qa)"/>
+            <path d="M124 222H376" stroke="#7d8bb0" marker-end="url(#qa)"/>
+            <path d="M380 268H128" stroke="#7d8bb0" marker-end="url(#qa)"/>
+            <path d="M124 314H376" stroke="#7d8bb0" marker-end="url(#qa)"/>
+            <path d="M380 360H632" stroke="#4fe3a0" marker-end="url(#qg)"/>
+            <path d="M380 406H128" stroke="#7d8bb0" marker-end="url(#qa)"/>
+          </g>
+          <g fill="#e6ecff" font-size="12" text-anchor="middle">
+            <text x="508" y="122">1. PUT track-status: on_hold</text>
+            <text x="252" y="168">2. Email + red badge on Orders</text>
+            <text x="252" y="214">3. Fix Issue (action=fix-issue)</text>
+            <text x="252" y="260">4. Builder: banner + Issues tab</text>
+            <text x="252" y="306">5. Resolve and Submit</text>
+            <text x="508" y="352">6. POST update_rejection</text>
+            <text x="252" y="398">7. Orders page: Item Resubmitted</text>
+          </g>
+          <text x="24" y="460" fill="#8b97b8" font-size="11.5">After step 6 the item returns to Artwork or Factory Production, depending on the rejection type.</text>
+        </svg>
+      </div>
+      <div class="card">
+        <h3>What happens</h3>
+        <ol class="steps">
+          <li><strong>Factory puts the item On Hold.</strong> It sends <code>on_hold</code> with <code>rejection_reason</code>, <code>rejection_type</code>, images and a date. The app sets <code>on_hold.is_active = true</code> and emails the order's sales rep (<code>OrderOnHoldNotification</code>).</li>
+          <li><strong>Rep is alerted.</strong> The email links to the item with <code>action=fix-issue</code>, and the Orders menu badge goes up by one.</li>
+          <li><strong>Fix Issue.</strong> The button shows on the Orders page and in the drawers, never for end users. <code>useFixIssue.ts</code> opens the item, or the reorder editor for reorders.
+            <ul>
+              <li>Access: managing reps and the order's own sales rep.</li>
+              <li>Rework mode turns on only when all of these hold: the link has <code>fix-issue</code>, the user has access, the item is On Hold, and the user is not an end user.</li>
+            </ul>
+          </li>
+          <li><strong>Rework mode in the builder.</strong>
+            <ul>
+              <li><code>RejectionBanner.vue</code> shows the "update only what is in the rework notes" message. <code>VITE_REJECTION_BANNER_MESSAGE</code> can override the text.</li>
+              <li><strong>Issues &amp; Logs</strong> shows the rejection reason and factory images: the header's Notes dropdown in the reskin builder, or a side panel in the classic builder.</li>
+              <li>The rep adds notes and attachments and answers "additional changes?". A justification is required when the answer is yes.</li>
+            </ul>
+          </li>
+          <li><strong>Resolve and Submit.</strong> <code>Builder.vue</code> validates the form. <code>ResolveAndSubmitModal.vue</code> then confirms, and requires an agreement checkbox when there are additional changes.</li>
+          <li><strong>Resubmit</strong> (<code>POST /carts/items/{cartItem}/resubmit-rejected-item</code>). In one transaction it:
+            <ul>
+              <li>saves the new design;</li>
+              <li>uploads attachments to S3;</li>
+              <li>writes a <code>fixed</code> / <code>rework</code> change log;</li>
+              <li>calls <code>api/order_item/update_rejection</code>;</li>
+              <li>moves the item back to Artwork or Factory Production.</li>
+            </ul>
+            Thumbnails and the PDF are then rebuilt (<code>RegeneratePDFJob</code>).
+          </li>
+          <li><strong>Done.</strong> The rep returns to the Orders page with "Item Resubmitted".</li>
+        </ol>
+      </div>
+      <div class="files"><code>app/Mail/OrderOnHoldNotification.php</code><code>resources/js/Composables/Rejections/useFixIssue.ts</code><code>resources/js/Components/Header/RejectionBanner.vue</code><code>resources/js/Components/BuilderReskin/Layout/NotesDropdown.vue</code><code>resources/js/Components/Builder/Rejection/IssuesAndLogsPanel.vue</code><code>resources/js/Components/Builder/Modals/ResolveAndSubmitModal.vue</code><code>app/Http/Controllers/Pages/CartItemController.php</code></div>
+      <div class="card brd" data-areas="Notifications|Rework Workflow|Issues Logs Tab|Additional Changes|Rework Submission|Access Control"></div>
+    </section>
+
+    <!-- 6 REORDER -->
+    <section id="reorder">
+      <h2><span class="num">STEP 6</span>Reorder</h2>
+      <p class="lead">"Reorder Item" copies a past order item into a cart with a new roster. The design stays locked to the original.</p>
+      <div class="card">
+        <h3>What happens</h3>
+        <ol class="steps">
+          <li><strong>Reorder button</strong> (<code>OrderTrackerNew.vue</code> → <code>buyItAgain</code>). It is hidden for reversible items and manual orders. Azure <code>GET customizer/order/{orderCode}</code> returns <code>factory_order_id</code>, <code>part_id</code> and <code>order_item_id</code>.</li>
+          <li><strong>Roster</strong>: with the reskin/order-tracking flag on, <code>CreateRosterModal.vue</code> opens (roster, then application sizes), then <code>SelectCart</code>. Otherwise <code>GET /customize/{cartItem}/reorder</code> opens <code>CartItem/ShowReorder</code>.</li>
+          <li><strong>Save</strong>: <code>POST /carts/items/reorder</code> (<code>@storeReorder</code>) copies the item with <code>is_reorder = true</code>, the original factory ids and the new roster, and clears the status and order code. Bulk reorders use <code>/api/carts/store-reorders</code>.</li>
+          <li><strong>Locked design</strong>: the builder shows a "LOCKED" badge ("Jersey design is locked to be sure the design is the same as the original design").</li>
+        </ol>
+        <p class="note">Reorders of <strong>legacy</strong> orders (the "REORDERS of Legacy Orders" BRD: price items, legacy orders page, deletion flow) have no code in this repo yet.</p>
+      </div>
+      <div class="files"><code>resources/js/Components/Orders/Dealer/OrderTrackerNew.vue</code><code>resources/js/api/azure.js</code><code>app/Http/Controllers/Pages/CartItemController.php</code></div>
+      <div class="card brd" data-areas="Reorder Rejections|Legacy Orders|Legacy Reorder|Legacy Deletion|Price Items"></div>
+    </section>
+
+    <!-- DATA MODEL -->
+    <section id="data">
+      <h2>Data model and statuses</h2>
+      <p class="lead">A user has carts, and a cart has items. Submitting a cart creates one order. Item progress lives in <code>cart_items.order_status_details</code>.</p>
+      <div class="figure">
+        <svg viewBox="0 0 960 190" role="img" aria-label="Main tables and relationships" font-family="system-ui, sans-serif" font-size="12.5">
+          <defs><marker id="da" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#7d8bb0"/></marker></defs>
+          <g fill="none" stroke="#5d6b8f" stroke-width="1.3">
+            <rect x="20" y="50" width="150" height="56" rx="10"/><rect x="250" y="50" width="150" height="56" rx="10"/><rect x="480" y="50" width="170" height="56" rx="10"/>
+            <rect x="250" y="130" width="150" height="48" rx="10"/><rect x="730" y="14" width="210" height="44" rx="10"/><rect x="730" y="72" width="210" height="44" rx="10"/><rect x="730" y="130" width="210" height="44" rx="10"/>
+          </g>
+          <g fill="none" stroke="#7d8bb0" stroke-width="1.3">
+            <path d="M170 78H246" marker-end="url(#da)"/><path d="M400 78H476" marker-end="url(#da)"/><path d="M325 106V126" marker-end="url(#da)"/>
+            <path d="M650 70H690V36H726" marker-end="url(#da)"/><path d="M650 86H690V94H726" marker-end="url(#da)"/><path d="M650 96H680V152H726" marker-end="url(#da)"/>
+          </g>
+          <g fill="#e6ecff" font-weight="600" text-anchor="middle"><text x="95" y="76">users</text><text x="325" y="76">carts</text><text x="565" y="76">cart_items</text><text x="325" y="152">orders</text><text x="835" y="41">changes_logs</text><text x="835" y="99">cart_items_side_b</text><text x="835" y="157">client_informations</text></g>
+          <g fill="#8b97b8" font-size="11" text-anchor="middle"><text x="95" y="94">role · is_managing_rep</text><text x="325" y="94">active / completed</text><text x="565" y="94">status · order_status_details</text><text x="325" y="170">pl_order_code · submitted_date</text></g>
+          <g fill="#8b97b8" font-size="11"><text x="180" y="70">has many</text><text x="410" y="70">has many</text><text x="333" y="121">has one</text></g>
+        </svg>
+      </div>
+      <div class="card scroll">
+        <h3>Status values</h3>
+        <table>
+          <tr><th>Field</th><th>Values</th></tr>
+          <tr><td><code>carts.status</code></td><td>active, completed (abandoned is used in queries)</td></tr>
+          <tr><td><code>cart_items.status</code></td><td>incomplete, approved, change_request, pending_approval, complete</td></tr>
+          <tr><td><code>cart_items.order_status</code></td><td>new, order_confirmed, artwork_production, factory_production, on_hold, shipped, pending_return, pending_cancel, returned, cancelled</td></tr>
+          <tr><td><code>order_status_details</code> keys</td><td>temporary_ship_date, order_confirmed, artwork_production, factory_production, on_hold, shipped, delivered (each with <code>is_active</code>)</td></tr>
+          <tr><td><code>changes_logs.type</code></td><td>fixed, ask_for_changes, quick_change (issue_type: rework, system_update)</td></tr>
+          <tr><td><code>orders.hybris_order_status</code></td><td>pending, success, failed</td></tr>
+        </table>
+      </div>
+      <p class="note">Not confirmed in code: what the PDF jobs send to <code>PdfService</code>, who calls <code>PUT /api/carts/items/{item}/status</code>, and how the quotation flow continues.</p>
+    </section>
+
+    <footer>Flow traced from the Customizer Core source code. BRD coverage comes from <code>data/graph-data.js</code>, which the truth-gate hook rebuilds after each <code>/brd-audit</code>. Only verified requirements are listed.</footer>
+  </main>
+</div>
+
+<script src="data/graph-data.js"></script>
+<script>
+(() => {
+  const D = window.BRAIN_DATA || { meta: {}, requirements: [], extractedByCategory: {} };
+  const totals = D.extractedByCategory || {};
+  const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+  const verifiedIn = (areas) => D.requirements.filter((r) => areas.includes(r.category));
+  const totalIn = (areas) => areas.reduce((s, a) => s + (totals[a] || 0), 0);
+
+  const m = D.meta || {};
+  document.getElementById('metaLine').textContent =
+    `${m.systemName || 'Customizer Core'}${m.systemBranch ? ' @ ' + m.systemBranch : ''}${m.verifiedAt ? ' · BRD verified ' + new Date(m.verifiedAt).toLocaleDateString() : ''} · ${m.verifiedCount || 0} of ${m.extractedCount || 0} requirements proven in code`;
+
+  // BRD coverage card per step
+  const stages = [];
+  document.querySelectorAll('section[id] .brd').forEach((card) => {
+    const section = card.closest('section');
+    let areas = (card.dataset.areas || '').split('|').filter(Boolean);
+    if (section.id === 'builder') areas = areas.concat(Object.keys(totals).filter((c) => /^Reskin/.test(c)));
+    const list = verifiedIn(areas);
+    const total = totalIn(areas);
+    stages.push({ id: section.id, title: section.querySelector('h2').lastChild.textContent.trim(), verified: list.length, total, areas });
+    if (!areas.length) {
+      card.innerHTML = '<h3>BRD coverage</h3><p class="empty">None of the three BRDs covers this step.</p>';
+      return;
+    }
+    const chips = areas.map((a) => {
+      const v = list.filter((r) => r.category === a).length, t = totals[a] || 0;
+      return `<span class="chip${v ? '' : ' zero'}">${esc(a)} <b>${v}</b> of ${t}</span>`;
+    }).join('');
+    const items = list.map((r) => `<li><strong>${esc(r.id)}</strong> ${esc(r.title)}${r.evidence && r.evidence[0] ? ` — <code>${esc(r.evidence[0].file)}:${r.evidence[0].line}</code>` : ''}</li>`).join('');
+    card.innerHTML = `<h3>BRD coverage · ${list.length} of ${total} verified</h3><div class="chips">${chips}</div>` +
+      (list.length ? `<details><summary>Show the ${list.length} verified requirement${list.length > 1 ? 's' : ''}</summary><ul>${items}</ul></details>`
+                   : '<p class="empty">No requirement for this step is proven in code yet.</p>');
+  });
+
+  // Pipeline across the top
+  document.getElementById('pipeline').innerHTML = stages.map((s, i) => {
+    const pct = s.total ? Math.round((s.verified / s.total) * 100) : 0;
+    return `<a class="stage${s.id === 'rework' ? ' warn' : ''}" href="#${s.id}"><span class="n">STEP ${i + 1}</span><b>${esc(s.title)}</b>
+      <span class="cov">${s.total ? `${s.verified} of ${s.total} BRD reqs` : 'no BRD scope'}</span><span class="bar"><i style="width:${pct}%"></i></span></a>`;
+  }).join('');
+
+  // Highlight the current section in the side nav
+  const links = [...document.querySelectorAll('#toc a')];
+  const obs = new IntersectionObserver((entries) => {
+    entries.forEach((e) => {
+      if (!e.isIntersecting) return;
+      links.forEach((a) => a.classList.toggle('active', a.getAttribute('href') === '#' + e.target.id));
+    });
+  }, { rootMargin: '-30% 0px -60% 0px' });
+  document.querySelectorAll('main section[id]').forEach((s) => obs.observe(s));
+})();
+</script>
+</body>
+</html>

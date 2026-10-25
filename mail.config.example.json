@@ -1,0 +1,21 @@
+{
+  "provider": "emailjs",
+  "notifyEmail": "you@example.com",
+  "emailjs": {
+    "serviceId": "service_xxxxxxx",
+    "templateId": "template_xxxxxxx",
+    "publicKey": "your-public-key",
+    "privateKey": "your-private-key",
+    "fromName": "BRD Analysis",
+    "attachments": false,
+    "maxAttachmentKB": 500,
+    "maxRequestKB": 50
+  },
+  "from": "BRD Analysis <brd-bot@example.com>",
+  "smtp": {
+    "host": "smtp.example.com",
+    "port": 587,
+    "secure": false,
+    "auth": { "user": "brd-bot@example.com", "pass": "app-password-here" }
+  }
+}

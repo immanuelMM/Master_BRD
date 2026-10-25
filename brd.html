@@ -1,0 +1,247 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BRD Truth Viewer</title>
+<style>
+  :root {
+    --bg: #05070d; --surface: #0c111e; --surface-2: #121a2c; --border: rgba(120,160,255,.16);
+    --text: #e6ecff; --muted: #8b97b8; --soft: #c7d0ea; --accent: #7cc4ff; --ok: #4fe3a0;
+    --paper: #ffffff; --ink: #1d2433; --ink-soft: #4a5568; --mark: #d6f5e3; --mark-edge: #1f9d5c; --mark-hover: #bff0d4;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body { background: radial-gradient(ellipse at 50% -10%, #0f1830 0%, var(--bg) 55%) fixed; color: var(--text);
+    font: 15px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; display: flex; flex-direction: column; }
+  a { color: var(--accent); }
+  code { font: 12px/1.4 ui-monospace, "Cascadia Code", Consolas, monospace; }
+
+  .topbar { display: flex; align-items: center; gap: 12px; padding: 10px 20px; border-bottom: 1px solid var(--border);
+    background: rgba(5,7,13,.9); backdrop-filter: blur(10px); flex-wrap: wrap; }
+  .topbar b { font-size: 15px; }
+  .topbar .meta { color: var(--muted); font-size: 12.5px; }
+  .btn { display: inline-flex; align-items: center; gap: 6px; font: inherit; font-size: 13px; padding: 6px 12px; border-radius: 8px;
+    border: 1px solid var(--border); color: var(--text); text-decoration: none; background: rgba(255,255,255,.04); cursor: pointer; white-space: nowrap; }
+  .btn:hover { border-color: var(--accent); }
+  .btn[aria-pressed=true] { background: rgba(124,196,255,.16); border-color: var(--accent); }
+
+  .tabs { display: flex; gap: 6px; padding: 10px 20px 0; border-bottom: 1px solid var(--border); overflow-x: auto; }
+  .tabbtn { font: inherit; font-size: 13.5px; color: var(--muted); background: none; border: 1px solid transparent; border-bottom: none;
+    padding: 9px 14px 10px; border-radius: 10px 10px 0 0; cursor: pointer; white-space: nowrap; display: flex; align-items: center; gap: 8px; }
+  .tabbtn:hover { color: var(--text); }
+  .tabbtn[aria-selected=true] { color: var(--text); background: var(--surface); border-color: var(--border); margin-bottom: -1px; }
+  .count { font-size: 11.5px; padding: 1px 8px; border-radius: 999px; background: rgba(79,227,160,.14); color: var(--ok); font-variant-numeric: tabular-nums; }
+  .count.zero { background: rgba(255,255,255,.06); color: var(--muted); }
+
+  .wrap { flex: 1; display: grid; grid-template-columns: minmax(0, 1fr) 360px; min-height: 0; }
+  .docpane { overflow-y: auto; padding: 24px 28px 80px; }
+  .toolbar { max-width: 880px; margin: 0 auto 14px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .toolbar .summary { color: var(--soft); font-size: 13.5px; margin-right: auto; }
+  .toolbar .summary b { color: var(--ok); }
+  .bar { height: 6px; border-radius: 3px; background: rgba(255,255,255,.08); overflow: hidden; width: 160px; display: inline-block; vertical-align: middle; margin-left: 8px; }
+  .bar i { display: block; height: 100%; background: var(--ok); }
+
+  /* The BRD page itself, styled like a Word document */
+  .paper { max-width: 880px; margin: 0 auto; background: var(--paper); color: var(--ink); border-radius: 6px; padding: 56px 64px;
+    box-shadow: 0 20px 60px rgba(0,0,0,.45); font: 14.5px/1.6 Calibri, "Segoe UI", Arial, sans-serif; }
+  .paper h1 { font-size: 26px; margin: 0 0 14px; color: #1f3864; }
+  .paper h2 { font-size: 20px; margin: 26px 0 10px; color: #2f5496; }
+  .paper h3 { font-size: 17px; margin: 22px 0 8px; color: #2f5496; }
+  .paper h4, .paper h5, .paper h6 { font-size: 15px; margin: 18px 0 6px; color: #1f3864; }
+  .paper p { margin: 0 0 8px; }
+  .paper ul { margin: 0 0 10px; padding-left: 22px; }
+  .paper li { margin: 2px 0; }
+  .paper img { max-width: 100%; height: auto; display: block; margin: 8px 0; border: 1px solid #e2e8f0; border-radius: 4px; }
+  .paper .tbl { overflow-x: auto; margin: 10px 0 14px; }
+  .paper table { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+  .paper td { border: 1px solid #b4c0d3; padding: 6px 8px; vertical-align: top; }
+  .paper td p { margin: 0 0 4px; }
+  .paper a { color: #1a56db; }
+  .paper.dimmed .blk:not(.hl) { opacity: .28; }
+
+  /* Highlight of a passage proven true in code */
+  .hl { background: var(--mark); box-shadow: inset 3px 0 0 var(--mark-edge); border-radius: 3px; cursor: pointer; position: relative;
+    padding-left: 6px; margin-left: -6px; transition: background .15s; }
+  .hl:hover { background: var(--mark-hover); }
+  .hl.flash { animation: flash 1.2s ease 2; }
+  @keyframes flash { 50% { background: #8fe3b4; } }
+  .tag { display: inline-block; font: 600 10.5px/1 ui-monospace, Consolas, monospace; color: #0d6b3c; background: #fff; border: 1px solid #7bd3a2;
+    border-radius: 999px; padding: 3px 7px; margin-left: 6px; vertical-align: 2px; white-space: nowrap; }
+
+  /* Side panel */
+  .side { border-left: 1px solid var(--border); background: var(--surface); overflow-y: auto; padding: 16px 18px 60px; }
+  .side h3 { margin: 0 0 4px; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .07em; }
+  .side input { width: 100%; padding: 7px 10px; border-radius: 8px; border: 1px solid var(--border); background: rgba(0,0,0,.3); color: var(--text); font: inherit; margin: 8px 0 12px; }
+  .req { border: 1px solid var(--border); border-radius: 10px; padding: 10px 12px; margin-bottom: 8px; cursor: pointer; background: var(--surface-2); }
+  .req:hover, .req.on { border-color: var(--ok); }
+  .req .id { font: 12px ui-monospace, Consolas, monospace; color: var(--ok); }
+  .req .cat { font-size: 11.5px; color: var(--muted); }
+  .req b { display: block; font-size: 13.5px; margin-top: 2px; }
+  .req .nf { font-size: 11.5px; color: #ffb547; margin-top: 4px; }
+  .detail { border: 1px solid rgba(79,227,160,.45); border-radius: 12px; padding: 12px 14px; margin-bottom: 14px; background: rgba(79,227,160,.06); display: none; }
+  .detail.show { display: block; }
+  .detail h4 { margin: 4px 0 6px; font-size: 15px; }
+  .detail p { margin: 6px 0; font-size: 13px; color: var(--soft); }
+  .detail .ev { font-size: 12px; color: var(--accent); margin-top: 8px; word-break: break-all; }
+  .detail pre { margin: 4px 0 0; padding: 8px; background: rgba(0,0,0,.4); border-radius: 6px; white-space: pre-wrap; word-break: break-word; font: 11.5px/1.4 ui-monospace, Consolas, monospace; }
+  .empty { color: var(--muted); font-size: 13px; }
+
+  @media (max-width: 1000px) {
+    .wrap { grid-template-columns: 1fr; }
+    .side { border-left: none; border-top: 1px solid var(--border); }
+    .paper { padding: 28px 20px; }
+    .docpane { padding: 16px 12px 40px; }
+  }
+</style>
+</head>
+<body>
+<script src="assets/nav.js"></script>
+<header class="topbar">
+  <b>BRD Truth Viewer</b>
+  <span class="meta" id="meta"></span>
+</header>
+<nav class="tabs" id="tabs" role="tablist" aria-label="BRD documents"></nav>
+<div class="wrap">
+  <main class="docpane" id="docpane">
+    <div class="toolbar">
+      <span class="summary" id="summary"></span>
+      <button class="btn" id="btnDim" aria-pressed="false">Show only what's true</button>
+      <button class="btn" id="btnNext">Next highlight ↓</button>
+    </div>
+    <article class="paper" id="paper"></article>
+  </main>
+  <aside class="side" aria-label="Verified requirements">
+    <div class="detail" id="detail"></div>
+    <h3>Proven true in this BRD</h3>
+    <input type="search" id="filter" placeholder="Filter by ID, title or category…" aria-label="Filter requirements">
+    <div id="reqList"></div>
+  </aside>
+</div>
+
+<script src="data/brd-docs.js"></script>
+<script src="data/graph-data.js"></script>
+<script>
+(() => {
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const DOCS = window.BRD_DOCS || [];
+const DATA = window.BRAIN_DATA || { meta: {}, requirements: [] };
+const m = DATA.meta || {};
+$('meta').textContent = `${m.systemName || 'System'}${m.systemBranch ? ' @ ' + m.systemBranch : ''} · only requirements proven in code are highlighted`;
+
+/* ---------- text matching ---------- */
+const STOP = new Set('the a an and or of to in on for with by is are be shall should will must can may it this that as at from into when which their there than then each all any not only also its user users system'.split(' '));
+const norm = (s) => String(s || '').toLowerCase().replace(/[‘’]/g, "'").replace(/[“”]/g, '"').replace(/[^a-z0-9' ]+/g, ' ').replace(/\s+/g, ' ').trim();
+const words = (s) => norm(s).split(' ').filter((w) => w.length > 2 && !STOP.has(w));
+
+// Every readable block in the rendered document (the deepest element that holds text).
+function blocksOf(root) {
+  return [...root.querySelectorAll('p, li, h1, h2, h3, h4, h5, h6, td')]
+    .filter((el) => !(el.tagName === 'TD' && el.querySelector('p, li')) && el.textContent.trim().length > 2);
+}
+function score(req, el) {
+  const text = norm(el.textContent);
+  const q = req.source && req.source.quote ? norm(req.source.quote) : '';
+  if (q && text === q) return 2.1;                                             // the whole block is the quote (short table cells)
+  if (q && q.length > 12 && text.includes(q)) return 2;                       // exact quote from the BRD
+  if (q) { const head = q.split(' ').slice(0, 7).join(' '); if (head.length > 15 && text.includes(head)) return 1.6; }
+  const rw = [...new Set(words(req.description || req.title))];
+  if (!rw.length) return 0;
+  const tw = new Set(words(el.textContent));
+  const hit = rw.filter((w) => tw.has(w)).length;
+  const s = hit / rw.length;
+  return tw.size > rw.length * 6 ? s * 0.85 : s;                               // long blocks get a small penalty
+}
+
+/* ---------- assign each verified requirement to a BRD + passage ---------- */
+const scratch = document.createElement('div');
+const docBlocks = DOCS.map((d) => { const el = document.createElement('div'); el.innerHTML = d.html; return blocksOf(el).map((b) => b.textContent); });
+const byFile = (f) => DOCS.findIndex((d) => d.file === f || (f && d.file.endsWith(f.split('/').pop())));
+const assigned = DOCS.map(() => []);
+DATA.requirements.forEach((r) => {
+  let di = r.source && r.source.file ? byFile(r.source.file) : -1;
+  if (di < 0) { // no source recorded: pick the BRD whose text matches best
+    let best = -1, bs = 0;
+    docBlocks.forEach((list, i) => list.forEach((t) => { scratch.textContent = t; const s = score(r, scratch); if (s > bs) { bs = s; best = i; } }));
+    di = bs >= 0.5 ? best : -1;
+  }
+  if (di >= 0) assigned[di].push(r);
+});
+
+/* ---------- tabs ---------- */
+let current = 0, dim = false, order = [], cursor = -1;
+$('tabs').innerHTML = DOCS.map((d, i) => `<button class="tabbtn" role="tab" data-i="${i}" aria-selected="${i === 0}" title="${esc(d.file)}">
+  ${esc(d.title.replace(/^(BRD|RD)_/, ''))} <span class="count ${assigned[i].length ? '' : 'zero'}">${assigned[i].length} true</span></button>`).join('');
+$('tabs').addEventListener('click', (e) => { const b = e.target.closest('.tabbtn'); if (b) show(+b.dataset.i); });
+
+function show(i) {
+  current = i; cursor = -1;
+  document.querySelectorAll('.tabbtn').forEach((b) => b.setAttribute('aria-selected', +b.dataset.i === i));
+  const doc = DOCS[i], paper = $('paper');
+  paper.innerHTML = doc.html;
+  paper.classList.toggle('dimmed', dim);
+  const blocks = blocksOf(paper);
+  blocks.forEach((b) => b.classList.add('blk'));
+  // place each requirement on its best passage
+  const placed = new Map();
+  assigned[i].forEach((r) => {
+    let best = null, bs = 0;
+    blocks.forEach((b) => { const s = score(r, b); if (s > bs) { bs = s; best = b; } });
+    if (best && bs >= 0.5) { if (!placed.has(best)) placed.set(best, []); placed.get(best).push(r); r._found = true; } else r._found = false;
+  });
+  placed.forEach((reqs, el) => {
+    el.classList.add('hl');
+    el.dataset.reqs = reqs.map((r) => r.id).join(',');
+    el.insertAdjacentHTML('beforeend', reqs.map((r) => `<span class="tag" title="${esc(r.title)}">${esc(r.id)} ✓</span>`).join(''));
+  });
+  order = blocks.filter((b) => b.classList.contains('hl'));
+  const total = (m.brdTotals && m.brdTotals[doc.file]) || null;
+  const n = assigned[i].length;
+  $('summary').innerHTML = n
+    ? `<b>${n}</b> requirement${n > 1 ? 's' : ''} from this BRD proven in code, on <b>${order.length}</b> highlighted passage${order.length === 1 ? '' : 's'}${total ? ` (of ${total} extracted)` : ''}<span class="bar"><i style="width:${total ? Math.round(n / total * 100) : 100}%"></i></span>`
+    : 'Nothing in this BRD is proven in the code yet, so nothing is highlighted.';
+  renderList();
+  $('detail').classList.remove('show');
+  $('docpane').scrollTop = 0;
+}
+
+/* ---------- side list + detail ---------- */
+function renderList() {
+  const q = $('filter').value.trim().toLowerCase();
+  const list = assigned[current].filter((r) => !q || `${r.id} ${r.title} ${r.category}`.toLowerCase().includes(q));
+  $('reqList').innerHTML = list.length ? list.map((r) => `<div class="req" data-id="${esc(r.id)}"><span class="id">${esc(r.id)} ✓</span> <span class="cat">· ${esc(r.category)}</span>
+      <b>${esc(r.title)}</b>${r._found ? '' : '<div class="nf">Passage not located in the document text</div>'}</div>`).join('')
+    : `<p class="empty">${assigned[current].length ? 'No match.' : 'No verified requirements for this BRD.'}</p>`;
+}
+function detail(id) {
+  const r = DATA.requirements.find((x) => x.id === id); if (!r) return;
+  document.querySelectorAll('.req').forEach((e) => e.classList.toggle('on', e.dataset.id === id));
+  $('detail').innerHTML = `<span class="id" style="font:12px ui-monospace,monospace;color:var(--ok)">${esc(r.id)} · VERIFIED${r.confidence != null ? ' · ' + Math.round(r.confidence * 100) + '%' : ''}</span>
+    <h4>${esc(r.title)}</h4><p>${esc(r.description)}</p>${r.reasoning ? `<p class="muted" style="color:var(--muted)">${esc(r.reasoning)}</p>` : ''}
+    ${(r.evidence || []).map((e) => `<div class="ev">${esc(e.file)}:${e.line}</div><pre>${esc(e.snippet)}</pre>`).join('')}`;
+  $('detail').classList.add('show');
+  $('detail').scrollIntoView({ block: 'nearest' });
+}
+function jumpTo(id) {
+  const el = [...document.querySelectorAll('.hl')].find((b) => (b.dataset.reqs || '').split(',').includes(id));
+  if (el) { el.scrollIntoView({ behavior: 'smooth', block: 'center' }); el.classList.remove('flash'); void el.offsetWidth; el.classList.add('flash'); }
+  detail(id);
+}
+$('reqList').addEventListener('click', (e) => { const c = e.target.closest('.req'); if (c) jumpTo(c.dataset.id); });
+$('paper').addEventListener('click', (e) => { const h = e.target.closest('.hl'); if (h) detail(h.dataset.reqs.split(',')[0]); });
+$('filter').addEventListener('input', renderList);
+$('btnDim').onclick = (e) => { dim = !dim; e.currentTarget.setAttribute('aria-pressed', dim); $('paper').classList.toggle('dimmed', dim); };
+$('btnNext').onclick = () => {
+  if (!order.length) return;
+  cursor = (cursor + 1) % order.length;
+  jumpTo(order[cursor].dataset.reqs.split(',')[0]);
+};
+
+if (!DOCS.length) { $('paper').innerHTML = '<p>No BRD documents converted yet. Run <code>python tools/brd2html.py</code>.</p>'; return; }
+const want = decodeURIComponent(location.hash.slice(1));
+show(Math.max(0, DOCS.findIndex((d) => d.file === want || d.title === want)));
+})();
+</script>
+</body>
+</html>

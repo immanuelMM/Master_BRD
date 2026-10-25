@@ -1,0 +1,485 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BRD Truth Brain</title>
+<style>
+  :root {
+    --bg: #05070d;
+    --panel: rgba(12, 17, 30, 0.78);
+    --border: rgba(120, 160, 255, 0.16);
+    --text: #e6ecff;
+    --muted: #8b97b8;
+    --accent: #7cc4ff;
+    --ok: #4fe3a0;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; background: radial-gradient(ellipse at 50% 40%, #0d1426 0%, var(--bg) 70%); color: var(--text);
+    font: 14px/1.45 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; overflow: hidden; }
+  #scene { position: fixed; inset: 0; }
+  .panel { position: fixed; background: var(--panel); border: 1px solid var(--border); border-radius: 14px;
+    backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px); }
+  header.panel { top: calc(var(--appnav-h, 0px) + 16px); left: 16px; padding: 14px 18px; max-width: 340px; }
+  h1 { margin: 0; font-size: 18px; letter-spacing: .02em; }
+  .sub { color: var(--muted); font-size: 12px; margin-top: 2px; word-break: break-word; }
+  .kpis { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; margin-top: 12px; }
+  .kpi b { display: block; font-size: 22px; font-variant-numeric: tabular-nums; }
+  .kpi span { font-size: 11px; color: var(--muted); text-transform: uppercase; letter-spacing: .06em; }
+  .ratio { margin-top: 12px; }
+  .bar { height: 6px; border-radius: 3px; background: rgba(255,255,255,.08); overflow: hidden; }
+  .bar > i { display: block; height: 100%; background: linear-gradient(90deg, var(--accent), var(--ok)); }
+  .ratio small { color: var(--muted); font-size: 11px; }
+
+  #legend { top: calc(var(--appnav-h, 0px) + 16px); right: 16px; width: 270px; padding: 14px 16px; max-height: calc(100vh - var(--appnav-h, 0px) - 32px); overflow: auto; }
+  #legend h2, #detail h2 { margin: 0 0 8px; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: .08em; font-weight: 600; }
+  input[type=search] { width: 100%; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--border); background: rgba(0,0,0,.35);
+    color: var(--text); font: inherit; margin-bottom: 12px; outline: none; }
+  input[type=search]:focus { border-color: var(--accent); }
+  .cat { display: grid; grid-template-columns: 12px 1fr auto; align-items: center; gap: 8px; padding: 5px 6px; border-radius: 6px; cursor: pointer; user-select: none; }
+  .cat:hover { background: rgba(255,255,255,.05); }
+  .cat.off { opacity: .35; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; box-shadow: 0 0 8px currentColor; background: currentColor; }
+  .cat .n { color: var(--muted); font-variant-numeric: tabular-nums; font-size: 12px; }
+  .cat .mini { grid-column: 2 / 4; height: 3px; border-radius: 2px; background: rgba(255,255,255,.06); }
+  .cat .mini i { display: block; height: 100%; border-radius: 2px; background: currentColor; opacity: .8; }
+  .types { margin-top: 14px; display: grid; gap: 4px; font-size: 12px; color: var(--muted); }
+  .types div { display: flex; align-items: center; gap: 8px; }
+
+  #controls { bottom: 16px; left: 50%; transform: translateX(-50%); padding: 6px; display: flex; gap: 6px; }
+  button { background: rgba(255,255,255,.06); color: var(--text); border: 1px solid var(--border); border-radius: 8px; padding: 7px 12px; font: inherit; font-size: 13px; cursor: pointer; }
+  button:hover { border-color: var(--accent); }
+  button[aria-pressed=true] { background: rgba(124,196,255,.18); border-color: var(--accent); }
+
+  #detail { left: 16px; bottom: 16px; width: 400px; max-height: 52vh; overflow: auto; padding: 16px 18px; display: none; }
+  #detail.show { display: block; }
+  #detail .close { float: right; padding: 2px 9px; }
+  #detail h3 { margin: 4px 0 6px; font-size: 16px; }
+  .tag { display: inline-block; font-size: 11px; padding: 2px 8px; border-radius: 999px; border: 1px solid var(--border); margin: 0 4px 4px 0; color: var(--muted); }
+  .tag.ok { color: var(--ok); border-color: rgba(79,227,160,.4); }
+  .ev { margin-top: 10px; border-left: 2px solid var(--accent); padding-left: 10px; }
+  .ev .f { font-size: 12px; color: var(--accent); word-break: break-all; }
+  code, pre { font: 12px/1.4 ui-monospace, "Cascadia Code", Consolas, monospace; }
+  pre { margin: 4px 0 0; padding: 8px; background: rgba(0,0,0,.4); border-radius: 6px; white-space: pre-wrap; word-break: break-word; }
+  .muted { color: var(--muted); }
+  #detail ul { margin: 6px 0 0; padding-left: 18px; }
+  #detail li { cursor: pointer; }
+  #detail li:hover { color: var(--accent); }
+
+  #tip { position: fixed; pointer-events: none; padding: 6px 10px; border-radius: 8px; background: rgba(5,8,16,.92); border: 1px solid var(--border);
+    font-size: 12px; max-width: 280px; display: none; z-index: 10; }
+  #empty { position: fixed; inset: 0; display: none; place-items: center; text-align: center; color: var(--muted); pointer-events: none; }
+  #empty.show { display: grid; }
+  #empty b { color: var(--text); font-size: 18px; display: block; margin-bottom: 6px; }
+
+  @media (max-width: 760px) {
+    header.panel { right: 16px; max-width: none; }
+    #legend { top: auto; bottom: 70px; left: 16px; right: 16px; width: auto; max-height: 30vh; }
+    #detail { right: 16px; width: auto; bottom: 70px; max-height: 45vh; z-index: 5; }
+  }
+</style>
+</head>
+<body>
+<script src="assets/nav.js"></script>
+<div id="scene"></div>
+
+<header class="panel">
+  <h1>BRD Truth Brain</h1>
+  <div class="sub" id="sysName">—</div>
+  <div class="kpis">
+    <div class="kpi"><b id="kVerified">0</b><span>Verified</span></div>
+    <div class="kpi"><b id="kCats">0</b><span>Areas</span></div>
+    <div class="kpi"><b id="kFiles">0</b><span>Code files</span></div>
+  </div>
+  <div class="ratio">
+    <div class="bar"><i id="ratioBar" style="width:0%"></i></div>
+    <small id="ratioText">—</small>
+  </div>
+</header>
+
+<aside class="panel" id="legend">
+  <input type="search" id="search" placeholder="Search requirement, ID or file…" aria-label="Search">
+  <h2>Areas (lobes)</h2>
+  <div id="cats"></div>
+  <div class="types">
+    <div><span class="dot" style="color:#ffffff"></span>Core — the system</div>
+    <div><span class="dot" style="color:#9aa6c8;width:7px;height:7px"></span>Verified requirement (colored by area)</div>
+    <div><span class="dot" style="color:#ffd27a;width:6px;height:6px"></span>Code file proving it</div>
+  </div>
+</aside>
+
+<div class="panel" id="controls">
+  <button id="btnRotate" aria-pressed="true">Rotate</button>
+  <button id="btnFiles" aria-pressed="true">Code files</button>
+  <button id="btnPulse" aria-pressed="true">Synapses</button>
+  <button id="btnReset">Reset view</button>
+</div>
+
+<section class="panel" id="detail" aria-live="polite"></section>
+<div id="tip"></div>
+<div id="empty"><div><b>No verified requirements yet</b>Run <code>/brd-audit</code> in Claude Code, then reload this page.</div></div>
+
+<script src="data/graph-data.js"></script>
+<script type="importmap">
+{ "imports": {
+  "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+} }
+</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+
+const DATA = window.BRAIN_DATA || { meta: {}, categories: [], requirements: [], files: [] };
+const PALETTE = ['#7cc4ff', '#ff7ab6', '#4fe3a0', '#ffb547', '#b48cff', '#5ee6e6', '#ff8a65', '#c6e86b', '#f06292', '#90a4ff'];
+const catColor = new Map(DATA.categories.map((c, i) => [c.name, PALETTE[i % PALETTE.length]]));
+const $ = (id) => document.getElementById(id);
+const FLOW_STEP = { 'Core Colors': 'builder', 'Rework Visibility': 'tracking', 'Notifications': 'rework', 'Rework Workflow': 'rework',
+  'Issues Logs Tab': 'rework', 'Additional Changes': 'rework', 'Rework Submission': 'rework', 'Access Control': 'rework',
+  'Reorder Rejections': 'reorder', 'Legacy Orders': 'reorder', 'Legacy Reorder': 'reorder', 'Legacy Deletion': 'reorder', 'Price Items': 'reorder' };
+const flowLink = (cat) => `<p><a href="flow.html#${FLOW_STEP[cat] || (/^Reskin/.test(cat) ? 'builder' : 'overview')}">See where this fits in the login → order flow →</a></p>`;
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+
+/* ---------- HUD ---------- */
+const m = DATA.meta;
+$('sysName').textContent = `${m.systemName || 'System'}${m.systemBranch ? ' @ ' + m.systemBranch : ''}${m.verifiedAt ? ' · verified ' + new Date(m.verifiedAt).toLocaleString() : ''}`;
+$('kVerified').textContent = m.verifiedCount || 0;
+$('kCats').textContent = DATA.categories.length;
+$('kFiles').textContent = DATA.files.length;
+const pct = m.extractedCount ? Math.round((m.verifiedCount / m.extractedCount) * 100) : 0;
+$('ratioBar').style.width = pct + '%';
+$('ratioText').textContent = m.extractedCount ? `${m.verifiedCount} of ${m.extractedCount} BRD requirements proven in code (${pct}%)` : 'No BRD extracted yet';
+if (!DATA.requirements.length) $('empty').classList.add('show');
+
+const maxCat = Math.max(1, ...DATA.categories.map((c) => c.count));
+const hiddenCats = new Set();
+$('cats').innerHTML = DATA.categories.map((c) => `
+  <div class="cat" data-cat="${esc(c.name)}" style="color:${catColor.get(c.name)}" role="button" tabindex="0" title="Click to show/hide">
+    <span class="dot"></span><span style="color:var(--text)">${esc(c.name)}</span><span class="n">${c.count}</span>
+    <span class="mini"><i style="width:${(c.count / maxCat) * 100}%"></i></span>
+  </div>`).join('');
+
+/* ---------- Scene ---------- */
+const host = $('scene');
+const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+renderer.setSize(innerWidth, innerHeight);
+host.appendChild(renderer.domElement);
+const scene = new THREE.Scene();
+scene.fog = new THREE.FogExp2(0x05070d, 0.035);
+const camera = new THREE.PerspectiveCamera(50, innerWidth / innerHeight, 0.1, 200);
+const HOME = new THREE.Vector3(13, 4, 7);
+camera.position.copy(HOME);
+const controls = new OrbitControls(camera, renderer.domElement);
+controls.enableDamping = true;
+controls.autoRotate = true;
+controls.autoRotateSpeed = 0.9;
+controls.minDistance = 5;
+controls.maxDistance = 40;
+
+const brain = new THREE.Group();
+scene.add(brain);
+
+function glowTexture() {
+  const c = document.createElement('canvas'); c.width = c.height = 64;
+  const g = c.getContext('2d');
+  const grd = g.createRadialGradient(32, 32, 0, 32, 32, 32);
+  grd.addColorStop(0, 'rgba(255,255,255,1)'); grd.addColorStop(0.25, 'rgba(255,255,255,.55)'); grd.addColorStop(1, 'rgba(255,255,255,0)');
+  g.fillStyle = grd; g.fillRect(0, 0, 64, 64);
+  return new THREE.CanvasTexture(c);
+}
+const GLOW = glowTexture();
+// Many nodes → smaller, fainter glows so the brain doesn't wash out to white.
+const DENSE = DATA.requirements.length > 120;
+const GLOW_K = DENSE ? 3.6 : 7, GLOW_OP = DENSE ? 0.42 : 0.85;
+
+/* Brain-shaped surface: two hemispheres, folded cortex (gyri), temporal lobes, flat base. */
+const R = 5;
+function brainRadius(dir) {
+  const { x, y, z } = dir;
+  let r = 1;
+  r *= 1 + 0.18 * Math.max(0, -y) * Math.max(0, Math.abs(z) < 0.5 ? 1 - Math.abs(z) * 2 : 0); // temporal lobes
+  r *= 1 - 0.28 * Math.max(0, -y - 0.35);                                                       // flatter base
+  r *= 1 - 0.14 * Math.exp(-(x * x) / 0.006) * Math.max(0, y + 0.2);                           // longitudinal fissure
+  const gyri = Math.sin(9 * x + 3 * Math.sin(7 * z)) * Math.sin(8 * y + 2 * Math.cos(6 * x)) + 0.5 * Math.sin(13 * z + 5 * y);
+  return r * (1 + 0.035 * gyri);
+}
+function brainPoint(dir, depth = 1) {
+  const d = dir.clone().normalize();
+  const r = brainRadius(d) * R * depth;
+  return new THREE.Vector3(d.x * r * 0.86, d.y * r * 0.78, d.z * r * 1.12);
+}
+
+// Cortex particle cloud
+{
+  const N = 16000, pos = new Float32Array(N * 3), col = new Float32Array(N * 3);
+  const base = new THREE.Color('#4a72c4'), hi = new THREE.Color('#bfe0ff');
+  for (let i = 0; i < N; i++) {
+    const v = new THREE.Vector3(Math.random() * 2 - 1, Math.random() * 2 - 1, Math.random() * 2 - 1);
+    if (v.lengthSq() < 1e-4) { i--; continue; }
+    const p = brainPoint(v, 0.97 + Math.random() * 0.05);
+    pos.set([p.x, p.y, p.z], i * 3);
+    const c = base.clone().lerp(hi, Math.pow(Math.random(), 3));
+    col.set([c.r, c.g, c.b], i * 3);
+  }
+  const geo = new THREE.BufferGeometry();
+  geo.setAttribute('position', new THREE.BufferAttribute(pos, 3));
+  geo.setAttribute('color', new THREE.BufferAttribute(col, 3));
+  brain.add(new THREE.Points(geo, new THREE.PointsMaterial({
+    size: 0.09, map: GLOW, vertexColors: true, transparent: true, opacity: 0.8, depthWrite: false, blending: THREE.AdditiveBlending,
+  })));
+}
+
+/* ---------- Graph nodes ---------- */
+const nodes = [];          // { kind, data, mesh, glow, pos, cat }
+const links = [];          // { a, b, line, curve, cats }
+const pickables = [];
+
+function addNode(kind, pos, color, size, data) {
+  const mesh = new THREE.Mesh(new THREE.SphereGeometry(size, 16, 16), new THREE.MeshBasicMaterial({ color, transparent: true }));
+  mesh.position.copy(pos);
+  const glow = new THREE.Sprite(new THREE.SpriteMaterial({ map: GLOW, color, transparent: true, opacity: GLOW_OP, depthWrite: false, blending: THREE.AdditiveBlending }));
+  glow.scale.setScalar(size * GLOW_K);
+  mesh.add(glow);
+  brain.add(mesh);
+  const n = { kind, data, mesh, glow, pos, color: new THREE.Color(color), cat: data.category || null };
+  mesh.userData.node = n;
+  nodes.push(n); pickables.push(mesh);
+  return n;
+}
+
+function addLink(a, b, color, opacity, bow = 0.25) {
+  const mid = a.pos.clone().add(b.pos).multiplyScalar(0.5);
+  const out = mid.clone().normalize().multiplyScalar(a.pos.distanceTo(b.pos) * bow);
+  const curve = new THREE.QuadraticBezierCurve3(a.pos, mid.add(out), b.pos);
+  const geo = new THREE.BufferGeometry().setFromPoints(curve.getPoints(24));
+  const line = new THREE.Line(geo, new THREE.LineBasicMaterial({ color, transparent: true, opacity, depthWrite: false, blending: THREE.AdditiveBlending }));
+  brain.add(line);
+  const l = { a, b, line, curve, baseOpacity: opacity };
+  links.push(l);
+  return l;
+}
+
+// Fibonacci directions → one lobe per area, biased to the upper/outer cortex.
+function lobeDirs(n) {
+  const out = [], g = Math.PI * (3 - Math.sqrt(5));
+  for (let i = 0; i < n; i++) {
+    const y = n === 1 ? 0.4 : 0.85 - (i / (n - 1)) * 1.3;
+    const r = Math.sqrt(1 - y * y);
+    out.push(new THREE.Vector3(Math.cos(i * g) * r, y, Math.sin(i * g) * r));
+  }
+  return out;
+}
+
+const core = addNode('core', new THREE.Vector3(0, 0, 0), '#ffffff', 0.32, { title: m.systemName || 'System' });
+const dirs = lobeDirs(DATA.categories.length);
+const catNodes = new Map();
+DATA.categories.forEach((c, i) => {
+  const n = addNode('category', brainPoint(dirs[i], 0.55), catColor.get(c.name), 0.22, { title: c.name, category: c.name, count: c.count });
+  n.dir = dirs[i];
+  catNodes.set(c.name, n);
+  addLink(core, n, catColor.get(c.name), 0.45, 0.1);
+});
+
+const reqNodes = new Map();
+const rand = (seed) => { let s = 0; for (const ch of seed) s = (s * 31 + ch.charCodeAt(0)) | 0; return () => ((s = (s * 1103515245 + 12345) | 0) >>> 0) / 4294967296; };
+DATA.requirements.forEach((r) => {
+  const cn = catNodes.get(r.category);
+  const rnd = rand(r.id);
+  const spread = 0.55 + Math.min(0.35, (cn.data.count || 1) * 0.03);
+  const dir = cn.dir.clone().add(new THREE.Vector3((rnd() - .5) * spread * 2, (rnd() - .5) * spread * 2, (rnd() - .5) * spread * 2)).normalize();
+  const n = addNode('requirement', brainPoint(dir, 0.93), catColor.get(r.category), 0.11 + 0.05 * (r.confidence ?? 0.8), r);
+  reqNodes.set(r.id, n);
+  addLink(cn, n, catColor.get(r.category), 0.55, 0.15);
+});
+
+const fileNodes = [];
+DATA.files.forEach((f) => {
+  const owners = f.reqs.map((id) => reqNodes.get(id)).filter(Boolean);
+  const c = owners.reduce((acc, n) => acc.add(n.pos), new THREE.Vector3()).multiplyScalar(1 / Math.max(1, owners.length));
+  const rnd = rand(f.path);
+  c.add(new THREE.Vector3(rnd() - .5, rnd() - .5, rnd() - .5).multiplyScalar(0.8));
+  const dir = c.lengthSq() > 1e-4 ? c.clone().normalize() : new THREE.Vector3(0, -1, 0);
+  const n = addNode('file', brainPoint(dir, 0.42 + rnd() * 0.15), '#ffd27a', 0.08, { title: f.path, path: f.path, reqs: f.reqs });
+  n.cats = new Set(owners.map((o) => o.cat));
+  fileNodes.push(n);
+  owners.forEach((o) => { const l = addLink(o, n, '#ffd27a', 0.22, 0.05); l.isFileLink = true; });
+});
+
+/* ---------- Synapse pulses ---------- */
+const pulses = [];
+const pulseMat = new THREE.SpriteMaterial({ map: GLOW, color: '#ffffff', transparent: true, depthWrite: false, blending: THREE.AdditiveBlending });
+for (let i = 0; i < Math.min(140, links.length * 2); i++) {
+  const s = new THREE.Sprite(pulseMat.clone()); s.scale.setScalar(0.28);
+  brain.add(s);
+  pulses.push({ s, link: null, t: 1, speed: 0 });
+}
+function respawn(p) {
+  const pool = links.filter((l) => l.line.visible);
+  if (!pool.length) { p.s.visible = false; return; }
+  p.link = pool[(Math.random() * pool.length) | 0];
+  p.t = 0; p.speed = 0.004 + Math.random() * 0.01; p.dir = Math.random() < .5;
+  p.s.material.color.copy(p.link.b.color);
+  p.s.visible = true;
+}
+
+/* ---------- Interaction ---------- */
+const ray = new THREE.Raycaster(), mouse = new THREE.Vector2();
+const tip = $('tip');
+let hovered = null, selected = null, query = '', showFiles = true, showPulse = true;
+
+function nodeVisible(n) {
+  if (n.kind === 'core') return true;
+  if (n.kind === 'file') return showFiles && [...n.cats].some((c) => !hiddenCats.has(c));
+  return !hiddenCats.has(n.cat);
+}
+function matches(n) {
+  if (!query) return true;
+  const hay = n.kind === 'requirement'
+    ? `${n.data.id} ${n.data.title} ${n.data.description} ${(n.data.evidence || []).map((e) => e.file).join(' ')}`
+    : `${n.data.title}`;
+  return hay.toLowerCase().includes(query);
+}
+function connected(n) {
+  const set = new Set([n]);
+  links.forEach((l) => { if (l.a === n) set.add(l.b); if (l.b === n) set.add(l.a); });
+  return set;
+}
+function refresh() {
+  const focus = selected || hovered;
+  const near = focus ? connected(focus) : null;
+  nodes.forEach((n) => {
+    const vis = nodeVisible(n);
+    n.mesh.visible = vis;
+    let o = 1;
+    if (query && !matches(n) && n.kind !== 'core') o = 0.12;
+    if (near && !near.has(n)) o = Math.min(o, 0.18);
+    n.mesh.material.opacity = o;
+    n.glow.material.opacity = GLOW_OP * o;
+    n.mesh.scale.setScalar(n === focus ? 1.8 : 1);
+  });
+  links.forEach((l) => {
+    l.line.visible = l.a.mesh.visible && l.b.mesh.visible;
+    let o = l.baseOpacity;
+    if (near) o = near.has(l.a) && near.has(l.b) && (l.a === focus || l.b === focus) ? 0.95 : 0.05;
+    else if (query && !(matches(l.a) || matches(l.b))) o = 0.04;
+    l.line.material.opacity = o;
+  });
+  document.querySelectorAll('.cat').forEach((el) => el.classList.toggle('off', hiddenCats.has(el.dataset.cat)));
+}
+
+function onMove(e) {
+  mouse.set((e.clientX / innerWidth) * 2 - 1, -(e.clientY / innerHeight) * 2 + 1);
+  ray.setFromCamera(mouse, camera);
+  const hit = ray.intersectObjects(pickables.filter((p) => p.visible), false)[0];
+  const n = hit ? hit.object.userData.node : null;
+  if (n !== hovered) { hovered = n; refresh(); }
+  renderer.domElement.style.cursor = n ? 'pointer' : 'grab';
+  if (n) {
+    tip.style.display = 'block';
+    tip.style.left = Math.min(e.clientX + 14, innerWidth - 290) + 'px';
+    tip.style.top = e.clientY + 14 + 'px';
+    tip.innerHTML = n.kind === 'requirement' ? `<b>${esc(n.data.id)}</b> ${esc(n.data.title)}`
+      : n.kind === 'category' ? `<b>${esc(n.data.title)}</b> · ${n.data.count} verified`
+      : n.kind === 'file' ? `<code>${esc(n.data.path)}</code> · proves ${n.data.reqs.length}`
+      : `<b>${esc(n.data.title)}</b>`;
+  } else tip.style.display = 'none';
+}
+
+function showDetail(n) {
+  const d = $('detail');
+  if (!n) { d.classList.remove('show'); return; }
+  let html = `<button class="close" id="closeDetail" aria-label="Close">×</button>`;
+  if (n.kind === 'requirement') {
+    const r = n.data;
+    html += `<h2 style="color:${catColor.get(r.category)}">${esc(r.category)}</h2>
+      <h3>${esc(r.id)} — ${esc(r.title)}</h3>
+      <span class="tag ok">✓ VERIFIED</span><span class="tag">${esc(r.priority)}</span>
+      ${r.confidence != null ? `<span class="tag">confidence ${Math.round(r.confidence * 100)}%</span>` : ''}
+      <p>${esc(r.description)}</p>
+      ${r.reasoning ? `<p class="muted">${esc(r.reasoning)}</p>` : ''}
+      ${flowLink(r.category)}
+      <h2>Evidence in code</h2>
+      ${(r.evidence || []).map((e) => `<div class="ev"><div class="f">${esc(e.file)}:${e.line}</div><pre>${esc(e.snippet)}</pre></div>`).join('')}`;
+  } else if (n.kind === 'category') {
+    const list = DATA.requirements.filter((r) => r.category === n.data.title);
+    html += `<h2>Area</h2><h3 style="color:${catColor.get(n.data.title)}">${esc(n.data.title)}</h3>
+      <p class="muted">${list.length} verified requirement(s)</p>${flowLink(n.data.title)}
+      <ul>${list.map((r) => `<li data-req="${esc(r.id)}"><b>${esc(r.id)}</b> ${esc(r.title)}</li>`).join('')}</ul>`;
+  } else if (n.kind === 'file') {
+    html += `<h2>Code file</h2><h3><code>${esc(n.data.path)}</code></h3><p class="muted">Proves ${n.data.reqs.length} requirement(s)</p>
+      <ul>${n.data.reqs.map((id) => { const r = reqNodes.get(id)?.data; return `<li data-req="${esc(id)}"><b>${esc(id)}</b> ${esc(r?.title || '')}</li>`; }).join('')}</ul>`;
+  } else {
+    html += `<h2>Core</h2><h3>${esc(n.data.title)}</h3><p class="muted">${esc(m.systemPath || '')}</p>
+      <p>${m.verifiedCount || 0} verified requirements across ${DATA.categories.length} areas, proven by ${DATA.files.length} code files.</p>
+      <p><a href="flow.html">Open the system flow: login → order →</a></p>
+      ${(m.brd || []).length ? `<p class="muted">BRD: ${(m.brd || []).map(esc).join(', ')}</p>` : ''}`;
+  }
+  d.innerHTML = html;
+  d.classList.add('show');
+  $('closeDetail').onclick = () => select(null);
+  d.querySelectorAll('li[data-req]').forEach((li) => (li.onclick = () => select(reqNodes.get(li.dataset.req))));
+}
+
+let flyTo = null;
+function select(n) {
+  selected = n;
+  showDetail(n);
+  refresh();
+  if (n) {
+    setRotate(false);
+    const world = n.mesh.getWorldPosition(new THREE.Vector3());
+    flyTo = { target: world, cam: world.clone().add(world.clone().normalize().multiplyScalar(n.kind === 'core' ? 14 : 7)).add(new THREE.Vector3(0, 1.5, 0)) };
+  }
+}
+
+let downAt = null;
+renderer.domElement.addEventListener('pointermove', onMove);
+renderer.domElement.addEventListener('pointerdown', (e) => (downAt = [e.clientX, e.clientY]));
+renderer.domElement.addEventListener('pointerup', (e) => {
+  if (!downAt || Math.hypot(e.clientX - downAt[0], e.clientY - downAt[1]) > 5) return;
+  select(hovered);
+});
+renderer.domElement.addEventListener('pointerleave', () => { tip.style.display = 'none'; hovered = null; refresh(); });
+
+function setRotate(on) { controls.autoRotate = on; $('btnRotate').setAttribute('aria-pressed', on); }
+$('btnRotate').onclick = () => setRotate(!controls.autoRotate);
+$('btnFiles').onclick = (e) => { showFiles = !showFiles; e.currentTarget.setAttribute('aria-pressed', showFiles); refresh(); };
+$('btnPulse').onclick = (e) => { showPulse = !showPulse; e.currentTarget.setAttribute('aria-pressed', showPulse); pulses.forEach((p) => (p.s.visible = false)); };
+$('btnReset').onclick = () => { select(null); flyTo = { target: new THREE.Vector3(), cam: HOME.clone() }; setRotate(true); };
+$('search').addEventListener('input', (e) => { query = e.target.value.trim().toLowerCase(); refresh(); });
+$('cats').addEventListener('click', (e) => {
+  const el = e.target.closest('.cat'); if (!el) return;
+  const c = el.dataset.cat; hiddenCats.has(c) ? hiddenCats.delete(c) : hiddenCats.add(c); refresh();
+});
+$('cats').addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.target.click(); } });
+addEventListener('keydown', (e) => { if (e.key === 'Escape') select(null); });
+addEventListener('resize', () => {
+  camera.aspect = innerWidth / innerHeight; camera.updateProjectionMatrix(); renderer.setSize(innerWidth, innerHeight);
+});
+
+/* ---------- Loop ---------- */
+const clock = new THREE.Clock();
+function tick() {
+  const t = clock.getElapsedTime();
+  if (flyTo) {
+    controls.target.lerp(flyTo.target, 0.08);
+    camera.position.lerp(flyTo.cam, 0.08);
+    if (camera.position.distanceTo(flyTo.cam) < 0.05) flyTo = null;
+  }
+  nodes.forEach((n, i) => { if (n.kind !== 'file') n.glow.scale.setScalar(n.mesh.geometry.parameters.radius * (GLOW_K + Math.sin(t * 2 + i) * (DENSE ? 0.5 : 1.2))); });
+  if (showPulse) pulses.forEach((p) => {
+    if (p.t >= 1 || !p.link || !p.link.line.visible) respawn(p);
+    p.t += p.speed;
+    const pt = p.link ? p.link.curve.getPoint(p.dir ? p.t : 1 - p.t) : null;
+    if (pt) { p.s.position.copy(pt); p.s.material.opacity = Math.sin(Math.PI * p.t) * Math.min(1, p.link.line.material.opacity * 2.2); }
+  });
+  controls.update();
+  renderer.render(scene, camera);
+  requestAnimationFrame(tick);
+}
+refresh();
+tick();
+</script>
+</body>
+</html>

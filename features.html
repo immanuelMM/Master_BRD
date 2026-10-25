@@ -1,0 +1,1586 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Customizer Functional Reference</title>
+<style>
+  :root {
+    --bg: #05070d; --surface: #0c111e; --surface-2: #121a2c; --border: rgba(120,160,255,.16);
+    --text: #e6ecff; --muted: #8b97b8; --soft: #c7d0ea; --accent: #7cc4ff; --ok: #4fe3a0; --warn: #ffb547; --bad: #ff7a8a;
+  }
+  * { box-sizing: border-box; }
+  html { scroll-behavior: smooth; scroll-padding-top: 64px; }
+  body { margin: 0; background: radial-gradient(ellipse at 50% -10%, #0f1830 0%, var(--bg) 55%) fixed; color: var(--text);
+    font: 15px/1.6 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  a { color: var(--accent); }
+  code { font: 12.5px/1.4 ui-monospace, "Cascadia Code", Consolas, monospace; background: rgba(124,196,255,.08);
+    padding: 1px 5px; border-radius: 4px; color: #cfe6ff; word-break: break-word; }
+
+  .layout { display: grid; grid-template-columns: 250px minmax(0, 1fr); gap: 32px; max-width: 1240px; margin: 0 auto; padding: 24px 24px 80px; }
+  .side { position: sticky; top: calc(var(--appnav-h, 0px) + 16px); align-self: start; max-height: calc(100vh - var(--appnav-h, 0px) - 32px); overflow: auto; }
+  .side input { width: 100%; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--border); background: rgba(0,0,0,.35);
+    color: var(--text); font: inherit; font-size: 14px; outline: none; margin-bottom: 6px; }
+  .side input:focus { border-color: var(--accent); }
+  .side .hits { font-size: 12px; color: var(--muted); min-height: 18px; margin: 0 0 10px 2px; }
+  .side .label { font-size: 11px; text-transform: uppercase; letter-spacing: .08em; color: var(--muted); margin: 0 0 6px 10px; }
+  .side ol { list-style: none; margin: 0; padding: 0; }
+  .side li a { display: flex; justify-content: space-between; gap: 8px; padding: 5px 10px; border-radius: 8px; color: var(--muted); text-decoration: none;
+    font-size: 14px; border-left: 2px solid transparent; }
+  .side li a:hover { color: var(--text); background: rgba(255,255,255,.04); }
+  .side li a.active { color: var(--text); border-left-color: var(--accent); background: rgba(124,196,255,.08); }
+  .side li a small { color: var(--muted); font-size: 11.5px; }
+
+  header.hero .meta { font-size: 13px; color: var(--muted); }
+  header.hero h1 { font-size: 30px; line-height: 1.2; margin: 6px 0 8px; }
+  header.hero p { color: var(--soft); margin: 0; max-width: 760px; }
+  .controls { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 16px; }
+  .btn { display: inline-flex; align-items: center; gap: 6px; font: inherit; font-size: 13px; padding: 6px 12px; border-radius: 8px;
+    border: 1px solid var(--border); color: var(--text); background: rgba(255,255,255,.04); cursor: pointer; text-decoration: none; }
+  .btn:hover { border-color: var(--accent); }
+
+  section { margin-top: 56px; }
+  section > h2 { font-size: 23px; margin: 0 0 6px; }
+  section > p.lead { color: var(--soft); margin: 0 0 18px; max-width: 800px; }
+  .pending { color: var(--muted); font-style: italic; border: 1px dashed var(--border); border-radius: 10px; padding: 14px 16px; }
+
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 12px; padding: 16px 18px; margin: 14px 0; }
+  .card h3 { margin: 0 0 4px; font-size: 17px; display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; }
+  .card h3 code { font-size: 12px; font-weight: 400; }
+  .card .sub { color: var(--muted); font-size: 13.5px; margin: 0 0 10px; }
+  .cols { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  .cols > div > h4, .card > h4 { font-size: 11.5px; text-transform: uppercase; letter-spacing: .07em; color: var(--muted); margin: 6px 0 4px; font-weight: 600; }
+  .card ul { margin: 0; padding-left: 18px; }
+  .card li { margin: 3px 0; font-size: 14px; }
+  .card li ul { margin-top: 2px; }
+  .card details { margin-top: 10px; border-top: 1px solid var(--border); padding-top: 8px; }
+  .card summary { cursor: pointer; font-size: 12.5px; color: var(--muted); }
+  .card summary:hover { color: var(--text); }
+  .card details p, .card details li { font-size: 12.5px; color: var(--soft); }
+  .tag { display: inline-block; font-size: 11px; font-weight: 600; letter-spacing: .03em; padding: 1px 7px; border-radius: 999px;
+    border: 1px solid var(--border); color: var(--muted); vertical-align: 2px; }
+  .tag.flag { color: var(--accent); border-color: rgba(124,196,255,.4); }
+  .tag.auth { color: var(--ok); border-color: rgba(79,227,160,.4); }
+  .tag.bug { color: var(--bad); border-color: rgba(255,122,138,.45); }
+  .tag.warn { color: var(--warn); border-color: rgba(255,181,71,.45); }
+
+  table { width: 100%; border-collapse: collapse; font-size: 13.5px; }
+  th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--border); vertical-align: top; }
+  th { font-size: 11.5px; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); font-weight: 600; background: var(--surface-2); }
+  .tablewrap { overflow-x: auto; border: 1px solid var(--border); border-radius: 12px; background: var(--surface); }
+  td.grp { color: var(--accent); font-weight: 600; white-space: nowrap; }
+
+  mark { background: rgba(255,207,92,.35); color: inherit; border-radius: 2px; }
+  .hidden { display: none !important; }
+  footer { margin-top: 64px; font-size: 12px; color: var(--muted); }
+
+  @media (max-width: 1000px) { .cols { grid-template-columns: 1fr; gap: 6px; } }
+  @media (max-width: 900px) {
+    .layout { grid-template-columns: 1fr; padding: 16px 16px 64px; gap: 8px; }
+    .side { position: static; max-height: none; }
+    .side ol { display: flex; flex-wrap: wrap; gap: 4px; }
+    .side li a { border: 1px solid var(--border); font-size: 13px; padding: 3px 10px; }
+    .side li a small { display: none; }
+    header.hero h1 { font-size: 24px; }
+  }
+  @media print {
+    .appnav, .side, .controls { display: none !important; }
+    .layout { display: block; }
+    body { background: #fff; color: #111; }
+    .card { break-inside: avoid; background: #fff; border-color: #ccc; }
+    details { display: block; } details > * { display: block; }
+  }
+</style>
+</head>
+<body>
+<script src="assets/nav.js"></script>
+<div class="layout">
+  <aside class="side">
+    <input type="search" id="q" placeholder="Search features, e.g. MOQ, promo, PDF…" aria-label="Search this reference">
+    <div class="hits" id="hits"></div>
+    <p class="label">Sections</p>
+    <ol id="toc"></ol>
+  </aside>
+
+  <main>
+    <header class="hero" id="top">
+      <div class="meta">Customizer Core @ pre-staging · traced from the source code · 2026-10-25</div>
+      <h1>Customizer Core: every function, page by page</h1>
+      <p>What each page lets people do, the rules behind it, and where the code lives. Use the search box to find a feature (for example "promo", "MOQ" or "PDF"). Open "Code" on a card for file:line references.</p>
+      <div class="controls">
+        <button class="btn" id="expand">Expand all code references</button>
+        <button class="btn" onclick="print()">Print / save as PDF</button>
+        <a class="btn" href="system.html#risks">Risks &amp; defects (System map)</a>
+      </div>
+    </header>
+
+    <!-- SECTIONS -->
+    <section id="overview" data-title="Overview">
+      <h2>Overview</h2>
+      <p class="lead">Customizer Core is the web app where sales reps, dealers and customers design team uniforms, build carts, get quotes and approvals, and place and track factory orders.</p>
+      <div class="card">
+        <div class="cols">
+          <div><h4>Who uses it</h4><ul>
+            <li><b>Customer (end user):</b> designs, saves, adds to cart, requests a quote. Cannot place orders directly.</li>
+            <li><b>Sales rep / dealer:</b> places orders (card or terms), manages customers, sends items for coach approval, fixes On Hold items.</li>
+            <li><b>Managing rep, Product Pro, brand manager:</b> rep-level access with extra permissions.</li>
+            <li><b>Coach approver:</b> no login; reviews and approves items through an emailed token link.</li>
+            <li><b>Guest:</b> can browse sports and designs; opening the builder asks for login.</li>
+          </ul></div>
+          <div><h4>How it is built</h4><ul>
+            <li>Laravel back end, Inertia + Vue 3 front end, Pinia stores.</li>
+            <li><b>Prolook / QStrike API:</b> system of record for accounts, saved designs and orders.</li>
+            <li><b>QX7 API:</b> brand data: sports, styles, colors, product info, feature flags, roles.</li>
+            <li><b>Nexio</b> card payments; <b>Hybris</b> order confirmation for some brands; S3 for images; a PDF service for spec sheets.</li>
+            <li>Many behaviors are switched by flags. See <a href="#flags">Feature flags</a>.</li>
+          </ul></div>
+        </div>
+      </div>
+    </section>
+
+    <section id="pages" data-title="Page inventory">
+      <h2>Page inventory</h2>
+      <p class="lead">There are 31 screens and entry points in 8 areas. Each area below has its own section.</p>
+      <div class="tablewrap"><table>
+        <thead><tr><th>Area</th><th>Page</th><th>Route</th><th>Purpose</th></tr></thead>
+        <tbody>
+          <tr><td class="grp">Public &amp; info</td><td>Home</td><td><code>/</code></td><td>Hero banners or video, "More to Explore".</td></tr>
+          <tr><td></td><td>Catalogs</td><td><code>/catalogs</code></td><td>QX7 catalog thumbnails (nav link hidden in production).</td></tr>
+          <tr><td></td><td>Info pages</td><td><code>/about-us · /faqs · /care-guide · /color-chart</code></td><td>Static brand content; color chart of QX7 sublimated colors.</td></tr>
+          <tr><td></td><td>Legal documents</td><td><code>/privacy-policy · /terms-and-conditions · /warranty</code></td><td>QX7 .docx rendered to HTML in the browser.</td></tr>
+          <tr><td></td><td>Contact us</td><td><code>/contact-us</code></td><td>Form; emails customer care and the customer.</td></tr>
+          <tr><td class="grp">Account access</td><td>Login</td><td><code>/login</code></td><td>Password + activation check, Prolook token, QX7 role and dealer sync.</td></tr>
+          <tr><td></td><td>Register</td><td><code>/register</code></td><td>Creates user, binds Prolook account, emails activation link.</td></tr>
+          <tr><td></td><td>Activate / set password</td><td><code>/account-activation/activate · /set-password</code></td><td>Activation link; first password for dealer-created customers.</td></tr>
+          <tr><td></td><td>Forgot / reset / update password</td><td><code>/forgot-password · /reset-password · /update-password</code></td><td>Reset by email; forced update after login.</td></tr>
+          <tr><td class="grp">Find a design</td><td>Sports</td><td><code>/sports</code></td><td>Sport tiles with Men/Women/Browse buttons.</td></tr>
+          <tr><td></td><td>Design picker</td><td><code>/sports/{sport}/designs</code></td><td>Pick a style; filters, search, team colors.</td></tr>
+          <tr><td></td><td>Decorations</td><td><code>/sports/{sport}/decorations</code></td><td>Pick a decoration type.</td></tr>
+          <tr><td class="grp">Builder</td><td>New item</td><td><code>/sports/{sport}/customize/{uniform_id}</code></td><td>The customizer (reskin or classic).</td></tr>
+          <tr><td></td><td>Saved design</td><td><code>/saved-designs/{id}/customize</code></td><td>Opens a Prolook saved design.</td></tr>
+          <tr><td></td><td>Edit cart item</td><td><code>/carts/items/{cartItem}</code></td><td>Edit an item in a cart; rework mode with <code>?action=fix-issue</code>.</td></tr>
+          <tr><td></td><td>Reorder / duplicate</td><td><code>/customize/{cartItem}/reorder · /duplicate</code></td><td>Design locked; roster only. Duplicate copies an item.</td></tr>
+          <tr><td class="grp">Cart, quote &amp; checkout</td><td>Shopping cart</td><td><code>/shopping-cart</code></td><td>Line items, MOQ, promo code, PDFs, approvals, quote.</td></tr>
+          <tr><td></td><td>Approval tab</td><td><code>/shopping-cart/approval</code></td><td>Items waiting for coach approval.</td></tr>
+          <tr><td></td><td>Quote request</td><td><code>/shopping-cart/{order}/quotation</code></td><td>Customer cart becomes a quote for the rep.</td></tr>
+          <tr><td></td><td>Checkout</td><td><code>/checkout</code></td><td>Rep: card or terms → Prolook order. Customer: quote request.</td></tr>
+          <tr><td></td><td>Order result</td><td><code>/checkout/success · /unsuccess</code></td><td>Success, failure, or Hybris pending.</td></tr>
+          <tr><td class="grp">Orders &amp; rework</td><td>Orders tracker</td><td><code>/users/orders</code></td><td>Production status, item/order drawers, Fix Issue, Reorder.</td></tr>
+          <tr><td></td><td>Rework (Fix Issue)</td><td><code>/carts/items/{id}?action=fix-issue</code></td><td>Resolve a factory rejection and resubmit.</td></tr>
+          <tr><td class="grp">My account</td><td>Profile</td><td><code>/users/profile</code></td><td>Personal info, password, dealer/rep assignment.</td></tr>
+          <tr><td></td><td>Address book</td><td><code>/users/address</code></td><td>Addresses with default shipping and billing.</td></tr>
+          <tr><td></td><td>Saved designs</td><td><code>/users/saved-designs</code></td><td>Filter, sort, share, favorite, archive, delete.</td></tr>
+          <tr><td></td><td>Saved logos</td><td><code>/users/saved-logos</code></td><td>Inksoft or Vectorsoft logos.</td></tr>
+          <tr><td></td><td>My carts &amp; quotes</td><td><code>/users/carts</code></td><td>All carts and quote requests.</td></tr>
+          <tr><td></td><td>Customers</td><td><code>/users/customers</code></td><td>Reps and dealers manage customer accounts.</td></tr>
+          <tr><td class="grp">Outside callers</td><td>Coach approval link</td><td><code>/approval?approval_token=…</code></td><td>No login; review, sign, approve, or request changes.</td></tr>
+          <tr><td></td><td>Factory &amp; partner calls</td><td><code>/api/carts/items/{id}/track-status</code> and others</td><td>Production status, Hybris callback, ship dates.</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+
+    <section id="global" data-title="Global UI (every page)">
+      <h2>Global UI (every page)</h2>
+      <p class="lead">Every page shares the header, account menu, mini-cart, banners and toasts. The brand is fixed per deployment; there is no in-app brand switcher and no global search.</p>
+
+      <article class="card" id="global-header">
+        <h3>Header and navigation <span class="tag flag">VITE_NAVIGATION_RESKIN</span></h3>
+        <div class="cols">
+          <div><h4>What users can do</h4><ul>
+            <li><b>Classic header:</b> logo (home), Customizer, Catalogs (hidden in production), Contact Us, Cobrowse, mobile menu.</li>
+            <li><b>Reskin header:</b> utility bar (Cobrowse, Catalog for PLS, Contact); "Build men's" and "Build women's" mega-menus (uniforms by sport and style, apparel, accessories); PLS only: "Discover" and "Design with AI" (Submit My AI Design, Design with ChatGPT, Learn More).</li>
+            <li>At 1194 px or narrower, a drawer menu with back navigation.</li>
+            <li><b>Cobrowse</b> shows a session code: "Please give this code to the support team."</li>
+          </ul></div>
+          <div><h4>Rules &amp; validations</h4><ul>
+            <li>Nav links are disabled while a forced password update is pending.</li>
+            <li>Reskin builder pages hide the global header.</li>
+          </ul></div>
+        </div>
+        <details><summary>Code</summary><p><code>Components/Header.vue</code> · <code>Components/Header/NavigationReskin.vue:52-182</code></p></details>
+      </article>
+
+      <article class="card" id="global-account-menu">
+        <h3>Account menu and pricing display</h3>
+        <div class="cols">
+          <div><h4>What users can do</h4><ul>
+            <li>Links: My Account, Address Book, Saved Logos, Saved Designs, My Carts, Customers, Orders, Old Customizer (if set), Users (Product Pro), Log Out.</li>
+            <li><b>Pricing Display:</b> "{Dealer|Sales Rep} Cost" or "Retail Cost". The label says Dealer when any active dealer exists.</li>
+            <li>Log out clears the saved pricing choice, column settings and dealer-link data.</li>
+          </ul></div>
+          <div><h4>Rules &amp; validations</h4><ul>
+            <li>Pricing toggle: dealer roles only, and only with brand feature 9.</li>
+            <li>Dealer Cost radio: dealers and brand managers always; sales reps only if listed in brand or dealer user properties.</li>
+            <li>Saved in the browser (default retail). On Orders pages it is forced to dealer cost for eligible users when order tracking is on.</li>
+          </ul></div>
+        </div>
+        <details><summary>Code</summary><p><code>Header/ClassicAccountMenu.vue:58-413</code> · <code>Header/ReskinAccountMenu.vue</code> · <code>Composables/Account/useAccountMenu.js:25-66</code> · <code>stores/costSettings.js</code> · <code>plugins/helper.js:273-285</code></p></details>
+      </article>
+
+      <article class="card" id="global-minicart">
+        <h3>Mini-cart</h3>
+        <div class="cols">
+          <div><h4>What users can do</h4><ul>
+            <li>See the item count badge and items grouped by Shipping Group, with a minimum-quantity bar and "Minimum Quantity Fee" (fee hidden for customers).</li>
+            <li>Edit or delete an item; "Proceed to Checkout" ("SEND TO HYBRIS" on Riddell).</li>
+          </ul></div>
+          <div><h4>Rules &amp; validations</h4><ul>
+            <li>Edit is disabled when approved or pending approval; reorders: "Unable to edit reorder item."</li>
+            <li>"Your Cart is Empty" with no items.</li>
+            <li>Live updates refresh thumbnails, Side B images and PDFs. MOQ changes warn: "There have been recent updates to our Minimum Order requirements."</li>
+          </ul></div>
+        </div>
+        <details><summary>Code</summary><p><code>Header/CartMenu.vue:56-260</code> · <code>routes/channels.php:24-29</code></p></details>
+      </article>
+
+      <article class="card" id="global-notifications">
+        <h3>Badges, banners, toasts and global modals</h3>
+        <ul>
+          <li><b>Account badge</b> = reworked carts + change requests + flagged logos or color conflicts + quote requests + rework orders. It checks every 5 seconds while loading, and is off for customers and when the vectorizer is off.</li>
+          <li><b>Banners:</b> Staging (non-production), Disclaimer and Vectorsoft (dismissible, remembered), mobile "Design like a pro - use a computer for the best experience", Old-customizer link, rework rejection.</li>
+          <li><b>Toasts:</b> top right, close after 5 seconds. Confirm dialogs default to "Confirmation", "Yes", "No".</li>
+          <li><b>Global modals:</b> welcome / verify email, forced password reset, Order Submission Pending, resend activation, login, register, forgot password.</li>
+        </ul>
+        <details><summary>Code</summary><p><code>Composables/Notifications/useCartNotifications.ts</code> · <code>Middleware/HandleInertiaRequests.php:50-57</code> · <code>Header/*Banner.vue</code> · <code>plugins/notification.js</code> · <code>Layouts/DefaultLayout.vue:80-153</code></p></details>
+      </article>
+
+      <article class="card" id="global-footer">
+        <h3>Footer, session and tracking</h3>
+        <ul>
+          <li><b>Footer</b> (<code>VITE_ENABLE_FOOTER</code>): About Us, Privacy, Terms, Warranty, Contact Us, Cobrowse, Catalogs (not production), Color Charts, Material Care Guide, social links. FAQ hidden.</li>
+          <li><b>Session:</b> 120 minutes, no expiry warning. A forced logout sends users to login with "You have been logged out!". Pages restored from the back/forward cache reload.</li>
+          <li><b>Scripts:</b> Google Analytics (production), Cobrowse.io, Inksoft launcher, Pusher/Echo live updates. Dealer links add <code>?dealer=</code> to every visit.</li>
+        </ul>
+        <details><summary>Code</summary><p><code>Components/Footer.vue</code> · <code>views/app.blade.php:20-52</code> · <code>Middleware/CanLogoutUser.php</code> · <code>app.js:23-116</code></p></details>
+      </article>
+    </section>
+    <section id="auth" data-title="Login, accounts &amp; roles">
+      <h2>Login, accounts &amp; roles</h2>
+      <p class="lead">Login checks the local password, then requires an activated account and a Prolook token, and re-syncs the role from QX7 every time. Sessions last 120 minutes.</p>
+
+      <article class="card" id="auth-login">
+        <h3>Login <code>/login</code></h3>
+        <div class="cols">
+          <div><h4>What users can do</h4><ul>
+            <li>Log in with email and password (page or modal). No "remember me".</li>
+            <li>Resend the activation link if the account isn't activated.</li>
+            <li>Log out to <code>/</code>, or to <code>/login</code>.</li>
+          </ul></div>
+          <div><h4>Rules &amp; validations</h4><ul>
+            <li>Not activated: logged out with "User is not yet activated" and a resend modal.</li>
+            <li>A Prolook token must be created; if Prolook refuses, the app grants brand access and retries, else "Something went wrong while generating access token".</li>
+            <li>Locked out after 5 failed attempts per email and IP.</li>
+            <li><b>Landing:</b> GM1 rep who never updated their password → <code>/update-password</code>; rep with incomplete info → <code>/users/profile</code>; modal login → back to the same page; otherwise the intended page or <code>/</code> with "Welcome back {name}!".</li>
+            <li>Session: 120 minutes, no idle timeout in the browser. Logged-in users on guest pages go to <code>/</code>; guests on protected pages go to <code>/login</code>.</li>
+            <li>Forced logout: <code>auth:logout-all</code> logs everyone out on their next request, but only on routes with the <code>can_logout_user</code> middleware.</li>
+          </ul></div>
+        </div>
+        <details><summary>Code</summary><p><code>Auth/AuthenticatedSessionController.php:55-315</code> · <code>Requests/Auth/LoginRequest.php</code> · <code>Components/Login/Form.vue:24</code> · <code>config/session.php:21-36</code> · <code>Middleware/CanLogoutUser.php</code> · <code>Console/Commands/LogOutAllUsers.php:57-70</code></p></details>
+      </article>
+
+      <article class="card" id="auth-roles">
+        <h3>Role sync and roles</h3>
+        <div class="cols">
+          <div><h4>How the role is set at every login</h4><ul>
+            <li>QX7 <code>can_place_order</code> false → <b>customer</b>.</li>
+            <li>Otherwise by QX7 position: Customer → customer, Sales Rep → sales_rep, Owner → admin, Product Pro → product_pro, Brand Manager → brand_manager, other → customer.</li>
+            <li>Forced to <b>sales_rep</b> when the user belongs to a dealer of this brand, is a brand user, or has this brand assigned.</li>
+            <li>The session also stores the QX7 user type (dealer / brand_user / sales_rep).</li>
+          </ul></div>
+          <div><h4>What each role reaches</h4><ul>
+            <li><b>All logged-in users:</b> profile, address book (404 on brand 5), saved designs and logos, carts, orders.</li>
+            <li><b>Customers menu:</b> Product Pro, sales rep, dealer, brand manager (menu only; no server check).</li>
+            <li><b>Users menu:</b> Product Pro only (menu only).</li>
+            <li><b>Admin:</b> team-store payout APIs.</li>
+            <li><b>Coach, player, family:</b> team-store features.</li>
+            <li><b>Approver:</b> no login; access by approval token.</li>
+            <li>Defined roles: customer, sales_rep, dealer, dealer_admin, product_pro, brand_manager, coach, player, family, admin.</li>
+          </ul></div>
+        </div>
+        <details><summary>Code</summary><p><code>AuthenticatedSessionController.php:227-384</code> · <code>Models/User.php:84-103</code> · <code>ReskinAccountMenu.vue:262, 353</code> · <code>UserController.php:66-85, 149-156</code> · <code>Middleware/ApprovalAccess.php</code></p></details>
+      </article>
+
+      <article class="card" id="auth-register">
+        <h3>Register and activate <code>/register · /register/{dealerName}</code></h3>
+        <div class="cols">
+          <div><h4>What users can do</h4><ul>
+            <li>Enter name, phone, country, state, city, zip, email, password, age check, "I am a sales rep", and a dealer or rep choice; optionally a Team Database team.</li>
+            <li><code>/register/{dealerName}</code> pre-selects a dealer.</li>
+            <li>Click the emailed activation link; resend it when logged out or logged in.</li>
+            <li>Customers created by a rep set their first password from a "set password" link.</li>
+          </ul></div>
+          <div><h4>Rules &amp; validations</h4><ul>
+            <li>Names 2–255; phone 10–20 characters of digits and <code>-+()</code>; numeric zip; unique email; confirmed password.</li>
+            <li>A rep is required when the user says they know their dealer (Legends, brand 48: a dealer).</li>
+            <li>Activation and set-password: at least 8 characters with mixed case, a number and a symbol.</li>
+            <li>Activation link lasts 24 hours. Expired, invalid or used links show a warning; expired opens a modal.</li>
+            <li>Creates or binds the Prolook account and emails the activation link. "I am a sales rep" emails the brand manager a dealer-access request. The chosen rep (or the brand manager) gets a "selected dealer" email.</li>
+          </ul></div>
+        </div>
+        <details><summary>Code</summary><p><code>Auth/RegisteredUserController.php:47-269</code> · <code>Listeners/BindProlookUserId.php</code> · <code>Action/AccountActivationController.php:22-198</code> · <code>Pages/UserController.php:459-540</code> · <code>Jobs/SendActivationLink.php</code></p></details>
+      </article>
+
+      <article class="card" id="auth-password">
+        <h3>Forgot, reset and forced password update</h3>
+        <ul>
+          <li>Forgot password emails a reset link valid for 1,440 minutes (24 hours). An expired link shows the "Password Reset Link Expired" page. A successful reset goes to login.</li>
+          <li>GM1 sales reps must update their password at <code>/update-password</code> after first login.</li>
+          <li>Profile password change needs the current password, and the new one must differ.</li>
+        </ul>
+        <details><summary>Code</summary><p><code>Auth/NewPasswordController.php:29-108</code> · <code>Action/ProfileController.php:16-87</code></p></details>
+      </article>
+
+      <article class="card" id="auth-hybris">
+        <h3>Hybris order guard (sales reps on allowed brands)</h3>
+        <ul>
+          <li>Pending order → forced to <code>/checkout?showPendingModal=1</code>. Success → <code>/checkout/success</code>. Failure → <code>/checkout/unsuccess</code>.</li>
+        </ul>
+        <details><summary>Code</summary><p><code>Middleware/CheckHybrisOrderStatus.php</code></p></details>
+      </article>
+    </section>
+
+    <section id="picker" data-title="Find a design (picker)">
+      <h2>Find a design (picker)</h2>
+      <p class="lead">Guests can browse sports and designs. Choosing a design asks them to log in, then opens the builder. Which picker runs depends on <code>VITE_FEATURE_DESIGN_PICKER</code>.</p>
+
+      <article class="card" id="picker-home">
+        <h3>Home <code>/</code></h3>
+        <div class="cols">
+          <div><h4>What users can do</h4><ul>
+            <li>See a hero banner: an image slider or a looping YouTube video.</li>
+            <li>See a "More to Explore" apparel banner. Each slide links to its <code>redirectURL</code>.</li>
+            <li>See any pending flash message.</li>
+          </ul></div>
+          <div><h4>Rules &amp; validations</h4><ul>
+            <li>A banner section shows only when the brand banner list from the API is not empty.</li>
+            <li>A slide with no image shows a placeholder.</li>
+            <li>If any banner item has a video, the first video replaces the slider: muted autoplay, no controls, looping.</li>
+          </ul></div>
+        </div>
+        <details><summary>Code</summary><p><code>routes/web.php:61</code> · <code>Pages/IndexController.php:14</code> · <code>Pages/Index.vue</code> · <code>Components/Banners/Main.vue:24-75</code> · <code>Components/Banners/MoreExplore.vue:24-47</code></p></details>
+      </article>
+
+      <article class="card" id="picker-sports">
+        <h3>Sports list <code>/sports</code></h3>
+        <div class="cols">
+          <div><h4>What users can do</h4><ul>
+            <li>Browse sport tiles (icon or placeholder, plus the sport's alias or name).</li>
+            <li>Hover a tile to see buttons:
+              <ul>
+                <li><b>Men/Boys</b> → <code>/sports/{name}/designs?gender=men&amp;sport_code=…</code></li>
+                <li><b>Women/Girls</b> → the same with <code>gender=women</code></li>
+                <li><b>Browse</b> (no gender) when neither matches or the sport has no genders</li>
+              </ul></li>
+            <li>Clicking any button clears saved picker filters (<code>userFilters</code> in localStorage).</li>
+          </ul></div>
+          <div><h4>Rules &amp; validations</h4><ul>
+            <li>Data: QX7 <code>GET /api/brand_sports/{BRAND_ID}/gender</code>, cached in the store for the session and sorted by <code>sort_order</code>.</li>
+            <li>Accessories have no genders, so they always show Browse.</li>
+            <li>Gender match: <code>\b(MEN(S)?|BOY(S)?)\b</code> and <code>\b(WOMEN(S)?|GIRL(S)?)\b</code>.</li>
+            <li>A "Request Info" button exists but is disabled (<code>v-if="false"</code>).</li>
+            <li>Error message: "Something went wrong while fetching catalogs" (reuses catalog wording).</li>
+          </ul></div>
+        </div>
+        <details><summary>Code</summary><p><code>routes/web.php:100-109</code> · <code>Pages/SportController.php:65</code> · <code>Components/Sport/Categories.vue:46-181</code> · <code>api/sports.js:3-42</code> · <code>stores/sports.js:70-85, 264-274</code></p></details>
+      </article>
+
+      <article class="card" id="picker-designs">
+        <h3>Design picker <code>/sports/{sport}/designs</code> <span class="tag flag">VITE_FEATURE_DESIGN_PICKER</span></h3>
+        <p class="sub">Breadcrumb: Home &gt; Select Design.</p>
+        <div class="cols">
+          <div><h4>What users can do</h4><ul>
+            <li><b>New picker (flag on):</b> the <code>@qstrike/picker</code> package draws the grid, filters, colors, team name and logo, and pricing.</li>
+            <li><b>Legacy list (flag off):</b> designs grouped by product line. The thumbnail swaps from front to left view on hover.
+              <ul>
+                <li>Card: genders, product and style name, info (i) modal, Adult/Youth price, ship date, item codes, "NEW" tag.</li>
+                <li>Side panel: team colors (or the TeamDB look customizer) and Keyword Search.</li>
+                <li>Filters: General, Price (low→high, high→low, range slider), Gender, Sports, Type, Decoration, Category, Neckline, Sleeve, Hemline, Waistline, Fit Intent, Pant Cuff/Length, Cut.</li>
+              </ul></li>
+            <li><b>Share Page</b> button (disabled until the picker loads).</li>
+            <li>Select a design → builder. If not logged in, the login modal opens and the user continues after login.</li>
+            <li><b>Reversible styles</b> (block pattern contains "Reversible") open a Side A / Side B chooser first.</li>
+            <li><b>Custom team logo:</b> Design Studio when the brand has the vectorizer feature, otherwise the Inksoft Upload/Edit Logo modals.</li>
+          </ul></div>
+          <div><h4>Rules &amp; validations</h4><ul>
+            <li>Legacy sort: block pattern <code>sort_order</code> (blank = 99), then style <code>sort_order</code>; product lines by name.</li>
+            <li>Keyword search matches product name, style name, ship date, price item or brand item code. It ignores case and runs on every keystroke.</li>
+            <li>"NEW" while today is before <code>tag_expiry_date</code>. The General filter shows NEW styles only.</li>
+            <li>No results: "No Available Styles!".</li>
+            <li><b>Availability:</b> for brand 69 or 3, only styles whose <code>block_pattern_rule_id</code> is in <code>VITE_ALLOWED_UNIFORM</code> are shown. <code>VITE_EXCLUDED_STYLES</code> hides styles in the new picker.</li>
+            <li>The Ship Date filter is built but switched off ("Remove this temporary").</li>
+            <li>The new picker always loads page 1; paging is commented out.</li>
+            <li>The builder route requires login.</li>
+          </ul></div>
+        </div>
+        <h4>Deep-link parameters</h4>
+        <ul>
+          <li><code>type</code>, <code>gender</code>, <code>uniformType</code>, <code>applicationType</code>, <code>teamColors</code> (JSON array of color codes), <code>isFrom</code>, <code>sport_code</code>, <code>category</code>.</li>
+          <li><code>blockResetState</code> keeps filter state when leaving the page. <code>pl-mktg-site</code> clears saved filters and is then removed from the URL.</li>
+          <li><code>isShareable=true</code> + <code>multiSelectedFilters</code> restore a shared filter set (CRE-9561 workaround).</li>
+        </ul>
+        <details><summary>Code</summary><p><code>Pages/Sports/Designs.vue:58-113, 200-219</code> · <code>Components/DesignPage/DesignLoader.vue:104-346</code> · <code>Components/DesignPage/DesignList.vue:135-283</code> · <code>stores/brand-styles.js:101-226, 595-617, 769-816</code> · <code>plugins/helper.js:295-308</code> · <code>api/qx7.js:13-41</code> · <code>SportController.php:217-229</code></p></details>
+      </article>
+
+      <article class="card" id="picker-decorations">
+        <h3>Decorations <code>/sports/{sport}/decorations</code></h3>
+        <ul><li>Decoration Type page with Sport, Apparel and Quickturn tabs. Accepts <code>type</code> and <code>gender</code> query parameters.</li></ul>
+        <details><summary>Code</summary><p><code>SportController.php:232-238</code> · <code>Pages/Sports/Decorations.vue</code> · <code>Components/Decorations/Content.vue</code></p></details>
+      </article>
+
+      <article class="card" id="picker-catalog">
+        <h3>Catalog <code>/catalogs</code></h3>
+        <div class="cols">
+          <div><h4>What users can do</h4><ul><li>View catalog thumbnails (view only, no links).</li></ul></div>
+          <div><h4>Rules &amp; validations</h4><ul>
+            <li>Data: QX7 <code>GET /api/master_resource_center/categories/10/brand/{BRAND_ID}</code>.</li>
+            <li>Empty: "No catalogs found." Error: "Something went wrong while fetching catalogs".</li>
+          </ul></div>
+        </div>
+        <details><summary>Code</summary><p><code>routes/web.php:62</code> · <code>Pages/Catalog.vue</code> · <code>Components/Catalog/CatalogItems.vue</code> · <code>api/catalogs.js</code></p></details>
+      </article>
+
+      <article class="card" id="picker-logo">
+        <h3>Logo preview <code>/logos/{id}/preview · /logos/{id}/{designId}/preview</code> <span class="tag">no login</span></h3>
+        <div class="cols">
+          <div><h4>What users can do</h4><ul>
+            <li>See an "Application Preview": logo name and ID, a lightbox image, a link to the full SVG in a new tab, and the colors used.</li>
+          </ul></div>
+          <div><h4>Rules &amp; validations</h4><ul>
+            <li>Looks up by Inksoft design ID first, then Vectorsoft saved-design ID.</li>
+            <li>Not found: "Logo Design ID {id} Not Found". No colors: "No Selected Colors".</li>
+          </ul></div>
+        </div>
+        <details><summary>Code</summary><p><code>routes/web.php:77-78</code> · <code>Pages/InksoftDesignController.php:12-45</code> · <code>ApiClient/Prolook.php:754-790</code> · <code>Pages/LogoDesign/Logo.vue</code> · <code>Pages/InksoftDesign/LogoHistory.vue</code></p></details>
+      </article>
+
+      <article class="card" id="picker-unavailable">
+        <h3>Item Unavailable <code>/saved-designs/unavailable</code></h3>
+        <ul>
+          <li>Message: "The design associated with this link has been deleted and is no longer available…". <b>OKAY</b> goes to <code>/sports</code>.</li>
+          <li>Shown when a saved-design link points to a design Prolook can't return, or one that is archived.</li>
+        </ul>
+        <details><summary>Code</summary><p><code>routes/web.php:85-90</code> · <code>Pages/SaveDesignController.php:44-54, 76-79</code> · <code>Pages/ItemUnavailable.vue</code></p></details>
+      </article>
+
+      <article class="card" id="picker-roles">
+        <h3>Role differences in the picker</h3>
+        <ul>
+          <li>Guests browse freely; opening the builder requires login.</li>
+          <li>Legacy prices: MSRP under retail cost. Under dealer cost, dealers and reps see prices from the dealer or rep formula applied to brand cost or MSRP.</li>
+          <li>The new picker gets the role, email, cost URLs and cost type; any role logic runs inside the package.</li>
+          <li>End users see no discount details. No server-side filtering of visible designs by role was found.</li>
+          <li><code>/customize/{id}/master-style</code> and <code>/master-block</code> open the Master Style / Master Block customizers with no login check.</li>
+        </ul>
+        <details><summary>Code</summary><p><code>DesignList.vue:51-132, 285-335</code> · <code>DesignLoader.vue:214-220</code> · <code>routes/web.php:428-429</code></p></details>
+      </article>
+    </section>
+
+    <section id="builder" data-title="Builder">
+      <h2>Builder</h2>
+      <p class="lead">The builder is where a style becomes a team uniform. The reskin UI (<code>VITE_FEATURE_BUILDER_RESKIN</code>) has seven tabs and opens on Options. The classic UI is described at the end of this section.</p>
+
+      <article class="card" id="builder-entry">
+        <h3>Entry points and modes <span class="tag auth">login</span></h3>
+        <div class="cols">
+          <div><h4>What users can do</h4><ul>
+            <li>New item: <code>/sports/{sport}/customize/{id}</code>; reversible: <code>…/reversible_uniform/{idB}</code>.</li>
+            <li>Saved design <code>/saved-designs/{id}/customize</code>, cart item <code>/carts/items/{id}</code>, view only <code>/carts/items/{id}/view-only</code>, reorder <code>/customize/{cartItem}/reorder</code>.</li>
+            <li>Internal tools: <code>/customize/{id}/master-style</code> and <code>/master-block</code> <span class="tag bug">no login check</span></li>
+            <li>The URL can preset team, stock, trim, twill, body, app and locker-tag colors, plus <code>team_name</code> and <code>team_id</code>.</li>
+          </ul></div>
+          <div><h4>Rules &amp; validations</h4><ul>
+            <li>Load modes: normal, saved-design, cart-item, reorder-item. Anything else: "Missing uniform type".</li>
+            <li>Shared design whose style changed after <code>sent_date</code>: "Changes have been made to this product offering…".</li>
+            <li>Saved design with pending style updates opened with <code>?view</code>: "System Update" modal.</li>
+            <li>Master style opens on Customize, hides Details, Options, Roster and Summary, and shows Save but not Add to Cart.</li>
+          </ul></div>
+        </div>
+        <details><summary>Code</summary><p><code>routes/web.php:88, 106-107, 229-276, 428-429</code> · <code>Pages/SportController.php:25-107, 197-209</code> · <code>Pages/SavedDesignCustomizer.vue:167-235</code> · <code>BuilderReskin/BuilderReskin.vue:427-462, 1500-1546</code>. <code>BuilderController.php</code> is unused legacy code.</p></details>
+      </article>
+
+      <article class="card" id="builder-header">
+        <h3>Header and sidebar</h3>
+        <div class="cols">
+          <div><h4>What users can do</h4><ul>
+            <li>Header: "Back to …", <b>Undo</b>, <b>Redo</b>, <b>Zoom</b> in/out (not on Roster), <b>Notes</b> (Issues / Logs), Cobrowse, Contact, Catalog (PLS brand only), <b>Save</b>, and <b>Add to Cart</b> ("Update Item" when editing a cart item, quote, change request or reorder).</li>
+            <li>Keyboard: <b>Ctrl/Cmd+Z</b> undo; <b>Ctrl/Cmd+Shift+Z</b> or <b>Ctrl/Cmd+Y</b> redo. Ignored while typing.</li>
+            <li>Tabs: Custom Pro, Details, Options, Customize, Applications, Roster, Summary.</li>
+          </ul></div>
+          <div><h4>Rules &amp; validations</h4><ul>
+            <li>Undo keeps up to 150 steps.</li>
+            <li>Add to Cart is disabled while the roster has sizes that are no longer available.</li>
+            <li>A tab with missing required items shows "!".</li>
+            <li>Applications is disabled while Custom Pro is on, and hidden if the style has no text or logo application.</li>
+            <li>Reorder: only Roster and Applications work. LOCKED badge: "Jersey design is locked to be sure the design is the same as the original design."</li>
+            <li>Rework mode (<code>action=fix-issue</code>) swaps the buttons for <b>Cancel</b> and <b>Resolve and Submit</b>. View-only hides Save and Add to Cart.</li>
+          </ul></div>
+        </div>
+        <details><summary>Code</summary><p><code>BuilderReskin/Layout/Header.vue:38-102, 234-276</code> · <code>Layout/Sidebar.vue:91-119</code> · <code>BuilderReskin.vue:101-116, 440-455, 1824-1838</code> · <code>stores/history.js:19</code> · <code>stores/cart-items.js:88-104</code></p></details>
+      </article>
+
+      <article class="card" id="builder-custompro">
+        <h3>Custom Pro (manual order) <span class="tag flag">VITE_MANUAL_ORDER_FEATURE</span></h3>
+        <div class="cols">
+          <div><h4>What users can do</h4><ul>
+            <li>Turn Custom Pro on or off. Price shows as "+ $X per item".</li>
+            <li>Upload a finished design (PNG, JPG, JPEG, PDF), preview or remove it. PDFs show "Open in a New Tab".</li>
+            <li>Write notes (up to 50,000 characters, auto-saved).</li>
+            <li>Pick a single Main Body Color in Customize.</li>
+          </ul></div>
+          <div><h4>Rules &amp; validations</h4><ul>
+            <li>Shown only when the flag is on, the style has a lead-time-2 add-on and allows manual orders.</li>
+            <li>PDF over 50 MB: "The PDF exceeds the 50MB limit and needs to be optimized before uploading." Images over 3 MB are compressed.</li>
+            <li>Toggling asks: "…This will erase any roster and design information already applied." Turning on removes all patterns and turns off Rush.</li>
+            <li>Locked while fixing an order issue.</li>
+            <li>Before cart, save or resubmit: "Please add a design file and choose a main body color before adding this to your cart."</li>
+            <li>Adding to a cart group that has Rush warns that Rush will be removed.</li>
+          </ul></div>
+        </div>
+        <details><summary>Code</summary><p><code>Tabs/CustomProTab.vue:27-80, 172-205, 296-367</code> · <code>stores/manual-order.js:71-126, 218-237</code> · <code>BuilderReskin.vue:1581-1612</code> · <code>Modals/ReskinSelectCart.vue:256-262</code> · <code>api/upload.js:15-20</code></p></details>
+      </article>
+
+      <article class="card" id="builder-details">
+        <h3>Details and Options (fabric)</h3>
+        <div class="cols">
+          <div><h4>Details (read only)</h4><ul>
+            <li>Price Item, Product Line, Block, Style, Gender, Youth and Adult price (struck through when discounted).</li>
+            <li>Sizing Chart, How to Measure, Materials (fabric cards with upgrade fee), Intended Fit, Decoration, Video.</li>
+          </ul></div>
+          <div><h4>Options</h4><ul>
+            <li>Pick one fabric per group. "(Suggested)" marks the default; upgrades show "+$X/item". Hover info shows content, weight, construction and features.</li>
+            <li>Reversible: "Fabric selection will be applied to both Side A and Side B."</li>
+            <li><code>VITE_NO_FABRIC_FEATURE</code>: checkboxes allow no fabric.</li>
+            <li>Custom Pro limits choice to the primary fabric group. Fabric is re-checked when the cost type changes.</li>
+          </ul></div>
+        </div>
+        <details><summary>Code</summary><p><code>Tabs/DetailsTab.vue:1-200, 332-366</code> · <code>Tabs/OptionsTab.vue:3-50, 172</code> · <code>BuilderReskin.vue:520-531</code></p></details>
+      </article>
+
+      <article class="card" id="builder-customize">
+        <h3>Customize (colors, parts, logo trims, patterns, piping)</h3>
+        <div class="cols">
+          <div><h4>What users can do</h4><ul>
+            <li><b>Team DB</b> (flag): choose or remove an organization or team.</li>
+            <li><b>Colors in Use:</b> add or replace team colors from Core and Additional colors; hover shows "(code) name".</li>
+            <li><b>Parts:</b> recolor each body part from the colors in use.</li>
+            <li><b>Brand logo, locker tag, heat-press trims:</b> pick a color and optionally a location.</li>
+            <li><b>Patterns:</b> Add (locations → pattern → position), recolor layers, Edit, Remove.</li>
+            <li><b>Piping:</b> Add (locations, size, color per layer or NONE), Remove, Remove All.</li>
+          </ul></div>
+          <div><h4>Rules &amp; validations</h4><ul>
+            <li>Minimum 2 team colors (1 for stock items): "A minimum of two colors is required for customization…"</li>
+            <li>Removing a color in use forces a replacement: "This color is being used on {parts}. Please choose a replacement color."</li>
+            <li>"Some unavailable colors are not shown." (non-stock items).</li>
+            <li>No maximum in reskin. Classic: 15 (twill/hybrid) or 6; sublimated picker max 6.</li>
+            <li>Brand logo with no color blocks the cart: "Please select a brand logo color before adding the item to cart."</li>
+            <li>"Custom Pattern" is not wired up yet. The Organization dropdown has sample names and the piping block is mock markup on pre-staging. <span class="tag warn">placeholder</span></li>
+          </ul></div>
+        </div>
+        <details><summary>Code</summary><p><code>Tabs/CustomizeTab.vue:1-50</code> · <code>Color/ReskinActiveColorRow.vue:2-99</code> · <code>Color/ReskinColorPickerModal.vue:5-476</code> · <code>Color/RemoveColorModal.vue:10-13</code> · <code>BrandLogo/ReskinBrandLogo.vue:1-140, 304</code> · <code>Pattern/ReskinPattern.vue:86-195</code> · <code>Parts/ReskinParts.vue:93-94, 299</code> · <code>TeamDBReskin.vue:369, 646</code> · <code>BuilderReskin.vue:1174-1224</code></p></details>
+      </article>
+
+      <article class="card" id="builder-apps">
+        <h3>Applications (text and logos)</h3>
+        <div class="cols">
+          <div><h4>What users can do</h4><ul>
+            <li><b>Add Text:</b> type → part → location. Team Name ("Set On Every Item"), Player Name and Number ("Set In Roster"), Graduation Year (if the style allows), custom placements.</li>
+            <li><b>Add Logo:</b> part → location, then create or edit in Vectorsoft / Design Studio (vectorizer on) or Inksoft.</li>
+            <li>Logo actions: Edit, Change Image, View, Download, View Art Details.</li>
+            <li><b>Editor:</b> size 10–200, position X/Y 1–100 (shoulder/cowl 10–200), rotation −360 to 360, alignment, opacity 0–100% (not stock).</li>
+            <li><b>Text styling:</b> value, accent and layer colors, solid or pattern base, font, layout, tailsweep (team name).</li>
+            <li>"Apply styling to all Player Numbers". Drag to reorder within a body part. Side A/B switch; duplicate to another side or location.</li>
+          </ul></div>
+          <div><h4>Rules &amp; validations</h4><ul>
+            <li>Player number: digits only. Graduation year: 4 digits.</li>
+            <li>Reorder: team name can't be edited or removed, and isn't offered as a type.</li>
+            <li>"This item has a N application limit" or "N applications are included… Additional applications available for $X each". At the limit: "Cannot add. Maximum application limit reached."</li>
+            <li>Remove: "Are you sure you want to remove this application?" Removing the last name/number/year app offers to clear the roster values.</li>
+            <li>Logos with color conflicts block Add to Cart and Update Item.</li>
+            <li>"Show/Hide Locations" only for non-brand styles or about 10 hard-coded super-user emails.</li>
+          </ul></div>
+        </div>
+        <details><summary>Code</summary><p><code>Tabs/ApplicationsTab.vue:1-60, 212-866</code> · <code>Applications/ReskinAddText.vue:205-233</code> · <code>ReskinAppLimitMessage.vue:3-16</code> · <code>ApplicationEditor.vue:30-1100</code> · <code>Controls/ReskinSizeSlider.vue:17</code> · <code>ReskinPositionSlider.vue:90-107</code> · <code>ReskinRotationSlider.vue:34</code> · <code>core/customizer/application.ts:80-87</code> · <code>BuilderReskin.vue:36-43, 468-479, 820-844, 1965-1971</code></p></details>
+      </article>
+
+      <article class="card" id="builder-roster">
+        <h3>Roster and sizes</h3>
+        <div class="cols">
+          <div><h4>What users can do</h4><ul>
+            <li>Pick Adult and Youth sizes; open How to Measure, Inseam Guide, Sizing Guide.</li>
+            <li>Player numbers: Add Range, Additional Numbers, Custom Number (3 characters), clear.</li>
+            <li>Roster table (per style): Number, Player Name, Gamer Tag, Inseam, Hemline, Sleeve Type, Pant Cut, Qty, Group ID, Graduation Year.</li>
+            <li>Name casing (upper, title, lower). See Total Quantity, "Minimum Order Quantity N", Roster Subtotal.</li>
+            <li>Upload a roster (.xlsx, .xls, .csv), download the template, copy a roster from another item, Advanced Application Sizing.</li>
+          </ul></div>
+          <div><h4>Rules &amp; validations</h4><ul>
+            <li>Numbers 0–999: "Range values must be between 0 and 999.", "Invalid range, start cannot be greater than end.", "Those numbers are already available."</li>
+            <li>Upload: "The size 'X' is not available on roster sizes.", "Invalid player number value on row …", "No Roster Uploaded. Please check your file."</li>
+            <li>Copy: "Your current roster will be overwritten, do you wish to continue?"</li>
+            <li>"You need to choose a Hemline before saving the roster."</li>
+            <li>Before cart: names, numbers and year must match between design and roster (offers Remove / Add).</li>
+            <li>Below MOQ: "The minimum order quantity of N has not been met… additional $X minimum order fee per item?" (Add item(s) / Continue). Bags: "The minimum order is N units per item." with no Continue.</li>
+            <li>Reorder: can't add names/numbers not on the original order; roster and app sizes start empty.</li>
+          </ul></div>
+        </div>
+        <details><summary>Code</summary><p><code>Tabs/RosterTab.vue:1-330, 823-1178</code> · <code>Roster/RosterTable.vue:18-874</code> · <code>Modals/ReskinUploadRoster.vue:41-532</code> · <code>Modals/ReskinCopyRoster.vue:453-851</code> · <code>BuilderReskin.vue:846-1100, 1359-1395</code> · <code>CartItemController.php:286</code></p></details>
+      </article>
+
+      <article class="card" id="builder-summary">
+        <h3>Summary (price)</h3>
+        <ul>
+          <li>Item Subtotal (discount struck through), Minimum Order Quantity (when above 1), Base Price (MSRP or Dealer Cost).</li>
+          <li>Add-ons with unit price, "x N items" or "per item", and line total. Edit buttons jump to the tab that controls each add-on.</li>
+          <li>"Add On pricing and Item Subtotal will update as the roster is filled out."</li>
+        </ul>
+        <details><summary>Code</summary><p><code>Tabs/SummaryTab.vue:1-140</code> · <code>BuilderReskin.vue:1397-1408</code></p></details>
+      </article>
+
+      <article class="card" id="builder-cart">
+        <h3>Add to Cart / Update Item</h3>
+        <div class="cols">
+          <div><h4>What users can do</h4><ul>
+            <li>In "Add Item to Cart", pick a cart ("(Active Cart)" is marked) or "Create New Cart", then "Save to Selected Cart".</li>
+            <li>New carts need a Cart Name (and My Team with Team DB).</li>
+            <li>Classic builder: save a reorder to several carts ("SAVE TO N CARTS") when ORT is on.</li>
+            <li>Sales reps can add to a customer's cart.</li>
+          </ul></div>
+          <div><h4>Checks (in order)</h4><ol>
+            <li>Team selected (Team DB)</li>
+            <li>Color minimum</li>
+            <li>Logo color conflicts</li>
+            <li>Brand logo color</li>
+            <li>Custom Pro data</li>
+            <li>Unavailable sizes</li>
+            <li>Roster match and MOQ</li>
+          </ol>
+          <ul><li>Cart Name: required, max 40, letters, numbers and spaces: "Cart Name is required.", "Cart Name must be 40 characters or less.", "This field does not accept special characters."</li>
+          <li>Server: the Team DB team must match the cart's team.</li></ul></div>
+        </div>
+        <details><summary>Code</summary><p><code>BuilderReskin.vue:1155-1320</code> · <code>Modals/ReskinSelectCart.vue:30-110, 351-353</code> · <code>Modals/ReskinCartForm.vue:92, 292-306</code> · <code>Builder/Modals/SelectCart.vue:222-251</code> · <code>CartItemController.php:478-570</code> · <code>routes/api.php:225</code></p></details>
+      </article>
+
+      <article class="card" id="builder-rework">
+        <h3>Rework in the builder (Resolve and Submit)</h3>
+        <ul>
+          <li>Notes dropdown: Issues (rework notes and attachments) and Logs.</li>
+          <li>Pick one: "I only made the changes listed in the rework notes." or additional changes (needs notes; hidden on reorders). Otherwise "Select one option."</li>
+          <li>Submit → "Item Resubmitted". Not available to end users or when <code>VITE_DISABLE_ORDER_REJECTIONS</code> is set.</li>
+          <li>See <a href="#orders-rework">On Hold → Fix Issue</a> for what happens next.</li>
+        </ul>
+        <details><summary>Code</summary><p><code>Layout/NotesDropdown.vue:24-279</code> · <code>Modals/ReskinResolveAndSubmit.vue:115-187</code> · <code>BuilderReskin.vue:1322-1342</code></p></details>
+      </article>
+
+      <article class="card" id="builder-canvas">
+        <h3>Canvas and views</h3>
+        <ul>
+          <li>Click a thumbnail to change the view; Alt+click opens an enlarged pop-up. Views are 2D (front, back, left, right, top); there is no 3D view.</li>
+          <li>Front/back only for Cinch Sack, 2023 Team Flag and MDJ; front only for Banners.</li>
+          <li>"Thumbnails update when you switch tabs." and "The finished product may vary slightly from the image on your monitor".</li>
+          <li>Reversible: the other side shows as a clickable Side A / Side B thumbnail.</li>
+        </ul>
+        <details><summary>Code</summary><p><code>Builder/Thumbnails.vue:5-113</code> · <code>BuilderReskin.vue:79-96</code></p></details>
+      </article>
+
+      <article class="card" id="builder-classic">
+        <h3>Classic builder (reskin flag off)</h3>
+        <ul>
+          <li>Panels: Custom Pro, Fabrics, Colors, Pipings, Patterns, Text, Upload Logos, Add ons, Roster, Issues/Logs, Details, Layers. Prev/Next navigation, no undo/redo.</li>
+          <li>Text limits: Team Name 100 ("Maximum character length of 100 reached", "Emojis are not allowed in team name"), Player Name 100, Custom Text 15, Player Number 3, Graduation Year 4.</li>
+          <li>Logo upload: SVG, PNG, JPEG, GIF, BMP, PDF, AI, TIFF, EPS.</li>
+          <li>Save &amp; Share is disabled on reorders. Reorder enables only Roster, plus Text and Issues when player applications exist.</li>
+          <li>The Duplicate page always uses the classic builder.</li>
+        </ul>
+        <details><summary>Code</summary><p><code>stores/customizer.js:528-610</code> · <code>Builder/Builder.vue:210-245</code> · <code>Builder/Sidebar.vue:67, 160-180</code> · <code>Builder/Text/TeamName.vue:31-45</code> · <code>Logo/LogoLocations.vue:25</code> · <code>Pages/CartItem/ShowDuplicate.vue</code></p></details>
+      </article>
+
+      <article class="card" id="builder-roles">
+        <h3>Role differences in the builder</h3>
+        <ul>
+          <li>Guests: every builder route needs login except master style and master block.</li>
+          <li>Dealers load dealer pricing; everyone else gets rep cost. Sales reps, dealers and brand managers can switch dealer/retail cost.</li>
+          <li>Non-rep users have their sales rep details passed in. Sales reps can add to a customer's cart.</li>
+          <li>End users can't enter rework mode. Super-user emails get Show Locations on brand styles.</li>
+        </ul>
+        <details><summary>Code</summary><p><code>BuilderReskin.vue:1641</code> · <code>SportController.php:78-85</code> · <code>CartItemController.php:536-545</code> · <code>stores/cart-items.js:97</code></p></details>
+      </article>
+    </section>
+    <section id="saved" data-title="Saved designs, sharing &amp; approval">
+      <h2>Saved designs, sharing &amp; approval</h2>
+      <p class="lead">Saved designs live in Prolook, not in this app's database. The browser saves them straight to the Prolook API. Coach approval is a separate flow for cart items.</p>
+
+      <article class="card" id="saved-save">
+        <h3>Save a design (builder → Save and Share)</h3>
+        <div class="cols">
+          <div><h4>What users can do</h4><ul>
+            <li>Enter a <b>Design Name</b> (required) and optional <b>Notes</b>. A read-only label shows "ID: n/a" or the saved ID.</li>
+            <li><b>Save Design</b> the first time; <b>Update</b> after that.</li>
+            <li><b>Save as New</b> appears only after an existing design's name is changed (a copy needs a new name).</li>
+            <li>After saving: View saved designs, Download Images ("Download File" for manual orders), Download PDF, Share by email, Copy design link.</li>
+            <li>From the cart, an item can also be saved as a design (server side).</li>
+          </ul></div>
+          <div><h4>Rules &amp; validations</h4><ul>
+            <li>"Design Name is required." / "Design Name must be 250 characters or less." (field max 250).</li>
+            <li>Manual-order data is validated before saving.</li>
+            <li>Thumbnails (front, back, left, right, top if used, plus side B for reversible) are uploaded to S3 through <code>/api/image/upload</code> in high and low resolution.</li>
+            <li>New: Prolook <code>POST /saved_design</code> (returns <code>sd_id</code>). Update: <code>POST /saved_design/update</code>. Uses the user's Prolook token.</li>
+            <li>Saved fields: style, brand, sport, user, material, customizations, thumbnails, name, notes, category, team, mascot, city, state; side-B fields for reversible.</li>
+            <li>Toasts: "Design saved successfully" / "Design updated successfully"; failure "We cannot save your design for now" / "We cannot update your design for now".</li>
+            <li>Download PDF uses the PDF generator. Error: "We cannot generate the PDF for now".</li>
+            <li>Copy link copies <code>/saved-designs/{id}/customize</code>: "Link copied" / "We cannot copy the link for now".</li>
+            <li>Cart-item save: "Cart item design saved successfully." / "Something went wrong while saving design."</li>
+          </ul></div>
+        </div>
+        <details><summary>Code</summary><p><code>Components/BuilderReskin/Modals/ReskinSaveAndShare.vue:17, 116-144, 194-232, 279-470</code> · classic: <code>Components/Builder/Modals/SaveAndShare.vue</code> · <code>stores/customizer.js:10238, 10329-10471</code> · <code>api/saved-designs.js:361-371</code> · <code>api/upload.js:40</code> · <code>api/pdf.js:5</code> · <code>Pages/CartItemController.php:3218</code></p></details>
+      </article>
+
+      <article class="card" id="saved-list">
+        <h3>Saved designs list <code>/users/saved-designs</code> <span class="tag auth">login</span></h3>
+        <div class="cols">
+          <div><h4>What users can do</h4><ul>
+            <li><b>Filter:</b> All, Sport, Category (plus Users and My Designs for some roles).</li>
+            <li><b>Sort:</b> None, Date/Time, Sport, Category, Design Name (plus Users and Team Name for some roles or brands).</li>
+            <li><b>Keyword search</b> (debounced, exact match) and paging: Previous, "X of Y", Next.</li>
+            <li>Per design: Information, Favorite / unfavorite, Load Design, Share Design, Move to Cart, Archive / Unarchive, Delete, View PDF File.</li>
+            <li>No rename or duplicate here: open the design and use Update or Save as New.</li>
+          </ul></div>
+          <div><h4>Rules &amp; validations</h4><ul>
+            <li>Data: Prolook <code>POST /saved_designs/brand/{brand_id}/minified/paginated</code>.</li>
+            <li>Favorite is not allowed on archived designs. Delete is only for archived designs.</li>
+            <li>View PDF File only when the design is archived and its style was deleted.</li>
+            <li>Move to Cart is hidden for team-database brands.</li>
+            <li>Every action asks for confirmation, e.g. "Are you sure you want to delete this design?" → "Design removed – {name} removed successfully".</li>
+            <li>Before Load, Share or Move: Logo Color Conflict check; "{pattern} is no longer available… Click "Continue" to archive this item."; a System Update re-render and re-save when styling issues are found.</li>
+            <li>Empty: "No result found." / "No saved designs yet."</li>
+            <li>A missing or archived design opens Item Unavailable.</li>
+          </ul></div>
+        </div>
+        <details><summary>Code</summary><p><code>Pages/User/SavedDesign.vue:184-220, 375-540, 580-760, 1040-1100</code> · <code>Components/User/SavedDesigns/SavedDesignItems.vue:198-391, 538</code> · <code>api/saved-designs.js:11-48, 322-338</code> · <code>stores/saved-designs.js:707</code> · <code>Pages/SaveDesignController.php:13-73</code> · <code>routes/web.php:85-90, 126</code></p></details>
+      </article>
+
+      <article class="card" id="saved-share">
+        <h3>Share a design</h3>
+        <div class="cols">
+          <div><h4>What users can do</h4><ul>
+            <li>Share by email to several recipients (shown as chips) with an optional message.</li>
+            <li>The list's share modal also has Facebook, Twitter and Pinterest buttons.</li>
+            <li>Typing an email that belongs to a registered user shows that user's name.</li>
+            <li>Recipients click <b>View Design</b> in the email to open the design in the builder.</li>
+          </ul></div>
+          <div><h4>Rules &amp; validations</h4><ul>
+            <li>Browser: "Email is required.", "Email must be 250 characters or less.", "Please enter a valid email address.", "This email has already been added."</li>
+            <li>Server: 1 to 50 emails; the design ID must be numeric.</li>
+            <li>One queued email per recipient. Subject: "{BRAND} {SenderFirstName} Has Shared A Design With You!" It holds thumbnails (incl. side B), the manual-order file, product and pattern names, and the message.</li>
+            <li>Link: <code>{APP_URL}/saved-designs/{id}/customize?sent_date=…</code>. No token and no expiry.</li>
+            <li><b>Any logged-in user</b> can open the link; there is no ownership check. Logged-out users go to login.</li>
+            <li>The recipient opens the original record, not a copy.</li>
+            <li>If the style changed since <code>sent_date</code>: "Changes have been made to this product offering, so the loaded image may be slightly different than what was originally shared."</li>
+            <li>Toasts: "Message sent successfully!" / "Message not sent."</li>
+          </ul></div>
+        </div>
+        <details><summary>Code</summary><p><code>Action/ShareDesignController.php:19-108</code> · <code>app/helpers.php:244</code> · <code>Components/User/SavedDesigns/ShareDesignModal.vue:241-336</code> · <code>Components/BuilderReskin/Modals/ReskinShareDesign.vue:156-180</code> · <code>Composables/useEmailRecipients.js:3-37</code> · <code>views/mail/share-design.blade.php</code> · <code>BuilderReskin.vue:1504-1537</code> · <code>routes/web.php:309-320</code></p></details>
+      </article>
+
+      <article class="card" id="saved-approval">
+        <h3>Coach review &amp; approval <code>/approval?approval_token=…</code> <span class="tag">no login</span></h3>
+        <div class="cols">
+          <div><h4>What users can do</h4><ul>
+            <li><b>Rep / user:</b> send a cart item (or all items) for approval with name, email, note, subject, message and attachments.</li>
+            <li><b>Approver</b> (from the emailed link, no login):
+              <ul>
+                <li>Edit Roster.</li>
+                <li>Ask for Changes with a note.</li>
+                <li>Approve: type their name, draw a signature and tick "I have read and agree…" to enable Approve.</li>
+              </ul></li>
+            <li>Rep can cancel an approval request.</li>
+          </ul></div>
+          <div><h4>Rules &amp; validations</h4><ul>
+            <li>Send: name required (max 255), email required (max 50), subject max 50, message max 200, attachments jpg/jpeg/png/docx/pdf up to 20 MB each. Empty roster: "Your Roster is Empty."</li>
+            <li>Each send makes a new token, sets the item to <code>pending_approval</code> and emails the approver.</li>
+            <li>Bad token: "Invalid approval token." (session cleared, back to home). No items: "Empty cart items."</li>
+            <li>Approve needs a signature and item IDs; only <code>pending_approval</code> items change to <code>approved</code>, and the PDF is regenerated. "Successfully approved cart item(s)."</li>
+            <li>When every item in the cart is approved, the rep gets "Your Order Has Been Approved".</li>
+            <li>Changes: note max 255, only from <code>pending_approval</code>. Item becomes <code>change_request</code> and the rep is emailed. "Change request successfully submitted."</li>
+            <li>Item statuses: incomplete → pending_approval → approved / change_request → complete.</li>
+            <li>Shared-team brands: "This item has already been approved." Allowed (Hybris) brands also send an approval webhook.</li>
+          </ul></div>
+        </div>
+        <details><summary>Code</summary><p><code>Pages/CartItemController.php:2951-3030, 3361</code> · <code>Pages/ApprovalController.php:49-282</code> · <code>Middleware/ApprovalAccess.php</code> · <code>Jobs/SendApprovalLink.php:131</code> · <code>Action/ChangesLogController.php</code> · <code>Listeners/ChangeRequestNotification.php:122</code> · <code>Pages/ReviewApproval.vue</code> · <code>Components/Signature/Index.vue:193-215</code> · <code>Models/CartItem.php:75-79</code></p></details>
+      </article>
+
+      <article class="card" id="saved-roles">
+        <h3>Role differences</h3>
+        <ul>
+          <li>Admin, Brand Manager, Dealer, Product Pro, Sales Rep and Managing Rep get the <b>Users</b> filter and sort. Sales reps and managing reps also get <b>My Designs</b>.</li>
+          <li>Admin, Dealer, Product Pro and Sales Rep also see their associated users' designs (Brand Manager does not).</li>
+          <li>Sales-rep designs are labelled "Sales Rep:".</li>
+        </ul>
+        <details><summary>Code</summary><p><code>stores/saved-designs.js:715</code></p></details>
+      </article>
+    </section>
+    <section id="cart" data-title="Cart, MOQ, promo &amp; PDF">
+      <h2>Cart, MOQ, promo &amp; PDF</h2>
+      <p class="lead">The cart groups items by factory. Reps can check out only when every item is approved, every PDF exists and every hard MOQ is met. Customers request team pricing instead of checking out.</p>
+
+      <article class="card" id="cart-page">
+        <h3>Cart page and line items <code>/shopping-cart</code> <span class="tag auth">login</span></h3>
+        <p class="sub">Loads the user's "defaulted" cart (picked from My Carts or a quote), otherwise their default cart that isn't complete.</p>
+        <div class="cols">
+          <div><h4>What users can do</h4><ul>
+            <li>See items grouped as <b>"Shipping Group: {factory_code}"</b>.</li>
+            <li>Each line shows sport, "View Product Info", the style name (editable inline), thumbnails (Side A / Side B tabs for reversible), the PDF or design-file link, roster rows (type, unit price, qty), add-ons with price × qty, and "Total: $x" (not for customers).</li>
+            <li>Line actions: <b>Edit app sizes</b>, <b>Edit roster</b> (quick modals), <b>Edit Item</b> (opens the builder), <b>Duplicate</b>, <b>Save Item</b> (to Saved Designs), <b>Delete</b>, <b>Archive</b> (style no longer available).</li>
+            <li>Per item approval: <b>Send for approval</b>, <b>Approve</b> (signature), <b>Cancel approval</b>, <b>Change request</b>.</li>
+            <li>Cart level: rename, set the TeamDB team, <b>Save cart</b> (un-defaults it), <b>Empty cart</b>, <b>Send All For Approval</b>, <b>Approve All Items</b>, <b>View Together</b>.</li>
+            <li>Per group <b>Production Options</b>: Standard or Week Rush, with an estimated ship date.</li>
+          </ul></div>
+          <div><h4>Rules &amp; validations</h4><ul>
+            <li>Delete: "Are you sure you want to delete this item?" → "Cart item deleted successfully".</li>
+            <li>Duplicate: "Do you want to duplicate this item?" → "Successfully Duplicated!" The copy gets a version suffix, no approval, a copy of side B, and MOQ is reprocessed.</li>
+            <li>Reorder items open the reorder editor; plain edit shows "Unable to edit reorder item."</li>
+            <li>Editing an approved item asks: "This item has already been approved. Would you like to remove the approval to make changes?"</li>
+            <li>Roster save needs a non-empty roster summary and size breakdown. It recalculates rush pricing, syncs side B, regenerates the PDF and reprocesses MOQ. "Roster successfully updated."</li>
+            <li>Cart name: required, max 40, unique among the user's active carts: "Cart name already exist, please enter a different one."</li>
+            <li>Empty roster on send or approve: "Your Roster is Empty."</li>
+            <li>Missing-info tooltips: "This item is missing fabric details", "…missing roster", "…missing app sizes".</li>
+            <li>On load: InkSoft logo removed notice, logo color-conflict notice, Unavailable item modal (→ Archive), System Update modal (applies new dealer prices).</li>
+            <li>Week Rush: "{name}: $x/ item (N days production)"; Standard: "free (N days Production)". Customers don't see these prices.</li>
+          </ul></div>
+        </div>
+        <details><summary>Code</summary><p><code>Pages/ShoppingCartController.php:17-95</code> · <code>Pages/ShoppingCart/ShoppingCartItem.vue:15, 75-148, 391, 475-494, 766, 1790, 1851-1935, 2276-2312, 2479</code> · <code>CartInformation.vue:204-267, 378-437</code> · <code>ShoppingCart.vue:250-300</code> · <code>Pages/CartItemController.php:2551-2727, 3192-3210</code> · <code>Api/CartItemController.php:165-204</code> · <code>Pages/CartController.php:211-289</code> · <code>CartNotificationController.php:9-17</code></p></details>
+      </article>
+
+      <article class="card" id="cart-moq">
+        <h3>MOQ (minimum order quantity) <span class="tag flag">FEATURE_MOQ_BY_FACTORY</span></h3>
+        <p class="sub">Three separate checks. Only the soft fee lets checkout continue.</p>
+        <div class="tablewrap"><table>
+          <thead><tr><th>Check</th><th>Where the number comes from</th><th>What happens</th><th>Blocks checkout?</th></tr></thead>
+          <tbody>
+            <tr><td><b>Minimum order fee</b> (by factory, soft)</td><td>QX7 add-on named "minimum order fee", <code>applies = by_factory</code>, <code>range.end</code></td><td>A fee is added when the group's quantity is at or below <code>range.end</code>. Only items with this add-on count. Fee = MSRP (retail) or Brand Cost (dealer). UI: "Minimum Quantity" ring "{qty} of {range_end+1}" and a fee line.</td><td>No</td></tr>
+            <tr><td><b>Factory MOQ</b> (hard)</td><td>QX7 <code>getFactoryMOQs</code>, saved in <code>cart.factory_moqs</code> when the first item enters a cart or factory group</td><td>Group quantity must reach <code>moq</code>.</td><td>Yes</td></tr>
+            <tr><td><b>Item MOQ</b> (hard)</td><td>QX7 block-pattern rule <code>moq</code>, kept in the item's customization and synced on each cart load</td><td>Quantity is summed per block pattern and must reach the MOQ.</td><td>Yes</td></tr>
+          </tbody>
+        </table></div>
+        <h4>Messages</h4>
+        <ul>
+          <li>Checkout tooltip: "Minimum Order Quantity requirements have not been reached for the following items." It lists "Item/s In Cart Required" (name qty/moq) and "Shipping Group/s In Cart Required".</li>
+          <li>On Checkout, Request Team Pricing or Save cart, MOQs are fetched again. If they changed: "MOQ Update – There have been recent updates to our Minimum Order requirements. Click OK to refresh your shopping cart with these changes."</li>
+          <li>No user override exists.</li>
+        </ul>
+        <details><summary>Code</summary><p><code>app/Services/MinimumOrderQuantity.php:74-94, 171-246</code> · <code>app/Models/Cart.php:63, 273-296, 346-387, 1144-1180</code> · <code>moq/moq-by-item.js:78-103</code> · <code>stores/shopping-cart.js:262-274</code> · <code>ShoppingCartHeader.vue:100-165, 566-676</code> · <code>CartInformation.vue:413-430</code></p></details>
+      </article>
+
+      <article class="card" id="cart-promo">
+        <h3>Promo / discount codes</h3>
+        <div class="cols">
+          <div><h4>What users can do</h4><ul>
+            <li>Reps, dealers and other non-customer roles type a code in <b>Promo Code</b> under the subtotal and click <b>Apply</b> or <b>Remove</b>.</li>
+            <li>The code is re-checked whenever the total or the cost type changes.</li>
+            <li>The discount shows on each line ("{CODE} - X% Off Applied"), on each group ("Promotional Discount -$x"), and fixed-amount codes strike through the grand total.</li>
+            <li>The code is written into each eligible item's PDF.</li>
+          </ul></div>
+          <div><h4>Rules &amp; validations (checked in this order)</h4><ul>
+            <li><b>Exists:</b> "This discount code is invalid."</li>
+            <li><b>Status:</b> inactive → "Discount code is invalid"; expired → "The discount has expired on {date}"; scheduled → invalid.</li>
+            <li><b>Eligibility:</b> Everyone · Specific Brands (brand code match) · Specific Dealers (sales rep with matching QX7 dealer) · Admin Only.</li>
+            <li><b>Factory filter</b>.</li>
+            <li><b>Minimum:</b> purchase amount (pricing-toggle dealers only; "Dealer cost ($x) did not meet Minimum Purchase Amount of $y.", else "This discount code isn't available for your account…"), quantity ("Did not meet Minimum Purchase Quantity of N"), or factory production day.</li>
+            <li><b>Usage limits:</b> "The maximum number of redemptions for this promo code has been reached." / "…only one per customer."</li>
+            <li>Codes don't stack: applying one removes the previous one.</li>
+          </ul></div>
+        </div>
+        <h4>Discount types</h4>
+        <ul>
+          <li><b>Percentage:</b> whole cart, or items filtered by sport, factory or price item. "Discount is successfully applied! Add-ons not included."</li>
+          <li><b>Fixed amount:</b> capped at the subtotal. "Discount code successfully applied to your order total."</li>
+          <li><b>Buy X Get Y</b> and <b>Free Shipping</b> ($50, hard-coded) exist in code. <span class="tag warn">needs QA</span></li>
+          <li>No qualifying items: "The current items are not applicable for the discount."</li>
+          <li>UI messages: "Please enter a promo code.", "Applying promo code...", "Promo code has been removed.", "Failed to remove promo code. Please try again." They fade after 10 seconds.</li>
+        </ul>
+        <details><summary>Code</summary><p><code>routes/api.php:216-218</code> · <code>Api/CartController.php:253-327</code> · <code>app/Services/Discount.php:37-68, 93-105, 157-553</code> · <code>Services/Utilities/DiscountUtilities.php:15-93</code> · <code>lang/en/discount.php</code> · <code>ShoppingCartHeader.vue:198-280, 815-857</code> · <code>ShoppingCart.vue:218-236</code> · <code>stores/shopping-cart.js:360-404</code></p></details>
+      </article>
+
+      <article class="card" id="cart-pdf">
+        <h3>PDF (order form per cart item)</h3>
+        <div class="cols">
+          <div><h4>What users can do</h4><ul>
+            <li>Open each item's PDF from its cart line. Manual orders show the design file instead.</li>
+            <li>The PDF updates live in the cart when generation finishes.</li>
+            <li>Saved designs also have a Download PDF button (see <a href="#saved-save">Save a design</a>).</li>
+          </ul></div>
+          <div><h4>Rules &amp; validations</h4><ul>
+            <li>Made by an external PDF service: <code>POST {PDF_GENERATOR_HOST}/api/upload</code> (default staging host).</li>
+            <li>Queued job: 3 tries, 120-second timeout. Saves <code>pdf_url</code> and broadcasts <code>.pdf-generated</code>.</li>
+            <li>Regenerated when any of these change: roster or app sizes, item name, approval or cancellation (signature), cart name or team, customer, promo code, rush option, sales rep on a quote.</li>
+            <li>Manual trigger: <code>POST /api/carts/items/{id}/generate-pdf</code> → "PDF generation has been queued."</li>
+            <li>10 seconds after load, the cart regenerates any missing PDFs.</li>
+            <li>Items with issues get a temporary PDF with the approval blanked. Deleted styles hide the builder link.</li>
+            <li>Checkout and Request Team Pricing wait with "PDF is still loading" until every PDF exists.</li>
+            <li>Rework resubmits keep the same PDF id. Terms orders write the IID and PO number into the PDF header.</li>
+            <li>No separate cart-level or quote PDF exists.</li>
+          </ul></div>
+        </div>
+        <details><summary>Code</summary><p><code>app/ApiClient/PdfService.php</code> · <code>config/dsg.php:12</code> · <code>Jobs/GeneratePDFJob.php:16-88</code> · <code>ShoppingCartItem.vue:1513-1545, 2422-2530</code> · <code>Pages/CartController.php:273-280, 373-404, 608-648</code> · <code>Api/CartItemController.php:209-228</code> · <code>ShoppingCartHeader.vue:569-575, 683-699</code></p></details>
+      </article>
+
+      <article class="card" id="cart-pricing">
+        <h3>Pricing and the Dealer / Retail toggle</h3>
+        <div class="cols">
+          <div><h4>What users can do</h4><ul>
+            <li>Sales reps, dealers and brand managers switch <b>Dealer Cost</b> / <b>Retail Cost</b> in the account menu when the brand has the pricing feature (QX7 id 9).</li>
+            <li>Prices, add-ons, rush and the MOQ fee all switch with it.</li>
+            <li>The header "Subtotal" is the sum of each group's totals.</li>
+          </ul></div>
+          <div><h4>Rules &amp; validations</h4><ul>
+            <li>Unit prices come from each item's roster summary (retail and dealer price per type).</li>
+            <li>Dealer price = QX7 formula over MSRP, Brand Cost or Factory Cost; no formula → Brand Cost.</li>
+            <li>Cart total = item subtotals + rush charges + MOQ fee + shipping (shipping is 0; that code is commented out).</li>
+            <li>Tax only on quotes: 7.25% when the shipping state is Utah, otherwise 0%.</li>
+            <li>The toggle is saved in the browser (localStorage) and defaults to retail.</li>
+          </ul></div>
+        </div>
+        <details><summary>Code</summary><p><code>pricing-toggle/dealer-cost.js:32-75</code> · <code>Models/Cart.php:273-334</code> · <code>Models/Order.php:70-73, 467-481</code> · <code>stores/costSettings.js</code> · <code>Composables/Account/useAccountMenu.js:53-65</code> · <code>ShoppingCartHeader.vue:58-90</code></p></details>
+      </article>
+
+      <article class="card" id="cart-quote">
+        <h3>Request Team Pricing (customer quote)</h3>
+        <div class="cols">
+          <div><h4>What users can do</h4><ul>
+            <li>Customers click <b>Request Team Pricing</b> instead of Checkout. They land on <code>/shopping-cart/request-submitted</code>.</li>
+            <li>The rep opens the quote at <code>/shopping-cart/{order}/quotation</code> → "Cart successfully loaded." and can edit its name and customer when assigned.</li>
+            <li>Deleting a quote returns the cart to its owner.</li>
+          </ul></div>
+          <div><h4>Rules &amp; validations</h4><ul>
+            <li>Needs an assigned user with role sales rep; otherwise the Dealer Not Found modal opens. Dealer-link sessions choose a rep first.</li>
+            <li>Gate: a default cart that isn't complete, has items, and has no incomplete items.</li>
+            <li>Creates an order with a quote ID, marks the cart sent for pricing, emails rep and customer, and queues dealer-price calculation.</li>
+            <li>Deleting a quote clears approvals, regenerates PDFs and emails the owner "Cart Removed From Dealer Workflow".</li>
+          </ul></div>
+        </div>
+        <details><summary>Code</summary><p><code>ShoppingCartHeader.vue:504-620, 772-800</code> · <code>Action/OrderController.php:42-240</code> · <code>Pages/CartController.php:593-606, 650-770</code></p></details>
+      </article>
+
+      <article class="card" id="cart-roles">
+        <h3>Role differences in the cart</h3>
+        <ul>
+          <li><b>Customer:</b> no subtotal, line totals, rush prices or promo box. Gets View Together and Request Team Pricing. Approval isn't required. Approve and Send-for-approval show only when an item has issues.</li>
+          <li><b>Sales rep / dealer / Product Pro:</b> see prices and the promo box; check out only when every item is approved ("Some items are not approved yet…"); load and edit quotes.</li>
+          <li><b>Brand-specific:</b> brand 5 shows "Send to Hybris" instead of Checkout; brand 48 (Legends) has a preferred-dealer flow; brand 66 maps shipping names differently; shared-team brands (Riddell) add "already approved by {rep}" guards.</li>
+        </ul>
+      </article>
+    </section>
+    <section id="orders" data-title="Checkout &amp; orders">
+      <h2>Checkout &amp; orders</h2>
+      <p class="lead">Reps place orders on payment terms and the order goes to Prolook <code>order/new</code>. Customers send a quote instead. After submission, the factory pushes production status per item, and an On Hold item goes back to the rep to fix and resubmit.</p>
+
+      <article class="card" id="orders-entry">
+        <h3>Checkout page <code>/checkout · /checkout/{order}/quotation</code> <span class="tag auth">login</span></h3>
+        <div class="cols">
+          <div><h4>What users can do</h4><ul>
+            <li><b>Customers:</b> "Send info to {Sales Rep}" and <b>Get {label} Quote</b>.</li>
+            <li><b>Dealers / reps:</b> "Checkout" ("Send to Hybris" on Riddell) with <b>Save For Later</b> and <b>Place my Order</b>.</li>
+            <li>Dealers, reps and Product Pros pick a customer (filter, search, sort, view). Non-reps also choose a sales rep within the active dealer link.</li>
+            <li><code>/checkout/{order}/quotation</code> turns a quote into an order.</li>
+          </ul></div>
+          <div><h4>Rules &amp; validations</h4><ul>
+            <li>No default cart: "No default cart." Empty: "Not allow to checkout Cart. No items in cart".</li>
+            <li>Riddell shared team: "The Order has already been placed by {name}."</li>
+            <li>The server-side "all items approved" check is commented out (the cart page still enforces it).</li>
+            <li>Hybris brands: a rep with a pending order is sent back to the pending modal.</li>
+          </ul></div>
+        </div>
+        <details><summary>Code</summary><p><code>Pages/CheckoutController.php:16-211</code> · <code>Policies/OrderPolicy.php:155-173</code> · <code>routes/web.php:185-193</code> · <code>Pages/Checkout/Index.vue:1-34</code></p></details>
+      </article>
+
+      <article class="card" id="orders-form">
+        <h3>Checkout form (dealer / rep)</h3>
+        <div class="cols">
+          <div><h4>What users can do</h4><ul>
+            <li><b>Shipping:</b> Full Name, Organization (Prevail: Attention), Email, Phone, Address, Apartment, Country/Region, State, City, Zipcode, Delivery Instruction; "Use as default address", "Save address", "Change Address" (address book). Hidden on Riddell.</li>
+            <li><b>Billing:</b> "Same As Shipping Address" or separate fields. Hidden on Prevail.</li>
+            <li><b>Payment:</b> Purchase Order # (required), Identification #, Notes. Default is pay with terms; the card button exists but is hidden. Hidden on Riddell.</li>
+            <li><b>Side panel:</b> cart name, order summary (subtotal, minimum fee, MOQ fee, shipping, discount, production charges, tax, retail/dealer totals) and payment terms.</li>
+            <li>Notes: "Estimated Ship Date is subject to change until your order passes factory art approval" and the Privacy / Terms agreement line.</li>
+          </ul></div>
+          <div><h4>Rules &amp; validations</h4><ul>
+            <li>Browser: address and apartment max 250; zip 4–10 characters.</li>
+            <li>Server: attention and organization 2–255; email; address max 255; city, country, state max 50; numeric zip; phone matches <code>^[0-9\s\-\+\(\)]*$</code>, 10–20 characters. "Invalid phone number". Skipped on Riddell.</li>
+            <li>Payment method must be card or terms: "The card information is required." / "The terms information is required." Sales rep ID required.</li>
+            <li>Blocked while PDFs regenerate: "The PDF is being regenerated due to recent changes. Please wait until it's ready before placing the order."</li>
+            <li>Discount re-checked: "There was an error applying the discount code…" or a "There have been changes to your applied discount code…" modal.</li>
+            <li>MOQ changed: "MOQ UPDATE" modal; OK refreshes the cart.</li>
+            <li>QX7 <code>can_place_order</code> false: "Your permissions have changed, and you are no longer able to place an order…", then logout after 3 seconds.</li>
+            <li>UPS address check (<code>VITE_ENABLE_UPS_VALIDATION</code>): confirm or replace the address.</li>
+            <li>Tax 7.25% only when the state is Utah.</li>
+          </ul></div>
+        </div>
+        <details><summary>Code</summary><p><code>Components/Checkout/Dealer.vue:300-560</code> · <code>ShippingInformation.vue:140-221</code> · <code>BillingInformation.vue</code> · <code>PaymentWithTerms.vue</code> · <code>Rules/ValidateShipping.php:30-58</code> · <code>Rules/ValidateBilling.php</code> · <code>Models/Order.php:467-481</code></p></details>
+      </article>
+
+      <article class="card" id="orders-quote">
+        <h3>Customer quote and Save for Later</h3>
+        <div class="cols">
+          <div><h4>What users can do</h4><ul>
+            <li>Customers submit shipping details and a dealer or rep, which creates a quote.</li>
+            <li>Anyone can <b>Save For Later</b> with a cart name; it lands in My Carts.</li>
+            <li>Reps resend, archive, restore or delete quotes.</li>
+          </ul></div>
+          <div><h4>Rules &amp; validations</h4><ul>
+            <li>Denied when: no default cart, cart already completed, "Not items in cart.", "Has incomplete item."</li>
+            <li>Rep outside the dealer link: "Please choose a sales representative under the current dealer."</li>
+            <li>Quote ID: <code>XXX-mm-dd-YYYY-{cart_id}</code>. The cart is marked complete and "sent for pricing"; dealer prices are computed in the background.</li>
+            <li>Save for later: cart name required, max 40 → "Successfully Saved for later". Saves billing, shipping and terms, and regenerates PDFs with the cart name.</li>
+            <li>"Successfully archived Order Quotation." / "Cannot create Order Quotation. Please try again later."</li>
+          </ul></div>
+        </div>
+        <details><summary>Code</summary><p><code>Action/OrderController.php:42-342, 1018-1310</code> · <code>Components/Checkout/EndUser.vue:148-213</code></p></details>
+      </article>
+
+      <article class="card" id="orders-submit">
+        <h3>Order submission (Place my Order)</h3>
+        <ol>
+          <li><b>Permission check:</b> "Cart was already completed.", "Cart has already ordered.", "User not yet binded to Prolook." The user must be the owner, the assigned rep, or a sibling rep (Riddell).</li>
+          <li><b>Discount reprocessed.</b> On failure: the QX7 warning or "Failed to apply discount."</li>
+          <li><b>Card payments</b> go through Nexio, except emails listed in <code>BYPASS_NEXIO_EMAILS</code>.</li>
+          <li><b>Send to Prolook</b> <code>POST /api/order/new</code>: brand, rep (from the QX7 order-sending method, else the brand rep), PO, ID number, notes, shipping, billing ("c/o {organization}"), items, reorder items, add-ons.</li>
+          <li><b>On success:</b> discount usage is sent to QX7, the cart is completed, <code>submitted_date</code> is set, each PDF header gets customizer ID / IID / PO, parts become "submitted", and temporary ship dates sync. The order confirmation email goes out.</li>
+          <li><b>On failure:</b> the Nexio payment is voided, the database is rolled back and the API message is shown. There is no automatic retry.</li>
+        </ol>
+        <h4>Hybris brands (<code>ALLOWED_BRAND_CODE</code>)</h4>
+        <ul>
+          <li>The order is marked pending and an "Order Submission Pending" overlay waits for the result.</li>
+          <li>After 60 seconds with no answer: failed ("No response from the OPEN API server"), the quote is restored from a 3-day cache and support is emailed.</li>
+          <li>The Hybris callback sets success (emails go out) or failure ("Order Submission Unsuccessful" page with details and a Back button).</li>
+        </ul>
+        <details><summary>Code</summary><p><code>Action/OrderController.php:390-968, 1338-1398</code> · <code>Models/Order.php:221-404, 817-949</code> · <code>ApiClient/Prolook.php:74-84</code> · <code>Modules/Integration/Controllers/OrderController.php:176-254</code> · <code>Middleware/CheckHybrisOrderStatus.php</code> · <code>Components/Orders/Modal/OrderPending.vue</code> · <code>Pages/Checkout/UnsuccessOrder.vue</code></p></details>
+      </article>
+
+      <article class="card" id="orders-status">
+        <h3>Order and item statuses</h3>
+        <div class="cols">
+          <div><h4>Order level</h4><ul>
+            <li><b>Quote:</b> marked as a quotation, with sent date and quote ID.</li>
+            <li><b>Saved for later.</b></li>
+            <li><b>Submitted:</b> submitted date set, no longer a quote.</li>
+            <li><b>Hybris:</b> pending → success or failed.</li>
+            <li><b>Reworked / cancelled by the factory:</b> goes back to a quote.</li>
+          </ul></div>
+          <div><h4>Item level (per Adult / Youth part)</h4><ul>
+            <li>submitted → order_confirmed → artwork_production → factory_production → shipped; <b>on_hold</b> from any stage.</li>
+            <li>Backward moves are ignored.</li>
+            <li>Any part on hold → the item is On Hold. Otherwise the item shows its lowest part status.</li>
+            <li>Item requests: pending_cancel / pending_return → cancelled / returned.</li>
+            <li>The factory pushes updates to <code>PUT /api/carts/items/{id}/track-status</code> with the brand key.</li>
+          </ul></div>
+        </div>
+        <details><summary>Code</summary><p><code>Models/CartItem.php:62-110, 1754-1965</code> · <code>Api/CartItemController.php:802-982</code></p></details>
+      </article>
+
+      <article class="card" id="orders-tracker">
+        <h3>Orders tracker <code>/users/orders</code> <span class="tag flag">QX7 ORT</span></h3>
+        <div class="cols">
+          <div><h4>What users can do</h4><ul>
+            <li>Search by PO number, cart name, web order code, sport, product and more. <code>?order=</code> or <code>?orderRequest=</code> pre-fills the search.</li>
+            <li>Filter: Rework Needed, Submitted, Order Confirmed, Artwork Production, Factory Production, Due/Ship On time / Early / Late, Shipped.</li>
+            <li>Date filter by submitted date or due/ship date. Sort on 19 columns.</li>
+            <li>Export CSV ("Cart Items in Production"). 100 rows per page.</li>
+            <li>Item and order drawers. <b>Fix Issue</b> on On Hold items, <b>Reorder Item</b> on others.</li>
+          </ul></div>
+          <div><h4>Rules &amp; validations</h4><ul>
+            <li>The new tracker needs the QX7 ORT feature; otherwise the old view shows.</li>
+            <li>Only submitted orders are listed.</li>
+            <li>Scope: the user's own orders plus orders where they or a sibling rep is the rep. Managing reps see all with <code>ORT_MANAGING_REP_ACCESS</code>.</li>
+            <li>Customers don't see On Hold.</li>
+          </ul></div>
+        </div>
+        <details><summary>Code</summary><p><code>Pages/User/Order.vue</code> · <code>OrderNew.vue:390-505</code> · <code>Api/OrderController.php:43-73</code> · <code>Models/User.php:2075-2500</code></p></details>
+      </article>
+
+      <article class="card" id="orders-rework">
+        <h3>On Hold → Fix Issue → resubmit <code>/carts/items/{id}?action=fix-issue</code></h3>
+        <div class="cols">
+          <div><h4>What users can do</h4><ul>
+            <li>The rep gets an email when the factory puts an item On Hold.</li>
+            <li>The rep opens Fix Issue, sees the rejection and its Issues &amp; Logs, edits the item and clicks <b>Resolve &amp; Submit</b>, adding notes, attachments, "has additional changes" and a justification.</li>
+          </ul></div>
+          <div><h4>Rules &amp; validations</h4><ul>
+            <li>The email needs ORT on and <code>DISABLE_ORDER_REJECTIONS</code> off.</li>
+            <li>"Rejection Details missing!" if there is no on-hold data. Justification is required when there are additional changes.</li>
+            <li>An artwork rejection returns to artwork_production; a factory rejection to factory_production.</li>
+            <li>A change log is written (type fixed, issue rework). MOQ is recomputed when there are additional changes.</li>
+            <li>Sends Prolook <code>/api/order_item/update_rejection</code>, regenerates thumbnails and the PDF (same PDF id), then returns to My Orders.</li>
+            <li>Reps can fix only their own orders (managing reps all, with the flag).</li>
+          </ul></div>
+        </div>
+        <details><summary>Code</summary><p><code>Pages/CartItemController.php:3524-3850</code> · <code>ApiClient/Prolook.php:792</code></p></details>
+      </article>
+
+      <article class="card" id="orders-reorder">
+        <h3>Reorder, factory rework / cancel, item cancel / return</h3>
+        <ul>
+          <li><b>Reorder</b> (<code>/customize/{cartItem}/reorder</code>): the design is locked and only the roster (names, numbers, sizes) can change. It needs the factory order ID (alphanumeric, 8–20), part ID and order item ID, and is sent as reorder items with the next order.</li>
+          <li><b>Factory rework or cancel</b> (<code>PATCH /api/integration/orders/{code}/rework</code>): the order goes back to a quote. Rework gets a new quote ID; cancel clears the Prolook order code. The brand manager and rep get "Order Status Notification".</li>
+          <li><b>Cancel with reason</b> (<code>PUT /api/orders/cancel/{code}</code>): stores the reason. With <code>sendEmail</code>, it flags rework and emails the rep "Fix Issue".</li>
+          <li><b>Item cancel / return request:</b> reason required (2–255), sent to Prolook, item becomes pending_cancel or pending_return. <span class="tag bug">emails crash</span></li>
+        </ul>
+        <details><summary>Code</summary><p><code>Modules/Integration/Controllers/OrderController.php:24-101</code> · <code>Api/OrderController.php:303-367</code> · <code>Pages/CartItemController.php:783+</code> · <code>routes/web.php:258-276</code> · <code>Api/CartItemController.php:572-705</code></p></details>
+      </article>
+
+      <article class="card" id="orders-emails">
+        <h3>Order emails</h3>
+        <div class="tablewrap"><table>
+          <thead><tr><th>Trigger</th><th>Recipients</th><th>Email</th></tr></thead>
+          <tbody>
+            <tr><td>Quote created</td><td>Rep and sibling reps; customer</td><td>"Team Pricing Request" / "Team Pricing Requested"</td></tr>
+            <tr><td>Order placed (Hybris: on success)</td><td>Rep (cc); end user if different</td><td>"{Brand} Order Confirmation [{code}]"</td></tr>
+            <tr><td>Ship date set / shipped</td><td>Rep and customer</td><td>Ship-date confirmation / order shipped with tracking</td></tr>
+            <tr><td>Item On Hold</td><td>Rep</td><td>On-hold notification</td></tr>
+            <tr><td>Factory rework or cancel</td><td>Brand manager, rep</td><td>"Order Status Notification"</td></tr>
+            <tr><td>Cancel with sendEmail</td><td>Rep</td><td>"Fix Issue"</td></tr>
+            <tr><td>Hybris failure</td><td>Riddell support (+cc/bcc)</td><td>Hybris order failed</td></tr>
+            <tr><td>Quote deleted by someone else</td><td>Quote owner</td><td>Quotation deleted / "Cart Removed From Dealer Workflow"</td></tr>
+          </tbody>
+        </table></div>
+        <details><summary>Code</summary><p><code>Providers/EventServiceProvider.php:79-137</code> · <code>Listeners/*</code> · <code>MailController</code></p></details>
+      </article>
+
+      <article class="card" id="orders-accounting">
+        <h3>Accounting <code>/accounting/overview · revenues · sales · products</code></h3>
+        <ul>
+          <li>All four pages show an "Under Development" placeholder.</li>
+          <li>The admin payout controller isn't routed. Payout APIs exist only for Team Stores (<code>/api/ts/admin/payouts/*</code>).</li>
+        </ul>
+        <details><summary>Code</summary><p><code>Pages/Accounting/*.vue</code> · <code>routes/web.php:157-166</code> · <code>routes/team-store-api.php:146-164</code></p></details>
+      </article>
+    </section>
+    <section id="account" data-title="My account">
+      <h2>My account</h2>
+      <p class="lead">Account pages share a sidebar: My Account, Address Book, Saved Logos, Saved Designs, My Carts, Customers, Orders and Users. Saved designs and orders are covered in their own sections.</p>
+
+      <article class="card" id="account-sidebar">
+        <h3>Account sidebar</h3>
+        <ul>
+          <li>My Carts and Orders show red badges. The current page's link is disabled. The Accounting block is switched off.</li>
+          <li>Address Book hidden for Riddell (brand 5) customers and reps. Customers for Product Pro and dealer roles. Users for Product Pro only.</li>
+        </ul>
+        <details><summary>Code</summary><p><code>Layouts/AccountPageLayout.vue:36-83</code> · <code>Components/Sidebar.vue:13-151</code> · <code>stores/sidebar.js:79-92</code></p></details>
+      </article>
+
+      <article class="card" id="account-profile">
+        <h3>Profile <code>/users/profile</code></h3>
+        <div class="cols">
+          <div><h4>What users can do</h4><ul>
+            <li><b>Personal Info:</b> edit first and last name, phone (country picker), country, state, city, zip; email is read-only. Changing country clears state; changing state clears city.</li>
+            <li><b>Settings:</b> marketing email checkbox (saves on click).</li>
+            <li><b>Update Password:</b> old, new, confirm, show/hide, live rules checklist.</li>
+            <li><b>Customer panel:</b> "My Team" (Team DB) with team search, or "My Preferred Dealer / Sales Rep" with a search modal (Near Me, All, Search Result). <code>?open=dealerModal</code> opens it.</li>
+            <li><b>Dealer / rep / brand manager panel:</b> read-only Dealer or Brand Info (dealer, position, reports to, Product Pro, brand manager).</li>
+          </ul></div>
+          <div><h4>Rules &amp; validations</h4><ul>
+            <li>Browser: names required, max 250, letters and spaces; zip 4–10 digits and dashes; "Please enter a valid phone number".</li>
+            <li>Server: names 2–50; phone max 20, saved in E.164; zip alphanumeric 2–10. "Successfully update Personal Information." / "Changes not saved".</li>
+            <li>Password: 8+ with mixed case, number and symbol; current password correct; "New password must be different from the current password." → "Successfully changed password."</li>
+            <li>Subscription: "Subscription Updated" / "Subscription not saved".</li>
+            <li>Dealer change: rep required (Legends: preferred dealer). "Dealer Updated" / "Dealer cannot be selected". Brand manager emailed unless restricted.</li>
+            <li>Near Me: the user's zip needs 4+ digits; reps match on the full zip, its first 4, or first 2 digits.</li>
+            <li>Team update reassigns the rep: "Unable to update Team. No Sales Representative associated!"</li>
+            <li>"Your current {rep} no longer has permission to handle your orders…" when the assigned rep became a customer.</li>
+          </ul></div>
+        </div>
+        <details><summary>Code</summary><p><code>Pages/User/Profile.vue</code> · <code>Action/ProfileController.php:16-103</code> · <code>Pages/UserController.php:87-147, 266-457</code> · <code>Components/Profile/EndUserDealer.vue</code> · <code>AdminDealer.vue</code> · <code>Modal/DealerSearch.vue:128-205</code> · <code>Modal/TeamSelection.vue:172-200</code></p></details>
+      </article>
+
+      <article class="card" id="account-address">
+        <h3>Address book <code>/users/address</code></h3>
+        <div class="cols">
+          <div><h4>What users can do</h4><ul>
+            <li>Grid or list view; sort by name, phone, email, address, apt, city, state, zip; keyword search.</li>
+            <li>Add, Edit, Delete, "Set as Default", "Removed as Default" (all confirmed).</li>
+            <li>Fields: full name, organization, email, phone, address, country, apt/suite, state, city, zip, "Set as Default Address". Brand 66 adds "Attention".</li>
+            <li>UPS validation modal before saving (when enabled).</li>
+          </ul></div>
+          <div><h4>Rules &amp; validations</h4><ul>
+            <li>Browser: full name, organization, email, address required (max 250); apt max 249; zip 4–10 digits.</li>
+            <li>Server: full name 2–100; zip alphanumeric 4–10; email, country, state, city required.</li>
+            <li>Duplicates: "Not allow to create same Address Book."</li>
+            <li>The page manages only the default shipping address; billing default exists only on the server.</li>
+            <li>Brand 5: hidden for customers and reps in the UI; the server returns 404 for everyone.</li>
+          </ul></div>
+        </div>
+        <details><summary>Code</summary><p><code>Pages/User/Address.vue</code> · <code>AddressBook/Modal/CreateAddressBookModal.vue:436-494</code> · <code>Action/AddressBookController.php</code> · <code>Policies/AddressBookPolicy.php:53-117</code></p></details>
+      </article>
+
+      <article class="card" id="account-logos">
+        <h3>Saved logos <code>/users/saved-logos</code></h3>
+        <div class="cols">
+          <div><h4>What users can do</h4><ul>
+            <li>Filter: All, Favorites, Active, Archive (staff also "Users" to view another user's logos). Sort: Newest, Oldest, Logo Name. Search.</li>
+            <li><b>Add Logo</b> (Vectorsoft or Inksoft).</li>
+            <li>Per logo: Favorite, Preview, Edit (active only), Archive / Unarchive, Delete (archived only). "Load More".</li>
+            <li>Brand tabs (Prevail, Alli, Axe, Baden, Legends, Perfect Game, Prolook, QTP, Riddell) for qstrike/prolook sales reps when the brand-tabs flag and vectorizer are on.</li>
+          </ul></div>
+          <div><h4>Rules &amp; validations</h4><ul>
+            <li>Every action is confirmed. Toasts: "{name} removed successfully", "Logo archived", "Logo added to favorites".</li>
+            <li>Empty: "No saved logos yet" / "No result found". "All logos are loaded".</li>
+          </ul></div>
+        </div>
+        <details><summary>Code</summary><p><code>Pages/User/SavedLogo.vue:162-507</code> · <code>User/SavedLogos/LogoItems.vue</code> · <code>data/brand-tabs.js</code></p></details>
+      </article>
+
+      <article class="card" id="account-carts">
+        <h3>My carts &amp; quote requests <code>/users/carts</code></h3>
+        <div class="cols">
+          <div><h4>What users can do</h4><ul>
+            <li>Sort: Date, Time, Cart Name, Quantity, Total, Favorites, Sent For Pricing (+ Team Name). Search (<code>?quote_id=</code> pre-fills). Paging.</li>
+            <li>Columns: date, organization (Team DB), cart name and note, rep (managing reps), quantity with "Quantity Fee" tag, total.</li>
+            <li>Tags: "Sent for Pricing" (locked), "Resubmit Required", "Active".</li>
+            <li>Actions: Favorite, Load Cart ("Cart successfully loaded."), Delete, Requested Changes, View Details (Replicate Item, View PDF, Buy It Again, Contact Support), edit name and note.</li>
+            <li><b>Sales reps:</b> tabs "My Saved Carts" and "Quote Requests" (<code>?tab=</code>). Quote rows: cart ID, customer, date/time MST; change-request rows are pink.</li>
+          </ul></div>
+          <div><h4>Rules &amp; validations</h4><ul>
+            <li>Name required, max 40; note max 255. "Cart name already exist, please enter a different one."</li>
+            <li>Delete: "Are you sure you want to delete this cart?" → "Cart deleted successfully."</li>
+            <li>Resubmit: "This cart has been sent back from internal approval and needs to be resubmitted."</li>
+            <li>Quote delete: "Remove Team Pricing Request?" with optional reason; the owner is emailed "Cart Removed From Dealer Workflow".</li>
+            <li>"Any edits made to the customer's cart will also appear on their side."</li>
+            <li>Resend, archive and restore quotes are on Orders → Quotations.</li>
+          </ul></div>
+        </div>
+        <details><summary>Code</summary><p><code>Pages/User/Cart.vue</code> · <code>Components/Carts/Dealer.vue</code> · <code>Carts/Dealer/QuoteRequestTable.vue</code> · <code>User/Cart/CartTable.vue:309-331</code> · <code>Pages/CartController.php:37-211, 559, 650-770</code> · <code>Orders/Dealer/Quotations.vue:405-490</code></p></details>
+      </article>
+
+      <article class="card" id="account-customers">
+        <h3>Customers <code>/users/customers</code></h3>
+        <div class="cols">
+          <div><h4>What users can do</h4><ul>
+            <li>Filter: All, Active, Not Active, Subscribed, Unsubscribed. Sort by name, phone, email, city, state, subscribed, account, last login (+ team). Search.</li>
+            <li><b>Export</b> to <code>customers.xlsx</code>.</li>
+            <li><b>Create New</b> customer.</li>
+          </ul></div>
+          <div><h4>Rules &amp; validations</h4><ul>
+            <li>Create: names 2–50 letters; unique email; phone 10–20 ("Invalid phone number"); country, state, city, zip required except on Riddell; organization required with Team DB.</li>
+            <li>The new customer is assigned to the creator and gets a registration email with a random password. "Successfully create Customer."</li>
+            <li>Scope: dealers see their dealer's customers; reps see theirs and sibling reps'; Product Pros see theirs.</li>
+            <li>No impersonation. Reps work on a customer's cart by assigning the customer to a cart.</li>
+          </ul></div>
+        </div>
+        <details><summary>Code</summary><p><code>Pages/User/Customers.vue</code> · <code>Customer/CreateCustomerModal.vue</code> · <code>Pages/UserController.php:52-64, 459-540</code> · <code>Models/User.php:798-830</code></p></details>
+      </article>
+
+      <article class="card" id="account-approval">
+        <h3>Approval page <code>/shopping-cart/approval</code></h3>
+        <ul>
+          <li>Step through unapproved items with Prev/Next (Side A/B tabs), see the builder URL and production details.</li>
+          <li>Edit Roster, Ask for Changes (customers, or when reviewing an order), Approve; a signature modal follows the last item.</li>
+          <li>Approved items show "Design Approved By" and a time. "This item is subject for change review."</li>
+          <li>No pending items → back to the cart. Shared-team brands: "All items have already been approved by {name}."</li>
+        </ul>
+        <details><summary>Code</summary><p><code>Pages/ShoppingCartController.php:244-285</code> · <code>Pages/ShoppingCart/ApprovalPage.vue</code> · <code>Components/Approval/Index.vue:125-467</code></p></details>
+      </article>
+
+      <article class="card" id="account-payment">
+        <h3>Payment book (saved cards)</h3>
+        <ul>
+          <li>No screen exists. Server endpoints accept card type, holder (2–30), first 6 and last 4 digits, and default.</li>
+          <li>The web update and set-default routes have no controller method.</li>
+        </ul>
+        <details><summary>Code</summary><p><code>Action/PaymentBookController.php</code> · <code>routes/web.php:349-350</code> · <code>routes/api.php:247-257</code></p></details>
+      </article>
+    </section>
+    <section id="other" data-title="Team stores &amp; other">
+      <h2>Team stores &amp; other pages</h2>
+      <p class="lead">Team stores exist only as APIs; the <code>/store</code> page is a placeholder. The rest of this section covers info pages, the contact form, uploads, email previews and scheduled jobs.</p>
+
+      <article class="card" id="other-teamstore">
+        <h3>Team stores <code>/api/ts/*</code></h3>
+        <div class="cols">
+          <div><h4>What users can do</h4><ul>
+            <li>Coach: create, update, delete, open or close, and complete a store; add products; invite players, family and fans.</li>
+            <li>Players and families: carts, store orders, pending and required items.</li>
+            <li>Owner: analytics and payouts. Admin: admin payouts (W-9 received, year-to-date).</li>
+            <li><code>/store</code> page shows only "Create store page content...".</li>
+          </ul></div>
+          <div><h4>Rules &amp; validations</h4><ul>
+            <li>Website URL: required, at least 3 characters, unique, pattern-checked. Website Header 3–25. Display gear 2–20 alphanumeric.</li>
+            <li>Team colors, sports and shipping address must be non-empty JSON; logo is a base64 image.</li>
+            <li>Status open or closed; complete 0 or 1.</li>
+            <li>Cart item: player number max 2; return or cancel reason 2–255; status updates need the item-status key.</li>
+            <li>Update, delete, status and complete have no ownership check. <span class="tag bug">risk</span></li>
+          </ul></div>
+        </div>
+        <details><summary>Code</summary><p><code>Api/TeamStoreController.php:58-310</code> · <code>routes/team-store-api.php</code> · <code>Pages/CreateStore.vue</code> · <code>Policies/TeamStorePolicy.php</code> · <code>TSCartItemPolicy.php</code></p></details>
+      </article>
+
+      <article class="card" id="other-info">
+        <h3>Info and legal pages</h3>
+        <ul>
+          <li><b>About Us</b>, <b>Care Guide</b> (download or print as PDF), <b>Color Chart</b> (sublimated colors from the API).</li>
+          <li><b>Privacy, Terms, Warranty:</b> the brand's legal .docx is downloaded and converted to HTML in the browser.</li>
+          <li><b>/faqs</b> redirects to home; the FAQs page is never shown.</li>
+          <li>Error pages: Password Reset Link Expired, 503 "Maintenance", 504 "Coming Soon".</li>
+          <li><code>/playground</code> and <code>/playground/modals</code> are public developer pages.</li>
+        </ul>
+        <details><summary>Code</summary><p><code>Pages/FaqsController.php</code> · <code>Pages/DocumentLoader.vue</code> · <code>Composables/docs-to-html.ts</code></p></details>
+      </article>
+
+      <article class="card" id="other-contact">
+        <h3>Contact Us <code>/contact-us</code></h3>
+        <div class="cols">
+          <div><h4>What users can do</h4><ul>
+            <li>Fill in first and last name, email, phone with country code, organization, order number, address, sports, zip and message.</li>
+            <li>Organization and order number can be pre-filled and locked from the URL.</li>
+          </ul></div>
+          <div><h4>Rules &amp; validations</h4><ul>
+            <li>Names 1–250; valid email; numeric phone of at least 3 digits; organization and address at least 3 alphanumeric; numeric zip; message required.</li>
+            <li>Brand managers get a "Customer Inquiry" email (with the customer's rep if found); the customer gets a confirmation.</li>
+            <li>"Message sent successfully!" / "Message not sent." No contact email configured → nothing is sent.</li>
+          </ul></div>
+        </div>
+        <details><summary>Code</summary><p><code>Pages/ContactUs.vue:36-110</code> · <code>Pages/ContactUsController.php:19-58</code> · <code>Listeners/NotifyCustomerCare.php</code> · <code>NotifyCustomer.php</code></p></details>
+      </article>
+
+      <article class="card" id="other-uploads">
+        <h3>Uploads, scale config and email previews</h3>
+        <ul>
+          <li><b>Image upload:</b> base64 image to S3, with an optional low-res copy (170×190).</li>
+          <li><b>File upload:</b> jpg, png, webp, bmp, tif, avif, svg, gif, pdf, doc(x), xls(x), txt, csv up to 50 MB. SVGs are cleaned of scripts and event handlers.</li>
+          <li><b>Image proxy</b> fetches any URL. <span class="tag bug">SSRF risk</span></li>
+          <li><b>Uniform scale:</b> reads and writes the shared <code>scale-v3.json</code> on S3, with no login.</li>
+          <li><b>Mail-view</b> (<code>/mail-view/*</code>): about 38 email-template previews, most without login, and several can send email with <code>?send=1&amp;address=</code>. <span class="tag bug">risk</span></li>
+        </ul>
+        <details><summary>Code</summary><p><code>ImageUploadController.php:104-215</code> · <code>UniformScaleController.php:10-131</code> · <code>routes/mail-view.php</code></p></details>
+      </article>
+
+      <article class="card" id="other-schedule">
+        <h3>Scheduled jobs</h3>
+        <div class="tablewrap"><table>
+          <thead><tr><th>Job</th><th>When</th><th>Runs only if</th></tr></thead>
+          <tbody>
+            <tr><td>Sync sales reps (Game One)</td><td>05:00 daily</td><td><code>GAME_ONE_ENABLED_SYNC_SALES_REP</code></td></tr>
+            <tr><td>Move customers to new reps</td><td>06:30 daily</td><td>same</td></tr>
+            <tr><td>Riddell endpoint to CSV</td><td>00:05 daily (America/Chicago)</td><td><code>RIDDELL_ENABLED_SYNC_ENDPOINT</code></td></tr>
+            <tr><td>Team Database reps sync</td><td>00:30 daily</td><td>same</td></tr>
+            <tr><td>Team Database customers sync</td><td>01:00 daily</td><td>same</td></tr>
+            <tr><td>Monthly order / payout check</td><td>Monthly</td><td>Always, but the command name is wrong, so it fails <span class="tag bug">broken</span></td></tr>
+            <tr><td>Mark orders shipped</td><td>1st of month, 05:00</td><td>Production and <code>ENABLE_SYNC_ORDER_STATUS_TO_SHIPPED</code></td></tr>
+            <tr><td>Fetch customers data</td><td>06:00 daily</td><td>Brand 66 and <code>FEATURE_TEAM_DATABASE</code></td></tr>
+          </tbody>
+        </table></div>
+        <details><summary>Code</summary><p><code>app/Console/Kernel.php:30-69</code></p></details>
+      </article>
+    </section>
+    <section id="flags" data-title="Feature flags">
+      <h2>Feature flags</h2>
+      <p class="lead">Behavior changes by build-time flags (<code>VITE_*</code>), server settings and QX7 brand features. Brand IDs that change behavior: 5 Riddell, 48 Legends, 66 Prevail, 69 and 3 (style allowlist); brand code PLS = Prolook.</p>
+      <div class="tablewrap"><table>
+        <thead><tr><th>Flag</th><th>Kind</th><th>Default</th><th>Effect</th></tr></thead>
+        <tbody>
+          <tr><td><code>VITE_FEATURE_BUILDER_RESKIN</code></td><td>build</td><td>—</td><td>New builder UI instead of classic; hides the global header in the builder.</td></tr>
+          <tr><td><code>VITE_NAVIGATION_RESKIN</code></td><td>build</td><td>—</td><td>New header with mega-menus and drawer.</td></tr>
+          <tr><td><code>VITE_FEATURE_DESIGN_PICKER</code></td><td>build</td><td>—</td><td>New <code>@qstrike/picker</code> on the designs page.</td></tr>
+          <tr><td><code>VITE_MANUAL_ORDER_FEATURE</code> / <code>VITE_MANUAL_ORDER_REORDER</code></td><td>build</td><td>—</td><td>Custom Pro tab; Custom Pro on reorders.</td></tr>
+          <tr><td><code>VITE_NO_FABRIC_FEATURE</code></td><td>build</td><td>—</td><td>Allows no fabric selection.</td></tr>
+          <tr><td><code>VITE_FEATURE_TEAM_DATABASE</code> / <code>FEATURE_TEAM_DATABASE</code></td><td>build / server</td><td>false</td><td>Team picker, team required before save or cart, team columns, sync jobs; turns dealer links off.</td></tr>
+          <tr><td><code>FEATURE_TEAM_DATABASE_ON_SHOPPING_CART</code></td><td>server</td><td>false</td><td>Team fields on the cart.</td></tr>
+          <tr><td><code>VITE_FEATURE_MOQ_BY_FACTORY</code> / <code>FEATURE_MOQ_BY_FACTORY</code></td><td>build / server</td><td>"on"</td><td>Minimum order fee and MOQ per factory.</td></tr>
+          <tr><td><code>DISABLE_MIN_ORDER_FEE</code></td><td>server</td><td>false</td><td>Turns off the minimum order fee.</td></tr>
+          <tr><td><code>VITE_DISABLE_ORDER_REJECTIONS</code> / <code>DISABLE_ORDER_REJECTIONS</code></td><td>build / server</td><td>false</td><td>Turns off On Hold rework mode, emails and badge.</td></tr>
+          <tr><td><code>ORT_MANAGING_REP_ACCESS</code></td><td>server</td><td>false</td><td>Managing reps see and fix all reps' orders.</td></tr>
+          <tr><td><code>ALLOWED_BRAND_CODE</code></td><td>server</td><td>""</td><td>Hybris brands: pending order flow, approval webhook, request-submitted flow.</td></tr>
+          <tr><td><code>SHARED_TEAM_ENABLED</code></td><td>server</td><td>true</td><td>Riddell shared-team approvals and order guards.</td></tr>
+          <tr><td><code>BYPASS_NEXIO_ENABLE</code> / <code>BYPASS_NEXIO_EMAILS</code></td><td>server</td><td>true / ""</td><td>Listed emails skip card processing.</td></tr>
+          <tr><td><code>RIDDELL_SUCCESS_ORDER_TESTING</code></td><td>server</td><td>—</td><td>Forces Hybris success (testing).</td></tr>
+          <tr><td><code>VITE_ENABLE_UPS_VALIDATION</code></td><td>build</td><td>—</td><td>UPS address check at checkout and in the address book.</td></tr>
+          <tr><td><code>VITE_ALLOWED_UNIFORM</code> / <code>VITE_EXCLUDED_STYLES</code></td><td>build</td><td>—</td><td>Style allowlist (brands 69, 3) and exclusions in the picker.</td></tr>
+          <tr><td><code>VITE_FEATURE_CUSTOM_TEAM_NAME</code> / <code>_LOGO</code></td><td>build</td><td>—</td><td>Team name from the URL; custom team logo.</td></tr>
+          <tr><td><code>VITE_FEATURE_VECTORSOFT_BRAND_TABS</code></td><td>build</td><td>—</td><td>Brand tabs on Saved Logos.</td></tr>
+          <tr><td><code>VITE_ENABLE_FOOTER</code>, <code>VITE_STAGING_BANNER</code>, <code>VITE_DISCLAIMER_BANNER</code>, <code>VITE_VECTORSOFT_BANNER</code>, <code>VITE_OLD_CUSTOMIZER</code></td><td>build</td><td>—</td><td>Footer and banners.</td></tr>
+          <tr><td><code>ENABLE_DEALER_LINKS</code></td><td>server</td><td>false</td><td><code>?dealer=</code> links limit the rep list.</td></tr>
+          <tr><td><code>DEALER_CHANGE_RESTRICTED_BRAND_ID</code></td><td>server</td><td>""</td><td>Listed brands skip dealer-change emails.</td></tr>
+          <tr><td><code>ENABLE_COBROWSE</code></td><td>server</td><td>false</td><td>Cobrowse support.</td></tr>
+          <tr><td>Sync flags (<code>GAME_ONE_…</code>, <code>RIDDELL_ENABLED_SYNC_ENDPOINT</code>, <code>ENABLE_SYNC_ORDER_STATUS_TO_SHIPPED</code>, <code>ENABLED_SYNC_MANAGING_REPS</code>)</td><td>server</td><td>false</td><td>Turn scheduled jobs on.</td></tr>
+          <tr><td><code>QUEUE_CONNECTION</code></td><td>server</td><td>sync</td><td>With sync, PDFs, thumbnails and emails run inside the web request.</td></tr>
+          <tr><td><code>SESSION_LIFETIME</code> · <code>REMEMBER_TOKEN_EXPIRATION</code> · <code>PASSWORD_RESET_TOKEN_EXPIRATION</code></td><td>server</td><td>120 min · 24 h · 24 h</td><td>Session, activation link and reset link lifetimes.</td></tr>
+          <tr><td>QX7 feature 9</td><td>QX7</td><td>—</td><td>Dealer / Retail cost toggle.</td></tr>
+          <tr><td>QX7 feature 14 (vectorizer)</td><td>QX7</td><td>—</td><td>Vectorsoft / Design Studio instead of Inksoft; logo color-conflict checks.</td></tr>
+          <tr><td>QX7 ORT</td><td>QX7</td><td>—</td><td>New orders tracker, Fix Issue, rework emails, multi-cart reorders.</td></tr>
+          <tr><td>QX7 PPTNF / PPTLF / DSV / WDPTF</td><td>QX7</td><td>—</td><td>Custom team name, custom team logo, DSV app-size vectors and roster, dealer pricing toggle.</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+    <section id="questions" data-title="Open questions">
+      <h2>Open questions</h2>
+      <p class="lead">These came up while tracing the code: likely defects, security gaps, and behavior that needs a business decision. For the earlier risk list, see <a href="system.html#risks">System map → Risks</a>.</p>
+      <div class="tablewrap"><table>
+        <thead><tr><th>Type</th><th>Area</th><th>Question</th><th>Where</th></tr></thead>
+        <tbody>
+          <tr><td><span class="tag bug">Security</span></td><td>Account</td><td><code>PATCH /users/set-password</code> lets any logged-in user set the password of any email.</td><td><code>UserController.php:709-741</code></td></tr>
+          <tr><td><span class="tag bug">Security</span></td><td>Account</td><td><code>POST /api/users/update-email</code> changes the email of any unactivated user without login.</td><td><code>routes/api.php</code></td></tr>
+          <tr><td><span class="tag bug">Security</span></td><td>Orders</td><td><code>GET /api/orders/{code}</code> (billing and card data minus number) and <code>PUT /api/orders/cancel/{code}</code> have no login.</td><td><code>Api/OrderController.php:277-367</code></td></tr>
+          <tr><td><span class="tag bug">Security</span></td><td>Utilities</td><td>Image proxy fetches any URL; scale config writes and mail-view previews (which can send email) need no login.</td><td><code>ImageUploadController.php</code> · <code>routes/mail-view.php</code></td></tr>
+          <tr><td><span class="tag bug">Security</span></td><td>Account</td><td>No server role check on <code>/users</code>, <code>/users/customers</code>, <code>/users/create</code>, <code>/accounting/*</code>; the view-customer gate is unused.</td><td><code>routes/web.php</code></td></tr>
+          <tr><td><span class="tag bug">Security</span></td><td>Team stores</td><td>Store update, delete, status and complete have no ownership check.</td><td><code>Policies/TeamStorePolicy.php</code></td></tr>
+          <tr><td><span class="tag bug">Security</span></td><td>Sharing</td><td>Any logged-in user can open a shared design link, and the Update button is shown; whether Prolook blocks a non-owner overwrite isn't visible here.</td><td><code>SaveDesignController.php</code></td></tr>
+          <tr><td><span class="tag warn">Needs check</span></td><td>Builder</td><td>Master style / master block customizers have no login. Intended?</td><td><code>routes/web.php:428-429</code></td></tr>
+          <tr><td><span class="tag bug">Defect</span></td><td>Cart</td><td>Buy X Get Y and Free Shipping discounts return a number where a list is expected, so applying them may fail. Needs a QA test.</td><td><code>Discount.php:50-58, 304, 429</code></td></tr>
+          <tr><td><span class="tag bug">Defect</span></td><td>Orders</td><td>Item cancel/return emails use undefined routes, so those requests probably fail.</td><td><code>Api/CartItemController.php:600, 666</code></td></tr>
+          <tr><td><span class="tag bug">Defect</span></td><td>Scheduler</td><td>The monthly check calls <code>check:order-every-month</code>, but the command is <code>check:order-on-month</code>.</td><td><code>Console/Kernel.php:53</code></td></tr>
+          <tr><td><span class="tag bug">Defect</span></td><td>Account</td><td><code>PATCH /users/update-sync-password</code> never saves (undefined variable).</td><td><code>UserController.php:542-568</code></td></tr>
+          <tr><td><span class="tag bug">Defect</span></td><td>Routes</td><td>Routes to missing methods: <code>/api/all/users/{email}</code> (private), <code>/api/account-activation/set-password</code>, <code>/approval/coach</code>, payment-book update and default.</td><td><code>routes/web.php</code> · <code>routes/api.php</code></td></tr>
+          <tr><td><span class="tag bug">Defect</span></td><td>Sharing</td><td>Social share URL <code>/customize/saved-design/{id}</code> has no route.</td><td><code>ShareDesignModal.vue:302</code></td></tr>
+          <tr><td><span class="tag bug">Defect</span></td><td>Cart</td><td>The approval page calls <code>isNotEmpty()</code> on an array when the user has no cart, which likely throws.</td><td><code>ShoppingCartController.php:247, 281</code></td></tr>
+          <tr><td><span class="tag bug">Defect</span></td><td>Account</td><td>Product Pro profile panel may never render (<code>'product pro'</code> vs <code>'product_pro'</code>); its dealer card is hard-coded and "Request Change" does nothing.</td><td><code>stores/user.js:85</code> · <code>ProductProDealer.vue</code></td></tr>
+          <tr><td><span class="tag bug">Defect</span></td><td>Account</td><td>Customers "Last Login" uses month in place of minutes; cart Total sort adds retail to itself; apt sort errors on empty values; the rejection banner close calls an undefined function.</td><td><code>Customers.vue</code> · <code>Cart.vue</code> · <code>Address.vue</code> · <code>RejectionBanner</code></td></tr>
+          <tr><td><span class="tag bug">Defect</span></td><td>Auth</td><td>Dealer-change-restricted brands: registration returns early with no redirect.</td><td><code>RegisteredUserController.php:178-181</code></td></tr>
+          <tr><td><span class="tag warn">Needs check</span></td><td>Orders</td><td>The <code>update_rejection</code> response's success flag isn't checked; only HTTP errors stop a resubmit.</td><td><code>CartItemController.php:3524-3850</code></td></tr>
+          <tr><td><span class="tag warn">Needs check</span></td><td>Orders</td><td>A Nexio decline returns before the caller's rollback (the payment function rolls back itself). Confirm intent.</td><td><code>Action/OrderController.php</code></td></tr>
+          <tr><td><span class="tag warn">Business</span></td><td>Pricing</td><td>Tax is 7.25% for Utah only, and the shipping address must carry a "default" flag. Confirm.</td><td><code>Models/Order.php:467-481</code></td></tr>
+          <tr><td><span class="tag warn">Business</span></td><td>Cart</td><td>Are size upcharges (2XL+) charged separately, or only through per-type roster prices?</td><td>—</td></tr>
+          <tr><td><span class="tag warn">Business</span></td><td>Cart</td><td>Is the legacy cart minimum of 6 items still enforced anywhere?</td><td><code>Models/Cart.php:63</code></td></tr>
+          <tr><td><span class="tag warn">Business</span></td><td>Cart</td><td>A "scheduled" discount shows the generic invalid message, though a "not yet active" message exists.</td><td><code>Discount.php</code></td></tr>
+          <tr><td><span class="tag warn">Business</span></td><td>Cart</td><td><code>PATCH /carts/{cart}/promoCode</code> updates PDFs without validating the code; which screen calls it?</td><td><code>Pages/CartController.php:291-371</code></td></tr>
+          <tr><td><span class="tag warn">Needs check</span></td><td>Cart</td><td>Roster unit prices may be visible to customers.</td><td><code>ShoppingCartItem.vue:269</code></td></tr>
+          <tr><td><span class="tag warn">Business</span></td><td>Orders</td><td>When does the factory cancel rather than rework, and what does the customer see?</td><td>—</td></tr>
+          <tr><td><span class="tag warn">Business</span></td><td>Builder</td><td>The reskin text editor has no limit for team or player name and no 3-digit cap on numbers (classic: 100 / 100 / 3). Is one enforced on the server?</td><td><code>ApplicationEditor.vue</code></td></tr>
+          <tr><td><span class="tag warn">Business</span></td><td>Picker</td><td>The Ship Date filter is switched off, and new-picker paging is fixed at page 1. Intended?</td><td><code>brand-styles.js</code> · <code>DesignLoader.vue</code></td></tr>
+          <tr><td><span class="tag warn">Business</span></td><td>Info</td><td><code>/faqs</code> always redirects home. Is the FAQ page retired?</td><td><code>FaqsController.php</code></td></tr>
+          <tr><td><span class="tag warn">Business</span></td><td>Contact</td><td>The form requires a customer-care email but sends to the QX7 brand manager. Intended?</td><td><code>ContactUsController.php</code></td></tr>
+          <tr><td><span class="tag warn">Business</span></td><td>Saved designs</td><td>Brand managers get the Users filter but not their associated users' designs.</td><td><code>stores/saved-designs.js:715</code></td></tr>
+          <tr><td><span class="tag warn">Business</span></td><td>Address book</td><td>Brand 5: the UI hides it only for customers and reps; the server blocks everyone.</td><td><code>UserController.php:149-156</code></td></tr>
+          <tr><td><span class="tag warn">Business</span></td><td>Auth</td><td>Roles dealer, dealer_admin and coach (outside team stores) are never set by the login sync. Where do they come from?</td><td><code>AuthenticatedSessionController.php</code></td></tr>
+          <tr><td><span class="tag warn">Needs check</span></td><td>Auth</td><td>Forced logout works only on routes with <code>can_logout_user</code>; API and cart-item routes are not covered.</td><td><code>Middleware/CanLogoutUser.php</code></td></tr>
+          <tr><td><span class="tag">Cleanup</span></td><td>Code</td><td>Unrouted legacy controllers (BuilderController, PickerController, root AccountController and others), an import of a missing API controller, an uncalled resend-quotation endpoint, and the legacy <code>POST /api/orders</code>.</td><td>various</td></tr>
+          <tr><td><span class="tag">Not visible</span></td><td>External</td><td>Picker internals (<code>@qstrike/picker</code>), Vectorsoft / Design Studio upload limits, Prolook search and page size, production values of the style allowlist, and the contents of approval and quote emails.</td><td>—</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+    <section id="routes" data-title="Route inventory">
+      <h2>Route inventory</h2>
+      <p class="lead">Every route grouped by area. Login: <b>session</b> = web login, <b>token</b> = API token, <b>guest</b> = logged-out only, <b>none</b> = open. Prefixes: <code>/api</code> for API routes, <code>/api/ts</code> for team stores, <code>/mail-view</code> for previews. Module routes under <code>/api/team-database/*</code> and <code>/api/integration/*</code> mostly use an API key.</p>
+      <div class="tablewrap"><table>
+        <thead><tr><th>Area</th><th>Method</th><th>URI</th><th>Login</th><th>Purpose</th></tr></thead>
+        <tbody>
+          <tr><td class="grp">Public</td><td>GET</td><td><code>/ · /catalogs · /contact-us · /about-us · /care-guide · /color-chart</code></td><td>none</td><td>Home and info pages</td></tr>
+          <tr><td></td><td>GET</td><td><code>/privacy-policy · /terms-and-conditions · /warranty</code></td><td>none</td><td>Legal documents</td></tr>
+          <tr><td></td><td>GET</td><td><code>/faqs</code></td><td>none</td><td>Redirects home</td></tr>
+          <tr><td></td><td>GET</td><td><code>/logos/{id}/preview · /logos/{id}/{designId}/preview</code></td><td>none</td><td>Logo preview</td></tr>
+          <tr><td></td><td>GET</td><td><code>/playground · /playground/modals · /version</code></td><td>none</td><td>Developer pages</td></tr>
+          <tr><td></td><td>GET</td><td><code>/store</code></td><td>session</td><td>Team store placeholder</td></tr>
+          <tr><td></td><td>GET</td><td><code>/cart-notifications</code></td><td>session</td><td>Cart badge counts</td></tr>
+          <tr><td class="grp">Auth</td><td>GET/POST</td><td><code>/login · /register · /register/{dealerName} · /forgot-password · /reset-password/{token}</code></td><td>guest</td><td>Login, registration, reset</td></tr>
+          <tr><td></td><td>GET/POST</td><td><code>/update-password · /confirm-password · /verify-email</code></td><td>session</td><td>Forced update, confirm, verify</td></tr>
+          <tr><td></td><td>POST</td><td><code>/logout · /logout-and-redirect-to-login</code></td><td>session</td><td>Logout</td></tr>
+          <tr><td></td><td>GET/PATCH</td><td><code>/account-activation/activate · /set-password · /unsubscribe · /update-password</code></td><td>none (token)</td><td>Activation and first password</td></tr>
+          <tr><td></td><td>PUT/POST</td><td><code>/resend-activation-link · /account-activation/resend-link</code></td><td>none / session</td><td>Resend activation</td></tr>
+          <tr><td></td><td>POST</td><td><code>/api/login</code></td><td>none</td><td>API token login</td></tr>
+          <tr><td class="grp">Design &amp; builder</td><td>GET</td><td><code>/sports · /sports/{s}/designs · /sports/{s}/decorations</code></td><td>none</td><td>Picker</td></tr>
+          <tr><td></td><td>GET</td><td><code>/sports/{s}/customize/{id}[/reversible_uniform/{rid}]</code></td><td>session</td><td>Builder</td></tr>
+          <tr><td></td><td>GET</td><td><code>/saved-designs/{id}/customize · /saved-designs/unavailable</code></td><td>session / none</td><td>Saved design</td></tr>
+          <tr><td></td><td>GET</td><td><code>/customize/{id}/master-style · /master-block</code></td><td>none</td><td>Internal customizers</td></tr>
+          <tr><td></td><td>GET</td><td><code>/customize/{cartItem}/reorder · /duplicate</code></td><td>session</td><td>Reorder, duplicate</td></tr>
+          <tr><td class="grp">Account</td><td>GET</td><td><code>/users/profile · /address · /saved-designs · /saved-logos · /carts · /store · /orders · /customers · /users</code></td><td>session</td><td>Account pages</td></tr>
+          <tr><td></td><td>PATCH/PUT</td><td><code>/users/update-dealer · /update-team · /subscribe · /profile/personal-info · /profile/password</code></td><td>session</td><td>Profile changes</td></tr>
+          <tr><td></td><td>PATCH</td><td><code>/users/update-sync-password · /users/reset-password · /users/set-password</code></td><td>session</td><td>Password helpers (see Open questions)</td></tr>
+          <tr><td></td><td>POST/GET</td><td><code>/users/create · /users/associated-customer · /users/{user}/address-books</code></td><td>session</td><td>Customers</td></tr>
+          <tr><td></td><td>various</td><td><code>/addresses[/{id}/set-default-shipping|billing, remove-default-…]</code></td><td>session</td><td>Address book</td></tr>
+          <tr><td></td><td>POST/DELETE</td><td><code>/payment-book · /payment-book/{id}</code> (update and default routes have no action)</td><td>session</td><td>Saved cards</td></tr>
+          <tr><td></td><td>GET</td><td><code>/accounting/overview · revenues · sales · products</code></td><td>session</td><td>Placeholders</td></tr>
+          <tr><td class="grp">Cart</td><td>GET</td><td><code>/shopping-cart · /approval · /{order}/quotation · /request-submitted · /{order}/quotation/approval</code></td><td>session</td><td>Cart and quote pages</td></tr>
+          <tr><td></td><td>various</td><td><code>/carts[/{cart}]</code>: store, update, save-cart, set-default, set-favorite, name, set-customer, empty-cart, send-all-approval, approve-all, promoCode, destroy</td><td>session</td><td>Cart management</td></tr>
+          <tr><td></td><td>various</td><td><code>/carts/items/…</code>: show, view-only, store, saved-design, update, archive-item, rosters, applications, name, status, week-rush, approve-items, send-approval, changes-logs, fix-changes, reorder, resubmit-rejected-item, destroy</td><td>session</td><td>Cart items</td></tr>
+          <tr><td></td><td>PATCH/POST</td><td><code>/api/carts/discount/apply-discount · remove-discount</code></td><td>token</td><td>Promo codes</td></tr>
+          <tr><td></td><td>PUT/PATCH</td><td><code>/api/carts/{cart}/process-moq-by-factory · update-factory-moqs · week-rush</code></td><td>token / none</td><td>MOQ and rush</td></tr>
+          <tr><td></td><td>POST</td><td><code>/api/carts/items/{id}/generate-pdf · duplicate · store-images</code></td><td>token</td><td>PDF, duplicate, images</td></tr>
+          <tr><td class="grp">Checkout &amp; orders</td><td>GET</td><td><code>/checkout · /checkout/{order}/quotation · /success · /unsuccess</code></td><td>session</td><td>Checkout pages</td></tr>
+          <tr><td></td><td>POST/DELETE</td><td><code>/orders/quotation · /submit · /{order}/submit · /save-for-later · /{order}/archive · /{id}/restore · /{id}/delete · /{order}/fail-pending · /{order}/resend-quotation</code></td><td>session</td><td>Orders and quotes</td></tr>
+          <tr><td></td><td>GET</td><td><code>/api/orders/in-production · /api/orders/submitted</code></td><td>token</td><td>Tracker data</td></tr>
+          <tr><td></td><td>GET/PUT</td><td><code>/api/orders/{code} · /api/orders/cancel/{code}</code></td><td>none</td><td>Order detail, cancel <span class="tag bug">no auth</span></td></tr>
+          <tr><td class="grp">Approval</td><td>GET/PATCH</td><td><code>/approval · /approval/{cartItem}/rosters · /approval/coach</code></td><td>approval token</td><td>Approver pages</td></tr>
+          <tr><td></td><td>POST</td><td><code>/approval/approve-items · /approval/approved</code></td><td>none</td><td>Approve</td></tr>
+          <tr><td></td><td>GET/POST</td><td><code>/changes-logs · /{cartItem}/request-changes · quick-edit</code></td><td>approval header</td><td>Change requests</td></tr>
+          <tr><td class="grp">Email</td><td>POST</td><td><code>/emails/share-page · share-design · share-logo · contact-us · send-design-email</code></td><td>none</td><td>Send emails</td></tr>
+          <tr><td></td><td>POST</td><td><code>/api/mail/share · contact-us · be-first-to-know</code></td><td>none</td><td>Send emails</td></tr>
+          <tr><td class="grp">Partners</td><td>PUT</td><td><code>/api/carts/items/{id}/track-status · /api/carts/items/{item}/status</code></td><td>key in body</td><td>Factory status</td></tr>
+          <tr><td></td><td>POST</td><td><code>/api/mail/ship-date-confirmation · order-shipped</code></td><td>header key</td><td>Ship dates, shipped</td></tr>
+          <tr><td></td><td>POST/PATCH</td><td><code>/api/integration/orders/{code}/hybrisOrderStatus · /rework · /api/integration/carts/{cart}/submit-order</code></td><td>API key</td><td>Hybris and rework</td></tr>
+          <tr><td></td><td>PUT</td><td><code>/api/orders/part-id</code></td><td>"api-key" (not registered)</td><td>Part IDs</td></tr>
+          <tr><td class="grp">Utilities</td><td>POST/GET</td><td><code>/api/image/upload · fileUpload · proxy</code></td><td>none</td><td>Uploads and proxy</td></tr>
+          <tr><td></td><td>GET/POST/PUT</td><td><code>/api/scales · /scales/sports/{sport} · /scales/update-props</code></td><td>none</td><td>Scale config</td></tr>
+          <tr><td></td><td>POST</td><td><code>/api/address/validate · /api/dealer-links/generate/{brand_id}</code></td><td>none</td><td>Address check, dealer links</td></tr>
+          <tr><td></td><td>GET</td><td><code>/api/teams/* · /api/v2/sales-reps · /api/users/sales-representatives</code></td><td>none</td><td>Team and rep lookups</td></tr>
+          <tr><td class="grp">Team stores</td><td>various</td><td><code>/api/team-stores · /api/products · /api/players · /api/family_fans</code></td><td>token</td><td>Store, products, rosters</td></tr>
+          <tr><td></td><td>various</td><td><code>/api/ts/carts · store-orders · orders · pending-items · required-items · analytics · payouts</code></td><td>token</td><td>Store carts, orders, payouts</td></tr>
+          <tr><td></td><td>GET/PATCH</td><td><code>/api/ts/admin/payouts/*</code></td><td>token + admin</td><td>Admin payouts</td></tr>
+          <tr><td class="grp">Mail-view</td><td>GET</td><td><code>/mail-view/template/{t}</code> and about 37 named previews</td><td>mostly none</td><td>Email previews; some can send</td></tr>
+        </tbody>
+      </table></div>
+    </section>
+    <!-- /SECTIONS -->
+
+    <footer>Traced from <code>C:/Users/merin/laravel-docker/core/src/customizer-core</code> on branch pre-staging. File paths are relative to <code>app/Http/Controllers</code> or <code>resources/js</code> unless shown in full. Items marked "open question" could not be confirmed in code.</footer>
+  </main>
+</div>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const sections = [...document.querySelectorAll('main section[id]')];
+
+// Table of contents with a card count per section
+$('toc').innerHTML = sections.map((s) => {
+  const n = s.querySelectorAll('.card').length;
+  return `<li><a href="#${s.id}">${s.dataset.title}${n ? `<small>${n}</small>` : ''}</a></li>`;
+}).join('');
+const tocLinks = [...document.querySelectorAll('#toc a')];
+
+// Highlight the section in view
+const spy = new IntersectionObserver((entries) => {
+  entries.forEach((e) => {
+    if (!e.isIntersecting) return;
+    tocLinks.forEach((a) => a.classList.toggle('active', a.getAttribute('href') === '#' + e.target.id));
+  });
+}, { rootMargin: '-20% 0px -70% 0px' });
+sections.forEach((s) => spy.observe(s));
+
+// Expand / collapse all code references
+let expanded = false;
+$('expand').onclick = () => {
+  expanded = !expanded;
+  document.querySelectorAll('.card details').forEach((d) => d.open = expanded);
+  $('expand').textContent = expanded ? 'Collapse all code references' : 'Expand all code references';
+};
+
+// Search: filter cards and table rows, highlight matches
+const units = [...document.querySelectorAll('.card, tbody tr')];
+units.forEach((u) => u.dataset.html = u.innerHTML);
+const escRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+function highlight(el, re) {
+  const walker = document.createTreeWalker(el, NodeFilter.SHOW_TEXT);
+  const nodes = [];
+  while (walker.nextNode()) if (re.test(walker.currentNode.nodeValue)) nodes.push(walker.currentNode);
+  nodes.forEach((n) => {
+    const span = document.createElement('span');
+    span.innerHTML = n.nodeValue.replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' }[c])).replace(re, '<mark>$&</mark>');
+    n.replaceWith(span);
+  });
+}
+let timer;
+$('q').addEventListener('input', () => { clearTimeout(timer); timer = setTimeout(runSearch, 120); });
+function runSearch() {
+  const q = $('q').value.trim();
+  units.forEach((u) => { u.innerHTML = u.dataset.html; u.classList.remove('hidden'); });
+  sections.forEach((s) => s.classList.remove('hidden'));
+  if (!q) { $('hits').textContent = ''; return; }
+  const words = q.toLowerCase().split(/\s+/);
+  const re = new RegExp(words.map(escRe).join('|'), 'gi');
+  let hits = 0;
+  units.forEach((u) => {
+    const ok = words.every((w) => u.textContent.toLowerCase().includes(w));
+    u.classList.toggle('hidden', !ok);
+    if (ok) { hits++; highlight(u, new RegExp(re.source, 'gi')); u.querySelectorAll('details').forEach((d) => { if (d.querySelector('mark')) d.open = true; }); }
+  });
+  // A table row inside a hidden card stays hidden with its card
+  sections.forEach((s) => s.classList.toggle('hidden', !s.querySelector('.card:not(.hidden), .tablewrap > table tbody tr:not(.hidden)')));
+  $('hits').textContent = hits ? `${hits} match${hits === 1 ? '' : 'es'}` : 'No matches';
+}
+</script>
+</body>
+</html>

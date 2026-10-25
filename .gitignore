@@ -1,0 +1,6 @@
+node_modules/
+mail.config.json
+requests/*
+!requests/.gitkeep
+brd-inbox/*
+!brd-inbox/.gitkeep

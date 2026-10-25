@@ -1,0 +1,12 @@
+{
+  "name": "master-brd",
+  "private": true,
+  "description": "BRD truth audit + BRD analysis request portal",
+  "scripts": {
+    "portal": "node server/portal.js",
+    "requests": "node tools/requests.js"
+  },
+  "dependencies": {
+    "nodemailer": "^10.2.1"
+  }
+}

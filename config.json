@@ -1,0 +1,25 @@
+{
+  "systemName": "Customizer Core",
+  "brdPath": "brd",
+  "systemPath": "C:/Users/merin/laravel-docker/core/src/customizer-core",
+  "ignore": [
+    "node_modules",
+    "vendor",
+    "storage",
+    "public/build",
+    ".git",
+    "bin",
+    "obj",
+    "dist",
+    "build",
+    ".venv",
+    "__pycache__"
+  ],
+  "systemBranch": "pre-staging",
+  "analysis": {
+    "brdDir": "brd-inbox",
+    "requestsDir": "requests",
+    "port": 4180,
+    "maxUploadMB": 20
+  }
+}

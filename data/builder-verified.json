@@ -1,0 +1,3093 @@
+{
+  "verifiedAt": "2026-10-23T13:00:00+00:00",
+  "systemPath": "C:/Users/merin/laravel-docker/core/src/customizer-core",
+  "requirements": [
+    {
+      "id": "BLD-001",
+      "title": "Reskin or classic builder by flag",
+      "description": "The builder shall render the reskinned BuilderReskin UI when VITE_FEATURE_BUILDER_RESKIN is \"true\" and the classic Builder otherwise (feature flag).",
+      "category": "Builder Loading & Modes",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in Customizer.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Pages/Sports/Customizer.vue",
+          "line": 10,
+          "snippet": ":is=\"featureStore.builderReskinEnabled ? BuilderReskin : Builder\""
+        },
+        {
+          "file": "resources/js/stores/master-feature.js",
+          "line": 54,
+          "snippet": "return import.meta.env.VITE_FEATURE_BUILDER_RESKIN === 'true';"
+        }
+      ]
+    },
+    {
+      "id": "BLD-002",
+      "title": "Load by uniform type",
+      "description": "The builder does initialise from one of four sources based on uniformType: a new style (normal), a saved design, a cart item, or a reorder item.",
+      "category": "Builder Loading & Modes",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in BuilderReskin.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/BuilderReskin.vue",
+          "line": 1543,
+          "snippet": "case 'saved-design': await loadSaveDesign(); break;"
+        },
+        {
+          "file": "resources/js/Components/Builder/Builder.vue",
+          "line": 1306,
+          "snippet": "case 'reorder-item':"
+        }
+      ]
+    },
+    {
+      "id": "BLD-003",
+      "title": "Reject unknown uniform type",
+      "description": "The builder shall throw an error when it is opened without a recognised uniform type.",
+      "category": "Builder Loading & Modes",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in BuilderReskin.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/BuilderReskin.vue",
+          "line": 1546,
+          "snippet": "default: throw new Error('Missing uniform type');"
+        }
+      ]
+    },
+    {
+      "id": "BLD-004",
+      "title": "Open customizer for a style",
+      "description": "The builder shall open the Sports/Customizer page for a sport and uniform ID, passing the user's open (non-abandoned, non-completed) carts.",
+      "category": "Builder Loading & Modes",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in SportController.php implements this behaviour.",
+      "evidence": [
+        {
+          "file": "app/Http/Controllers/Pages/SportController.php",
+          "line": 25,
+          "snippet": "public function showCustomizer(Request $request, $sports, $uniform_id) {"
+        },
+        {
+          "file": "app/Http/Controllers/Pages/SportController.php",
+          "line": 34,
+          "snippet": "->whereNotIn('status', ['abandoned', 'completed'])"
+        }
+      ]
+    },
+    {
+      "id": "BLD-005",
+      "title": "Reversible two-sided uniforms",
+      "description": "The builder shall load a reversible uniform from two style IDs (Side A and Side B) when a reversible uniform ID is supplied.",
+      "category": "Builder Loading & Modes",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in SportController.php implements this behaviour.",
+      "evidence": [
+        {
+          "file": "app/Http/Controllers/Pages/SportController.php",
+          "line": 109,
+          "snippet": "public function showCustomizerReversible(Request $request, $sports, $uniform_id, $reversible_uniform_id) {"
+        },
+        {
+          "file": "resources/js/Components/BuilderReskin/BuilderReskin.vue",
+          "line": 1462,
+          "snippet": "ids: [props.uniform_id, props.reversible_uniform_id].filter(id => id !== ''),"
+        }
+      ]
+    },
+    {
+      "id": "BLD-006",
+      "title": "Preset colors from URL",
+      "description": "The builder shall accept preset team, stock, trim, twill, body and application colors passed as request parameters.",
+      "category": "Builder Loading & Modes",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in SportController.php implements this behaviour.",
+      "evidence": [
+        {
+          "file": "app/Http/Controllers/Pages/SportController.php",
+          "line": 63,
+          "snippet": "$team_colors = json_decode($request->teamColors) ?? [];"
+        },
+        {
+          "file": "app/Http/Controllers/Pages/SportController.php",
+          "line": 66,
+          "snippet": "$twill_colors = json_decode($request->twillColors) ?? [];"
+        }
+      ]
+    },
+    {
+      "id": "BLD-007",
+      "title": "Reorder mode from route name",
+      "description": "The builder shall enter reorder mode when the request route name ends with \".reorder\".",
+      "category": "Builder Loading & Modes",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in SportController.php implements this behaviour.",
+      "evidence": [
+        {
+          "file": "app/Http/Controllers/Pages/SportController.php",
+          "line": 72,
+          "snippet": "$isReorder = $request->routeIs('*.reorder');"
+        }
+      ]
+    },
+    {
+      "id": "BLD-008",
+      "title": "Edit existing cart item",
+      "description": "The builder shall open an existing cart item for editing (uniformType cart-item) and show a Deleted Item page when the cart item is soft-deleted.",
+      "category": "Builder Loading & Modes",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in Show.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Pages/CartItem/Show.vue",
+          "line": 13,
+          "snippet": ":uniformType=\"`cart-item`\""
+        },
+        {
+          "file": "app/Http/Controllers/Pages/CartItemController.php",
+          "line": 68,
+          "snippet": "return Inertia::render('CartItem/DeletedItem');"
+        }
+      ]
+    },
+    {
+      "id": "BLD-009",
+      "title": "Edit reorder item",
+      "description": "The builder shall open a reorder item for editing using the reorder-item uniform type.",
+      "category": "Builder Loading & Modes",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in EditReorder.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Pages/CartItem/EditReorder.vue",
+          "line": 4,
+          "snippet": ":uniformType=\"`reorder-item`\""
+        }
+      ]
+    },
+    {
+      "id": "BLD-010",
+      "title": "Duplicate cart item mode",
+      "description": "The builder shall support a duplicate mode for a cart item, flagged with isDuplicate and provided to child components.",
+      "category": "Builder Loading & Modes",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in CartItemController.php implements this behaviour.",
+      "evidence": [
+        {
+          "file": "app/Http/Controllers/Pages/CartItemController.php",
+          "line": 282,
+          "snippet": "$isDuplicate = true;"
+        },
+        {
+          "file": "resources/js/Pages/CartItem/ShowDuplicate.vue",
+          "line": 143,
+          "snippet": "provide('isDuplicate', props.isDuplicate);"
+        }
+      ]
+    },
+    {
+      "id": "BLD-011",
+      "title": "View-only mode",
+      "description": "The builder shall offer a view-only mode for a cart item in which save and add-to-cart actions are hidden.",
+      "category": "Builder Loading & Modes",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in CartItemController.php implements this behaviour.",
+      "evidence": [
+        {
+          "file": "app/Http/Controllers/Pages/CartItemController.php",
+          "line": 445,
+          "snippet": "$isViewOnly = true;"
+        },
+        {
+          "file": "resources/js/Components/Builder/Builder.vue",
+          "line": 236,
+          "snippet": "v-if=\"isBrandStyle && !isViewOnly\""
+        }
+      ]
+    },
+    {
+      "id": "BLD-012",
+      "title": "Saved design changed warning",
+      "description": "The builder shall warn when a shared saved design is opened after the product offering was updated since it was sent.",
+      "category": "Builder Loading & Modes",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in BuilderReskin.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/BuilderReskin.vue",
+          "line": 1533,
+          "snippet": "message: 'Changes have been made to this product offering, so the loaded image may be slightly different than what was originally shared.',"
+        }
+      ]
+    },
+    {
+      "id": "BLD-013",
+      "title": "Custom team name from URL",
+      "description": "The builder shall pre-fill team name applications from a team_name URL parameter when the custom team name feature flag is enabled.",
+      "category": "Builder Loading & Modes",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in BuilderReskin.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/BuilderReskin.vue",
+          "line": 314,
+          "snippet": "const urlTeamTeam = ref(getQueryStringValue('team_name'));"
+        },
+        {
+          "file": "resources/js/stores/master-feature.js",
+          "line": 15,
+          "snippet": "const isEnabled = import.meta.env.VITE_FEATURE_CUSTOM_TEAM_NAME === 'true';"
+        }
+      ]
+    },
+    {
+      "id": "BLD-014",
+      "title": "Team database team required",
+      "description": "The builder shall require a team to be selected (team-name selection modal) before saving or adding to cart when the Team Database feature is on.",
+      "category": "Builder Loading & Modes",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in BuilderReskin.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/BuilderReskin.vue",
+          "line": 1124,
+          "snippet": "modal('#team-name-selection').show();"
+        }
+      ]
+    },
+    {
+      "id": "BLD-015",
+      "title": "Hide panels without data",
+      "description": "The builder shall hide the piping, pattern, fabric, add-on, text and logo panels when the style has no data for them.",
+      "category": "Builder Loading & Modes",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in Builder.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/Builder/Builder.vue",
+          "line": 661,
+          "snippet": "if (isEmpty(customizerStore.getPipingLists)) {"
+        },
+        {
+          "file": "resources/js/Components/Builder/Builder.vue",
+          "line": 687,
+          "snippet": "if (!customizerStore.hasMasterBlockLogoApplication) {"
+        }
+      ]
+    },
+    {
+      "id": "BLD-016",
+      "title": "Master style restricted tabs",
+      "description": "The reskinned builder shall hide the Details, Options, Roster and Summary tabs when editing a master style.",
+      "category": "Builder Loading & Modes",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in BuilderReskin.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/BuilderReskin.vue",
+          "line": 446,
+          "snippet": "const isMasterStyle = customizerStore.uniformStyleType?.toLowerCase() === 'master';"
+        }
+      ]
+    },
+    {
+      "id": "BLD-017",
+      "title": "Welcome modal",
+      "description": "The builder shall include a builder welcome modal.",
+      "category": "Builder Loading & Modes",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in BuilderReskin.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/BuilderReskin.vue",
+          "line": 127,
+          "snippet": "<WelcomeModalVue :modal-id=\"`builder-welcome-modal`\" />"
+        }
+      ]
+    },
+    {
+      "id": "BLD-018",
+      "title": "Back navigation link",
+      "description": "The reskinned builder header shall show a \"Back to ...\" link to the previous context.",
+      "category": "Builder Loading & Modes",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in Header.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/Layout/Header.vue",
+          "line": 34,
+          "snippet": "<span>Back to {{ backLabel }}</span>"
+        }
+      ]
+    },
+    {
+      "id": "BLD-019",
+      "title": "Reskin sidebar tabs",
+      "description": "The reskinned builder shall provide sidebar tabs Custom Pro, Details, Options, Customize, Applications, Roster and Summary.",
+      "category": "Navigation & Tabs",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in Sidebar.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/Layout/Sidebar.vue",
+          "line": 94,
+          "snippet": "{ code: 'details', label: 'Details', icon: IconDetails, info: false },"
+        },
+        {
+          "file": "resources/js/Components/BuilderReskin/Layout/Sidebar.vue",
+          "line": 99,
+          "snippet": "{ code: 'summary', label: 'Summary', icon: IconSummary, info: false },"
+        }
+      ]
+    },
+    {
+      "id": "BLD-020",
+      "title": "Classic panel list",
+      "description": "The classic builder shall provide panels Custom Pro, Fabrics, Colors, Pipings, Patterns, Text, Upload Logos, Add ons and Roster.",
+      "category": "Navigation & Tabs",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in customizer.js implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/stores/customizer.js",
+          "line": 571,
+          "snippet": "name: 'Upload Logos',"
+        },
+        {
+          "file": "resources/js/stores/customizer.js",
+          "line": 550,
+          "snippet": "name: 'Pipings',"
+        }
+      ]
+    },
+    {
+      "id": "BLD-021",
+      "title": "Layers panel when applications exist",
+      "description": "The builder shall add a Layers panel after the logo panel whenever either side has applications.",
+      "category": "Navigation & Tabs",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in customizer.js implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/stores/customizer.js",
+          "line": 606,
+          "snippet": "name: 'Layers',"
+        }
+      ]
+    },
+    {
+      "id": "BLD-022",
+      "title": "Previous/next panel arrows",
+      "description": "The classic builder shall let users step to the previous or next panel and refresh thumbnails when doing so.",
+      "category": "Navigation & Tabs",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in Header.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/Builder/Header.vue",
+          "line": 46,
+          "snippet": "customizerStore.previousPanel();"
+        },
+        {
+          "file": "resources/js/Components/Builder/Header.vue",
+          "line": 53,
+          "snippet": "customizerStore.nextPanel();"
+        }
+      ]
+    },
+    {
+      "id": "BLD-023",
+      "title": "Missing-item tab indicator",
+      "description": "The builder shall mark tabs/panels that have missing required items with an exclamation icon.",
+      "category": "Navigation & Tabs",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in Sidebar.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/Layout/Sidebar.vue",
+          "line": 14,
+          "snippet": "<ExclamationCircleIcon v-if=\"panelCodesWithMissingItems.includes(tab.code)\" class=\"icon-16\" />"
+        }
+      ]
+    },
+    {
+      "id": "BLD-024",
+      "title": "Applications tab locked in Custom Pro",
+      "description": "The reskinned builder shall disable the Applications tab while Custom Pro (manual order) is active.",
+      "category": "Navigation & Tabs",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in Sidebar.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/Layout/Sidebar.vue",
+          "line": 108,
+          "snippet": "if (manualOrderStore.isActive && tab.code === 'applications') {"
+        }
+      ]
+    },
+    {
+      "id": "BLD-025",
+      "title": "Custom Pro tab named by add-on",
+      "description": "The reskinned builder shall label the Custom Pro tab with the manual order add-on name when available.",
+      "category": "Navigation & Tabs",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in Sidebar.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/Layout/Sidebar.vue",
+          "line": 93,
+          "snippet": "{ code: 'custom-pro', label: manualOrderStore.getManualOrderAddOn?.name || 'Custom Pro', icon: IconCustomPro, info: true },"
+        }
+      ]
+    },
+    {
+      "id": "BLD-026",
+      "title": "Undo and redo",
+      "description": "The reskinned builder shall provide Undo and Redo buttons, disabled when no history is available or history is busy.",
+      "category": "Navigation & Tabs",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in Header.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/Layout/Header.vue",
+          "line": 43,
+          "snippet": "<span>Undo</span>"
+        },
+        {
+          "file": "resources/js/Components/BuilderReskin/Layout/Header.vue",
+          "line": 230,
+          "snippet": "const isUndoEnabled = computed(() => canUndo.value && !props.historyBusy);"
+        }
+      ]
+    },
+    {
+      "id": "BLD-027",
+      "title": "Undo/redo keyboard shortcuts",
+      "description": "The reskinned builder shall support Ctrl/Cmd+Z for undo and Ctrl/Cmd+Shift+Z or Ctrl/Cmd+Y for redo outside text inputs.",
+      "category": "Navigation & Tabs",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in BuilderReskin.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/BuilderReskin.vue",
+          "line": 1835,
+          "snippet": "} else if ((key === 'z' && e.shiftKey) || key === 'y') {"
+        }
+      ]
+    },
+    {
+      "id": "BLD-028",
+      "title": "Switch perspective via thumbnails",
+      "description": "The builder shall show perspective thumbnails and switch the canvas view when a thumbnail is clicked.",
+      "category": "Canvas & Views",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in Thumbnails.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/Builder/Thumbnails.vue",
+          "line": 8,
+          "snippet": "@click=\"featureStore.builderReskinEnabled ? onPerspectiveClick(thumbnail.view) : customizerStore.changeUniformActiveView(thumbnail.view)\""
+        }
+      ]
+    },
+    {
+      "id": "BLD-029",
+      "title": "Alt-click thumbnail preview",
+      "description": "The builder shall open an enlarged thumbnail pop-up when a thumbnail is Alt-clicked.",
+      "category": "Canvas & Views",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in Thumbnails.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/Builder/Thumbnails.vue",
+          "line": 9,
+          "snippet": "@click.alt=\"onViewThumbnailPopUp(thumbnail)\""
+        }
+      ]
+    },
+    {
+      "id": "BLD-030",
+      "title": "Restricted views per block pattern",
+      "description": "The builder shall limit thumbnails to front/back for Cinch Sack, Team Flag and MDJ styles and to front only for Banners.",
+      "category": "Canvas & Views",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in Thumbnails.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/Builder/Thumbnails.vue",
+          "line": 106,
+          "snippet": "return ['front', 'back'].includes(view);"
+        }
+      ]
+    },
+    {
+      "id": "BLD-031",
+      "title": "Thumbnail disclaimer notes",
+      "description": "The builder shall tell users that thumbnails update on tab switch and that the finished product may vary from the screen.",
+      "category": "Canvas & Views",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in Thumbnails.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/Builder/Thumbnails.vue",
+          "line": 47,
+          "snippet": "'Thumbnails update when you switch customization tabs' : 'Thumbnails update when you switch tabs.';"
+        },
+        {
+          "file": "resources/js/Components/Builder/Thumbnails.vue",
+          "line": 49,
+          "snippet": "'The finished product may vary slightly from the image on your monitor';"
+        }
+      ]
+    },
+    {
+      "id": "BLD-032",
+      "title": "Canvas zoom toggle",
+      "description": "The reskinned builder shall provide a Zoom In/Zoom Out toggle for the canvas, unavailable on the Roster tab.",
+      "category": "Canvas & Views",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in Header.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/Layout/Header.vue",
+          "line": 57,
+          "snippet": ":title=\"customizerStore.isZoomedIn ? 'Zoom Out' : 'Zoom In'\""
+        },
+        {
+          "file": "resources/js/Components/BuilderReskin/BuilderReskin.vue",
+          "line": 370,
+          "snippet": "if (!activeUniformSide.value || activeTab.value === 'roster') return;"
+        }
+      ]
+    },
+    {
+      "id": "BLD-033",
+      "title": "Switch reversible side",
+      "description": "The builder shall show the other side of a reversible uniform as a thumbnail that switches the active side when clicked.",
+      "category": "Canvas & Views",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in BuilderReskin.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/BuilderReskin.vue",
+          "line": 91,
+          "snippet": "@click.prevent=\"onChangeActiveUniform(uniform.code, uniform.side)\""
+        },
+        {
+          "file": "resources/js/Components/BuilderReskin/BuilderReskin.vue",
+          "line": 85,
+          "snippet": "<div class=\"side-label\">Side {{ uniform.side }}</div>"
+        }
+      ]
+    },
+    {
+      "id": "BLD-034",
+      "title": "Custom Pro design preview",
+      "description": "The builder shall show the uploaded Custom Pro design file on the canvas, with a PDF placeholder and an Open in a New Tab option for PDFs.",
+      "category": "Canvas & Views",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in BuilderReskin.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/BuilderReskin.vue",
+          "line": 54,
+          "snippet": "<p class=\"pdf-text\">Preview unavailable for PDF files.</p>"
+        },
+        {
+          "file": "resources/js/Components/BuilderReskin/BuilderReskin.vue",
+          "line": 337,
+          "snippet": "window.open(mOUploadedFile.value.url, '_blank', 'noopener');"
+        }
+      ]
+    },
+    {
+      "id": "BLD-035",
+      "title": "Canvas loading indicator",
+      "description": "The reskinned builder shall show a loading spinner until the uniform stage is ready.",
+      "category": "Canvas & Views",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in BuilderReskin.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/BuilderReskin.vue",
+          "line": 77,
+          "snippet": "role=\"status\" aria-label=\"Loading uniform preview\"></div>"
+        }
+      ]
+    },
+    {
+      "id": "BLD-036",
+      "title": "Show/Hide application locations",
+      "description": "The builder shall offer a Show/Hide Locations toggle only for non-brand styles or for listed super users.",
+      "category": "Canvas & Views",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in BuilderReskin.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/BuilderReskin.vue",
+          "line": 40,
+          "snippet": "v-if=\"!isBrandStyle || SUPER_USER.includes($page.props.auth.user?.email)\">"
+        }
+      ]
+    },
+    {
+      "id": "BLD-037",
+      "title": "Fabric groups and selection",
+      "description": "The builder shall list fabrics per fabric group and mark the suggested fabric.",
+      "category": "Fabric",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in OptionsTab.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/Tabs/OptionsTab.vue",
+          "line": 9,
+          "snippet": "<h5 class=\"fabric-group__name\">{{ group.groupName }}</h5>"
+        },
+        {
+          "file": "resources/js/Components/BuilderReskin/Tabs/OptionsTab.vue",
+          "line": 19,
+          "snippet": "v-if=\"group.suggestedFabricId === fabric.id\"> (Suggested)</span>"
+        }
+      ]
+    },
+    {
+      "id": "BLD-038",
+      "title": "Fabric upgrade fee per item",
+      "description": "The builder shall show a signed per-item upgrade fee (e.g. +$5.00/item) for upgraded fabrics.",
+      "category": "Fabric",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in OptionsTab.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/Tabs/OptionsTab.vue",
+          "line": 204,
+          "snippet": "return `${sign}$${Math.abs(n).toFixed(2)}`;"
+        }
+      ]
+    },
+    {
+      "id": "BLD-039",
+      "title": "Fabric info tooltip",
+      "description": "The builder shall show a fabric tooltip with thumbnail, content, weight (oz), construction and function features.",
+      "category": "Fabric",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in OptionsTab.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/Tabs/OptionsTab.vue",
+          "line": 210,
+          "snippet": "if (mf.weight_oz) parts.push(`${mf.weight_oz} oz`);"
+        }
+      ]
+    },
+    {
+      "id": "BLD-040",
+      "title": "Fabric same on both sides",
+      "description": "The builder shall apply a fabric selection to both sides of a reversible uniform and tell the user so.",
+      "category": "Fabric",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in OptionsTab.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/Tabs/OptionsTab.vue",
+          "line": 265,
+          "snippet": "customizerStore.applyFabricToOppositeSide(fabric, targetGroup);"
+        },
+        {
+          "file": "resources/js/Components/Builder/Fabric/FabricPanel.vue",
+          "line": 223,
+          "snippet": "header: 'Fabric Consistency Notice',"
+        }
+      ]
+    },
+    {
+      "id": "BLD-041",
+      "title": "Custom Pro body fabric only",
+      "description": "The builder shall restrict fabric choices to the primary fabric group while Custom Pro is active.",
+      "category": "Fabric",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in OptionsTab.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/Tabs/OptionsTab.vue",
+          "line": 160,
+          "snippet": "? visibleGroups.filter(fabricGroup => isPrimaryFabricGroup(fabricGroup?.groupName))"
+        }
+      ]
+    },
+    {
+      "id": "BLD-042",
+      "title": "Optional fabric (no-fabric feature)",
+      "description": "The builder shall let users toggle fabrics as checkboxes (allowing none) when the no-fabric customizer feature is enabled and not in Custom Pro or pullover styles.",
+      "category": "Fabric",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in OptionsTab.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/Tabs/OptionsTab.vue",
+          "line": 35,
+          "snippet": ":type=\"isNoFabricFeatureEnabled && group.fabrics.length > 1 ? 'checkbox' : 'radio'\""
+        }
+      ]
+    },
+    {
+      "id": "BLD-043",
+      "title": "Pullover colors follow fabric",
+      "description": "The builder shall update available colors from the active fabric for pullover styles.",
+      "category": "Fabric",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in OptionsTab.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/Tabs/OptionsTab.vue",
+          "line": 277,
+          "snippet": "if (customizerStore.isPullover) await customizerStore.setColorsByActiveFabric(fabric.id);"
+        }
+      ]
+    },
+    {
+      "id": "BLD-044",
+      "title": "Fabric price follows cost type",
+      "description": "The builder shall re-evaluate the selected fabric when the cost type (retail/dealer) changes.",
+      "category": "Fabric",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in BuilderReskin.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/BuilderReskin.vue",
+          "line": 526,
+          "snippet": "[() => costSettingsStore.costType],"
+        }
+      ]
+    },
+    {
+      "id": "BLD-045",
+      "title": "Colors in Use row",
+      "description": "The reskinned builder shall display the current team colors as a \"Colors in Use\" row of swatches with color codes.",
+      "category": "Colors",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in ReskinActiveColorRow.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/Color/ReskinActiveColorRow.vue",
+          "line": 47,
+          "snippet": "<label class=\"\">Colors in Use</label>"
+        }
+      ],
+      "relatedBrd": [
+        "REQ-004"
+      ]
+    },
+    {
+      "id": "BLD-046",
+      "title": "Click swatch to change color",
+      "description": "The builder shall open the color picker dropdown when a Colors in Use swatch or the add button is clicked.",
+      "category": "Colors",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in ReskinActiveColorRow.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/Color/ReskinActiveColorRow.vue",
+          "line": 59,
+          "snippet": "@click=\"openColorPicker($event, color)\""
+        }
+      ],
+      "relatedBrd": [
+        "REQ-005",
+        "REQ-006"
+      ]
+    },
+    {
+      "id": "BLD-047",
+      "title": "Core Colors section",
+      "description": "The color picker shall split available colors into Core Colors (core_color flag) and the rest.",
+      "category": "Colors",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in ReskinColorPickerModal.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/Color/ReskinColorPickerModal.vue",
+          "line": 155,
+          "snippet": "acc[color.core_color ? 0 : 1].push(color);"
+        }
+      ],
+      "relatedBrd": [
+        "REQ-007"
+      ]
+    },
+    {
+      "id": "BLD-048",
+      "title": "Additional Colors section",
+      "description": "The color picker shall label non-core colors \"Additional Colors\" when core colors exist, otherwise \"Colors\".",
+      "category": "Colors",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in ReskinColorPickerModal.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/Color/ReskinColorPickerModal.vue",
+          "line": 38,
+          "snippet": "<span v-if=\"coreColors.length\">Additional Colors</span>"
+        }
+      ],
+      "relatedBrd": [
+        "REQ-008"
+      ]
+    },
+    {
+      "id": "BLD-049",
+      "title": "Ignore duplicate, keep minimum colors",
+      "description": "The reskinned color picker shall ignore a color already in use and refuse a replacement that would drop below the minimum color count.",
+      "category": "Colors",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in ReskinColorPickerModal.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/Color/ReskinColorPickerModal.vue",
+          "line": 217,
+          "snippet": "if (isColorAlreadyInUse(newColor)) {"
+        },
+        {
+          "file": "resources/js/Components/BuilderReskin/Color/ReskinColorPickerModal.vue",
+          "line": 227,
+          "snippet": "if (wouldDropBelowMinimum(newColor, replacedColorCode)) {"
+        }
+      ]
+    },
+    {
+      "id": "BLD-050",
+      "title": "Minimum colors enforced",
+      "description": "The builder shall require at least 2 team colors (1 for stock items) when saving colors and before add-to-cart.",
+      "category": "Colors",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in ReskinColorPickerModal.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/Color/ReskinColorPickerModal.vue",
+          "line": 477,
+          "snippet": "throw new Error('Minimum colors not met.');"
+        },
+        {
+          "file": "resources/js/Components/BuilderReskin/BuilderReskin.vue",
+          "line": 1175,
+          "snippet": "const MIN_TEAM_COLORS = customizerStore?.isStockItem ? 1 : 2;"
+        }
+      ]
+    },
+    {
+      "id": "BLD-051",
+      "title": "Replace color still in use",
+      "description": "The builder shall require a replacement color when removing a color used on parts, trims or applications, or when only two colors remain.",
+      "category": "Colors",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in RemoveColorModal.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/Color/RemoveColorModal.vue",
+          "line": 11,
+          "snippet": "<span v-if=\"formattedPartsList\">This color is being used on {{ formattedPartsList }}. Please choose a replacement color.</span>"
+        },
+        {
+          "file": "resources/js/Components/BuilderReskin/Color/RemoveColorModal.vue",
+          "line": 13,
+          "snippet": "<span v-else>A minimum of two colors is required for customization. Please choose a replacement color.</span>"
+        }
+      ]
+    },
+    {
+      "id": "BLD-052",
+      "title": "Unavailable colors note",
+      "description": "The color picker shall note that unavailable colors are not shown (non-stock items).",
+      "category": "Colors",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in ReskinColorPickerModal.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/Color/ReskinColorPickerModal.vue",
+          "line": 70,
+          "snippet": "<div v-if=\"!customizerStore.isStockItem\" class=\"text-xs card-footer footer mt-sm\">Some unavailable colors are not shown.</div>"
+        }
+      ]
+    },
+    {
+      "id": "BLD-053",
+      "title": "Classic color limits by decoration",
+      "description": "The classic color selection shall allow up to 15 colors for twill/hybrid uniforms and 6 otherwise, with a minimum of 2 (1 for stock).",
+      "category": "Colors",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in ColorSelection.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/Builder/Modals/ColorSelection.vue",
+          "line": 76,
+          "snippet": "const MAX_TEAM_COLORS = resourceStore.isTwillOrHybrid ? 15 : 6, MIN_TEAM_COLORS = customizerStore.isStockItem ? 1 : 2;"
+        }
+      ]
+    },
+    {
+      "id": "BLD-054",
+      "title": "Sublimated color maximum",
+      "description": "The builder shall block selecting more than the maximum number of sublimated colors with a warning.",
+      "category": "Colors",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in SublimatedColorSelection.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/Builder/Modals/SublimatedColorSelection.vue",
+          "line": 99,
+          "snippet": "message: `You have reached the maximum limit for selecting colors. Selection should not exceed ${MAX_TEAM_COLORS} colors.`,"
+        }
+      ]
+    },
+    {
+      "id": "BLD-055",
+      "title": "Reversible colors kept in sync",
+      "description": "The builder shall merge saved team colors into the other side of a reversible uniform.",
+      "category": "Colors",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in ReskinColorPickerModal.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/Color/ReskinColorPickerModal.vue",
+          "line": 364,
+          "snippet": "await handleReversibleUniformColors(previousTeamColors, currentTeamColors, replacements);"
+        }
+      ]
+    },
+    {
+      "id": "BLD-056",
+      "title": "Part color from team colors",
+      "description": "The builder shall let users recolor each body part from the team colors in use.",
+      "category": "Colors",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in ReskinParts.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/Parts/ReskinParts.vue",
+          "line": 411,
+          "snippet": "changeColorGroup(colorGroup.parts, colorObject);"
+        }
+      ]
+    },
+    {
+      "id": "BLD-057",
+      "title": "Brand logo auto-recolor",
+      "description": "The builder shall change a brand logo color automatically when a part under it is set to the same color.",
+      "category": "Colors",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in ReskinParts.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/Parts/ReskinParts.vue",
+          "line": 470,
+          "snippet": "brandLogoStore.changeBrandLogoColor(color, false, logo.code, side, colorGroup.name);"
+        }
+      ]
+    },
+    {
+      "id": "BLD-058",
+      "title": "Custom Pro main body color",
+      "description": "The builder shall let users choose a single Main Body Color from Core and Additional colors while Custom Pro is active.",
+      "category": "Colors",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in ReskinActiveColorRow.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/Color/ReskinActiveColorRow.vue",
+          "line": 4,
+          "snippet": "<label class=\"main-body-color-label\">Main Body Color</label>"
+        },
+        {
+          "file": "resources/js/Components/BuilderReskin/Color/ReskinCustomProColorPickerModal.vue",
+          "line": 121,
+          "snippet": "manualOrderStore.setMainBodyColor(toRaw(color));"
+        }
+      ]
+    },
+    {
+      "id": "BLD-059",
+      "title": "Brand logo color required",
+      "description": "The builder shall block add-to-cart until a brand logo color is selected, switching to the affected side and tab.",
+      "category": "Colors",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in BuilderReskin.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/BuilderReskin.vue",
+          "line": 1203,
+          "snippet": "message: 'Please select a brand logo color before adding the item to cart.',"
+        }
+      ]
+    },
+    {
+      "id": "BLD-060",
+      "title": "Logo color conflicts block cart",
+      "description": "The builder shall list logos with unresolved color conflicts, offer a Fix action, and block add-to-cart/update while conflicts exist.",
+      "category": "Colors",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in ColorConflictAlertModal.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/Builder/Modals/ColorConflictAlertModal.vue",
+          "line": 15,
+          "snippet": "Colors have not been selected for your logo, please edit your logo and choose colors"
+        },
+        {
+          "file": "resources/js/Components/BuilderReskin/BuilderReskin.vue",
+          "line": 839,
+          "snippet": "if (isConflictExists) colorConflictAlertModal.value.show(conflicts);"
+        }
+      ]
+    },
+    {
+      "id": "BLD-061",
+      "title": "Piping sizes",
+      "description": "The builder shall let users choose a piping size per piping location.",
+      "category": "Piping",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in PipingPanel.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/Builder/Piping/PipingPanel.vue",
+          "line": 38,
+          "snippet": "@change=\"changeSize(piping.name, item.size, item.numberOfColors)\""
+        }
+      ]
+    },
+    {
+      "id": "BLD-062",
+      "title": "Piping layer colors",
+      "description": "The builder shall let users color each piping layer from team colors or choose NONE.",
+      "category": "Piping",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in PipingPanel.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/Builder/Piping/PipingPanel.vue",
+          "line": 69,
+          "snippet": "<span class=\"color-code\">NONE</span>"
+        },
+        {
+          "file": "resources/js/Components/Builder/Piping/PipingPanel.vue",
+          "line": 180,
+          "snippet": "customizerStore.setPipingColor(pipingName, pipingLayer, toRaw(colorObject));"
+        }
+      ]
+    },
+    {
+      "id": "BLD-063",
+      "title": "Enable or disable piping",
+      "description": "The builder shall let users switch piping on or off per location, creating default piping with the first size when enabled.",
+      "category": "Piping",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in PipingPanel.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/Builder/Piping/PipingPanel.vue",
+          "line": 199,
+          "snippet": "const status = settings.enabled ? 0 : 1;"
+        }
+      ]
+    },
+    {
+      "id": "BLD-064",
+      "title": "Reskin piping editor",
+      "description": "The reskinned builder shall provide a piping editor with Locations, Sizes and Colors.",
+      "category": "Piping",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in ReskinPipingEditor.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/Piping/ReskinPipingEditor.vue",
+          "line": 7,
+          "snippet": "<label class=\"piping-section-label\">Locations</label>"
+        }
+      ]
+    },
+    {
+      "id": "BLD-065",
+      "title": "Recolor pattern layers",
+      "description": "The builder shall let users recolor each layer of a body-part pattern.",
+      "category": "Patterns",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in ReskinParts.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/Parts/ReskinParts.vue",
+          "line": 84,
+          "snippet": "@select=\"(color) => historyStore.runWithCheckpoint('pattern color', () => changePatternColor(part, layer, color))\""
+        }
+      ]
+    },
+    {
+      "id": "BLD-066",
+      "title": "Remove pattern",
+      "description": "The builder shall let users remove a body-part pattern, with a delete confirmation in the classic panel.",
+      "category": "Patterns",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in PatternGroupPanel.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/Builder/Pattern/PatternGroupPanel.vue",
+          "line": 344,
+          "snippet": "message: 'Are you sure you want to delete this pattern?'"
+        }
+      ]
+    },
+    {
+      "id": "BLD-067",
+      "title": "No available patterns notice",
+      "description": "The builder shall notify the user when no patterns are available.",
+      "category": "Patterns",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in PatternSelection.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/Builder/Modals/PatternSelection.vue",
+          "line": 100,
+          "snippet": "message: `No available patterns.`,"
+        }
+      ]
+    },
+    {
+      "id": "BLD-068",
+      "title": "Application pattern removal",
+      "description": "The builder shall confirm before removing a pattern from a text application.",
+      "category": "Patterns",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in ApplicationColors.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/Builder/Application/ApplicationColors.vue",
+          "line": 751,
+          "snippet": "message: 'Are you sure you want to remove this pattern?'"
+        }
+      ]
+    },
+    {
+      "id": "BLD-069",
+      "title": "Custom Pro clears patterns",
+      "description": "The builder shall remove all applied patterns when Custom Pro is enabled.",
+      "category": "Patterns",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in BuilderReskin.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/BuilderReskin.vue",
+          "line": 16,
+          "snippet": "<CustomProTab v-show=\"activeTab === 'custom-pro'\" @onEnable=\"removePatterns\" />"
+        }
+      ]
+    },
+    {
+      "id": "BLD-070",
+      "title": "Vectorsoft vs Inksoft logo editor",
+      "description": "The builder shall use the Vectorsoft logo and Design Studio modals when the vectorizer feature (brand toggle 14) is enabled, otherwise the Inksoft logo editor.",
+      "category": "Logos & Art",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in BuilderReskin.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/BuilderReskin.vue",
+          "line": 154,
+          "snippet": "<VectorsoftLogoModal v-if=\"featureStore.vectorizerEnabled\" :from-builder=\"true\" ref=\"vectorsoftLogoModal\" />"
+        },
+        {
+          "file": "resources/js/stores/master-feature.js",
+          "line": 32,
+          "snippet": "const VECTORIZER_TOGGLE_ID = '14';"
+        }
+      ]
+    },
+    {
+      "id": "BLD-071",
+      "title": "Inksoft custom and saved logos",
+      "description": "The builder shall offer Custom Logo (Inksoft designer) and Saved Logo tabs for logos when the vectorizer is off.",
+      "category": "Logos & Art",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in UploadLogo.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/Builder/Modals/UploadLogo.vue",
+          "line": 19,
+          "snippet": "<a class=\"\" id=\"saved-logo-tab\" aria-expanded=\"false\">Saved Logo</a>"
+        },
+        {
+          "file": "resources/js/Components/Builder/Modals/UploadLogo.vue",
+          "line": 172,
+          "snippet": "<p v-else>No saved logos yet</p>"
+        }
+      ]
+    },
+    {
+      "id": "BLD-072",
+      "title": "Accepted logo file types",
+      "description": "The builder shall accept SVG, PNG, JPEG, GIF, BMP, PDF, AI, TIFF and EPS files for logo upload.",
+      "category": "Logos & Art",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in LogoLocations.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/Builder/Logo/LogoLocations.vue",
+          "line": 25,
+          "snippet": "accept=\"image/svg+xml,image/png,image/jpeg,image/jpg,image/gif,image/bmp,application/pdf,.ai,.tiff,.tif,.eps\""
+        }
+      ]
+    },
+    {
+      "id": "BLD-073",
+      "title": "Add application wizard",
+      "description": "The classic builder shall add a logo application by choosing App Type, Part and Location.",
+      "category": "Logos & Art",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in LogoLocations.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/Builder/Logo/LogoLocations.vue",
+          "line": 79,
+          "snippet": "<h6 class=\"m-0 t-s-xs t-t-uppercase t-w-bolder\">Choose Location</h6>"
+        }
+      ]
+    },
+    {
+      "id": "BLD-074",
+      "title": "Custom team logo via Inksoft",
+      "description": "The builder shall create a custom team logo from an Inksoft design.",
+      "category": "Logos & Art",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in UploadLogo.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/Builder/Modals/UploadLogo.vue",
+          "line": 468,
+          "snippet": "const baseUrl = 'https://stores.inksoft.com';"
+        }
+      ]
+    },
+    {
+      "id": "BLD-075",
+      "title": "Remove all logos",
+      "description": "The builder shall let users remove all logos after confirmation.",
+      "category": "Logos & Art",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in LogoList.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/Builder/Logo/LogoList.vue",
+          "line": 548,
+          "snippet": "message: 'Are you sure you want to remove all the logos?'"
+        }
+      ]
+    },
+    {
+      "id": "BLD-076",
+      "title": "Brand logo cannot be removed",
+      "description": "The builder shall prevent removal of a mandatory brand logo.",
+      "category": "Logos & Art",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in BrandLogo.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/Builder/Logo/BrandLogo.vue",
+          "line": 435,
+          "snippet": "message: `Removing of brand logo is not available.`,"
+        }
+      ]
+    },
+    {
+      "id": "BLD-077",
+      "title": "Inksoft logo transition notice",
+      "description": "The builder shall warn that an InkSoft logo was removed from the design as part of the transition.",
+      "category": "Logos & Art",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in BuilderReskin.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/BuilderReskin.vue",
+          "line": 1968,
+          "snippet": "message: 'The InkSoft logo in your design was removed as part of the transition.',"
+        }
+      ]
+    },
+    {
+      "id": "BLD-078",
+      "title": "Logo edit and preview",
+      "description": "The reskinned application editor shall let users edit a logo and view its file/art details.",
+      "category": "Logos & Art",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in ApplicationEditor.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/Applications/ApplicationEditor.vue",
+          "line": 39,
+          "snippet": "<a class=\"edit-logo\" uk-tooltip=\"title: Edit; delay: 900\" @click=\"onEditLogo\">"
+        }
+      ]
+    },
+    {
+      "id": "BLD-079",
+      "title": "Add text application",
+      "description": "The builder shall add team name, player name, player number and custom text applications, and notify when no location is available.",
+      "category": "Text & Numbers",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in AddText.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/Builder/Text/AddText.vue",
+          "line": 41,
+          "snippet": "message: `Cannot find available location for ${type}`,"
+        },
+        {
+          "file": "resources/js/Components/BuilderReskin/Tabs/ApplicationsTab.vue",
+          "line": 866,
+          "snippet": "message: `Successfully added a ${data.type}.`,"
+        }
+      ]
+    },
+    {
+      "id": "BLD-080",
+      "title": "Text font selection",
+      "description": "The application editor shall let users choose a font for a text application.",
+      "category": "Text & Numbers",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in ApplicationEditor.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/Applications/ApplicationEditor.vue",
+          "line": 332,
+          "snippet": "<span>Font</span>"
+        }
+      ]
+    },
+    {
+      "id": "BLD-081",
+      "title": "Text layout selection",
+      "description": "The application editor shall let users choose a text layout (shape).",
+      "category": "Text & Numbers",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in ApplicationEditor.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/Applications/ApplicationEditor.vue",
+          "line": 367,
+          "snippet": "<span>Layout</span>"
+        }
+      ]
+    },
+    {
+      "id": "BLD-082",
+      "title": "Tail sweep for team names",
+      "description": "The application editor shall offer a Tail Sweep option (including None) for team name applications.",
+      "category": "Text & Numbers",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in ApplicationEditor.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/Applications/ApplicationEditor.vue",
+          "line": 412,
+          "snippet": "<span>Tailsweep</span>"
+        }
+      ]
+    },
+    {
+      "id": "BLD-083",
+      "title": "Text accents/outlines",
+      "description": "The application editor shall let users choose a text accent (outline style) and recolor its layers.",
+      "category": "Text & Numbers",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in ApplicationEditor.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/Applications/ApplicationEditor.vue",
+          "line": 182,
+          "snippet": "<span>Accent</span>"
+        }
+      ]
+    },
+    {
+      "id": "BLD-084",
+      "title": "Apply to all player names",
+      "description": "The builder shall apply one player name configuration to all player names after confirmation.",
+      "category": "Text & Numbers",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in PlayerName.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/Builder/Text/PlayerName.vue",
+          "line": 736,
+          "snippet": "message: 'All configuration will be apply to all player names. Do you wish to continue?'"
+        }
+      ]
+    },
+    {
+      "id": "BLD-085",
+      "title": "Remove all player numbers",
+      "description": "The builder shall let users remove all player numbers after confirmation.",
+      "category": "Text & Numbers",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in PlayerNumber.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/Builder/Text/PlayerNumber.vue",
+          "line": 771,
+          "snippet": "message: 'Are you sure you want to remove all the player numbers?'"
+        }
+      ]
+    },
+    {
+      "id": "BLD-086",
+      "title": "Apply styling to all",
+      "description": "The reskinned application editor shall offer an action to apply the current styling to all matching applications.",
+      "category": "Text & Numbers",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in ApplicationEditor.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/Applications/ApplicationEditor.vue",
+          "line": 126,
+          "snippet": "@click=\"onApplyStylingToAll\">"
+        }
+      ]
+    },
+    {
+      "id": "BLD-087",
+      "title": "Size, position, rotation, alignment",
+      "description": "The application editor shall provide size, position and rotation sliders and alignment controls.",
+      "category": "Applications",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in ApplicationEditor.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/Applications/ApplicationEditor.vue",
+          "line": 81,
+          "snippet": "<ReskinRotationSlider />"
+        },
+        {
+          "file": "resources/js/Components/BuilderReskin/Applications/ApplicationEditor.vue",
+          "line": 84,
+          "snippet": "<ReskinAlignmentControls />"
+        }
+      ]
+    },
+    {
+      "id": "BLD-088",
+      "title": "Logo opacity control",
+      "description": "The application editor shall let users increase or decrease logo opacity.",
+      "category": "Applications",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in ApplicationEditor.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/Applications/ApplicationEditor.vue",
+          "line": 89,
+          "snippet": "<h5 class=\"uk-display-inline uk-text-middle label\">Opacity</h5>"
+        }
+      ]
+    },
+    {
+      "id": "BLD-089",
+      "title": "Applications grouped by body part",
+      "description": "The Applications tab shall group applications by body part in the order Front Body, Back Body, Left Sleeve, Right Sleeve, Shoulder Number.",
+      "category": "Applications",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in ApplicationsTab.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/Tabs/ApplicationsTab.vue",
+          "line": 212,
+          "snippet": "const SECTION_ORDER = ['Front Body', 'Back Body', 'Left Sleeve', 'Right Sleeve', 'Shoulder Number'];"
+        }
+      ]
+    },
+    {
+      "id": "BLD-090",
+      "title": "Drag to reorder layers",
+      "description": "The builder shall let users drag applications within a body part to change their stacking order.",
+      "category": "Applications",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in ApplicationsTab.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/Tabs/ApplicationsTab.vue",
+          "line": 726,
+          "snippet": "customizerStore.updateApplicationOrder(newOrder);"
+        }
+      ]
+    },
+    {
+      "id": "BLD-091",
+      "title": "Per-side applications list",
+      "description": "The Applications tab shall let users switch between Side A and Side B applications on reversible uniforms.",
+      "category": "Applications",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in ApplicationsTab.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/Tabs/ApplicationsTab.vue",
+          "line": 29,
+          "snippet": "@click.prevent=\"selectSide(uniform)\">"
+        }
+      ]
+    },
+    {
+      "id": "BLD-092",
+      "title": "Duplicate single application",
+      "description": "The builder shall duplicate an application to another location and block it when the application/location limit is reached.",
+      "category": "Applications",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in ApplicationsTab.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/Tabs/ApplicationsTab.vue",
+          "line": 410,
+          "snippet": "message: 'Cannot duplicate. Maximum application limit reached.',"
+        }
+      ]
+    },
+    {
+      "id": "BLD-093",
+      "title": "Limits and paid extra applications",
+      "description": "The builder shall disable Add Text/Add Logo and duplication when the style application limit is reached, and show the limit / paid additional application message.",
+      "category": "Applications",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in ApplicationsTab.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/Tabs/ApplicationsTab.vue",
+          "line": 73,
+          "snippet": ":disabled=\"isAddDisabled\" @click=\"onAddText\">"
+        },
+        {
+          "file": "resources/js/Components/BuilderReskin/Tabs/ApplicationsTab.vue",
+          "line": 320,
+          "snippet": "return isApplicationLimitReached(customizerStore);"
+        }
+      ]
+    },
+    {
+      "id": "BLD-094",
+      "title": "Delete application",
+      "description": "The builder shall confirm before removing an application and clear roster numbers/names when the last player number/name application is deleted.",
+      "category": "Applications",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in ApplicationsTab.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/Tabs/ApplicationsTab.vue",
+          "line": 661,
+          "snippet": "message: \"Are you sure you want to remove this application?\""
+        },
+        {
+          "file": "resources/js/Components/BuilderReskin/Tabs/ApplicationsTab.vue",
+          "line": 645,
+          "snippet": "rosterStore.clearPlayerNumbersFromRoster();"
+        }
+      ]
+    },
+    {
+      "id": "BLD-095",
+      "title": "Classic layers panel ordering",
+      "description": "The classic Layers panel shall list applications by z-index and allow drag reordering.",
+      "category": "Applications",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in ApplicationLayer.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/Builder/Layers/ApplicationLayer.vue",
+          "line": 98,
+          "snippet": ".sort((a, b) => (b.zIndex ?? 0) - (a.zIndex ?? 0));"
+        }
+      ]
+    },
+    {
+      "id": "BLD-096",
+      "title": "Unavailable sizes block cart",
+      "description": "The builder shall warn and switch to the Roster tab when the roster contains sizes no longer available, and disable the Add to Cart button.",
+      "category": "Roster & Sizes",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in BuilderReskin.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/BuilderReskin.vue",
+          "line": 867,
+          "snippet": "message: `Please remove unavailable sizes before adding the item to cart.<ul>${listSizes.join('')}</ul>`,"
+        },
+        {
+          "file": "resources/js/Components/BuilderReskin/Layout/Header.vue",
+          "line": 272,
+          "snippet": "const isCtaDisabled = computed(() => props.hasUnavailableSizes);"
+        }
+      ]
+    },
+    {
+      "id": "BLD-097",
+      "title": "Player numbers need roster entries",
+      "description": "The builder shall ask the user to remove player numbers or add numbers to the roster when the design has numbers but the roster does not.",
+      "category": "Roster & Sizes",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in BuilderReskin.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/BuilderReskin.vue",
+          "line": 1023,
+          "snippet": "message: 'Player Numbers are included in your design. Would you like to \"Remove\" this OR \"Add Numbers(s)\" to your roster?',"
+        }
+      ]
+    },
+    {
+      "id": "BLD-098",
+      "title": "Player names need roster entries",
+      "description": "The builder shall ask the user to remove player names or add names to the roster when the design has names but the roster does not.",
+      "category": "Roster & Sizes",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in BuilderReskin.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/BuilderReskin.vue",
+          "line": 1043,
+          "snippet": "message: 'Player Names are included on your design, would you like to \"Remove\" this OR \"Add Name(s)\" to your roster?',"
+        }
+      ]
+    },
+    {
+      "id": "BLD-099",
+      "title": "Graduation year needs roster",
+      "description": "The builder shall ask the user to remove the graduation year or add graduation years to the roster.",
+      "category": "Roster & Sizes",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in BuilderReskin.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/BuilderReskin.vue",
+          "line": 1063,
+          "snippet": "message: 'A graduation year is included on your design, would you like to \"Remove\" this OR \"Add Graduation Year(s)\" to your roster?',"
+        }
+      ]
+    },
+    {
+      "id": "BLD-100",
+      "title": "Hemline required",
+      "description": "The builder shall require a hemline to be chosen before saving the roster.",
+      "category": "Roster & Sizes",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in BuilderReskin.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/BuilderReskin.vue",
+          "line": 1079,
+          "snippet": "message: 'You need to choose a Hemline before saving the roster.',"
+        }
+      ]
+    },
+    {
+      "id": "BLD-101",
+      "title": "Roster auto-persist",
+      "description": "The reskinned builder shall auto-save roster edits into the design (debounced 100 ms) and recalculate add-ons.",
+      "category": "Roster & Sizes",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in BuilderReskin.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/BuilderReskin.vue",
+          "line": 1359,
+          "snippet": "const PERSIST_ROSTER_DEBOUNCE_MS = 100;"
+        }
+      ]
+    },
+    {
+      "id": "BLD-102",
+      "title": "Advanced application sizing",
+      "description": "The builder shall open an advanced application sizing modal from the roster.",
+      "category": "Roster & Sizes",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in BuilderReskin.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/BuilderReskin.vue",
+          "line": 128,
+          "snippet": "<ReskinAdvancedAppSizing ref=\"advancedAppSizingModal\" />"
+        }
+      ]
+    },
+    {
+      "id": "BLD-103",
+      "title": "Sizing, measuring and inseam guides",
+      "description": "The builder shall show sizing guide, how-to-measure and inseam guide modals when the style provides them.",
+      "category": "Roster & Sizes",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in BuilderReskin.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/BuilderReskin.vue",
+          "line": 132,
+          "snippet": ":sizing-guide=\"rosterStore.getSizingGuide\""
+        },
+        {
+          "file": "resources/js/Components/BuilderReskin/BuilderReskin.vue",
+          "line": 142,
+          "snippet": ":inseam-guide=\"rosterStore.getInseamGuide\""
+        }
+      ]
+    },
+    {
+      "id": "BLD-104",
+      "title": "Copy and upload roster",
+      "description": "The Roster tab shall support copying a roster from another item and uploading a roster file.",
+      "category": "Roster & Sizes",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in RosterTab.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/Tabs/RosterTab.vue",
+          "line": 417,
+          "snippet": "import ReskinCopyRoster from '@/Components/BuilderReskin/Modals/ReskinCopyRoster.vue';"
+        },
+        {
+          "file": "resources/js/Components/BuilderReskin/Tabs/RosterTab.vue",
+          "line": 418,
+          "snippet": "import ReskinUploadRoster from '@/Components/BuilderReskin/Modals/ReskinUploadRoster.vue';"
+        }
+      ]
+    },
+    {
+      "id": "BLD-105",
+      "title": "Number ranges and extras",
+      "description": "The Roster tab shall let users add player number ranges, additional numbers and custom numbers.",
+      "category": "Roster & Sizes",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in RosterTab.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/Tabs/RosterTab.vue",
+          "line": 133,
+          "snippet": "<label for=\"range-from\">Add Range</label>"
+        },
+        {
+          "file": "resources/js/Components/BuilderReskin/Tabs/RosterTab.vue",
+          "line": 266,
+          "snippet": "<label for=\"more-from\">Additional Numbers</label>"
+        }
+      ]
+    },
+    {
+      "id": "BLD-106",
+      "title": "Reorder disables, not deletes",
+      "description": "In reorder mode the builder shall disable (turn off) player numbers/names instead of deleting them.",
+      "category": "Roster & Sizes",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in BuilderReskin.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/BuilderReskin.vue",
+          "line": 926,
+          "snippet": "await customizerStore.changeAllPlayerNumbersStatus('off');"
+        }
+      ]
+    },
+    {
+      "id": "BLD-107",
+      "title": "Reorder clears roster",
+      "description": "Opening an item for reorder shall clear its roster and application sizes.",
+      "category": "Roster & Sizes",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in CartItemController.php implements this behaviour.",
+      "evidence": [
+        {
+          "file": "app/Http/Controllers/Pages/CartItemController.php",
+          "line": 286,
+          "snippet": "$this->clearRosterAndApplicationSizes($cartItem);"
+        }
+      ]
+    },
+    {
+      "id": "BLD-108",
+      "title": "Classic roster summary",
+      "description": "The classic Roster panel shall summarise size, items and player numbers per roster.",
+      "category": "Roster & Sizes",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in RosterPanel.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/Builder/Roster/RosterPanel.vue",
+          "line": 22,
+          "snippet": "<span>Player Numbers</span>"
+        }
+      ]
+    },
+    {
+      "id": "BLD-109",
+      "title": "Minimum order fee confirmation",
+      "description": "The builder shall warn with a Minimum Order confirmation (Add item(s) or accept) and apply the minimum order fee to both sides when quantity is below the MOQ.",
+      "category": "Pricing & MOQ",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in BuilderReskin.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/BuilderReskin.vue",
+          "line": 885,
+          "snippet": "header: 'Minimum Order',"
+        },
+        {
+          "file": "resources/js/Components/BuilderReskin/BuilderReskin.vue",
+          "line": 895,
+          "snippet": "customizerStore.addMinimumOrderFee(true);"
+        }
+      ]
+    },
+    {
+      "id": "BLD-110",
+      "title": "MOQ from block pattern rule",
+      "description": "The builder shall read the minimum order quantity from the style's block pattern rule and pass it to the roster table.",
+      "category": "Pricing & MOQ",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in BuilderReskin.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/BuilderReskin.vue",
+          "line": 333,
+          "snippet": "return activeUniformSide.value?.resources?.brand_style_data?.block_pattern_rule?.moq || 0;"
+        }
+      ]
+    },
+    {
+      "id": "BLD-111",
+      "title": "MOQ shown with tooltip",
+      "description": "The builder shall display the Minimum Order Quantity with an explanatory tooltip when MOQ > 1.",
+      "category": "Pricing & MOQ",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in DesignInformation.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/Builder/DesignInformation.vue",
+          "line": 49,
+          "snippet": "<span class=\"moq-info-text\" style=\"color:#707070 !important;\">Minimum Order Quantity {{ designInfo.moq }}</span>"
+        },
+        {
+          "file": "resources/js/Components/BuilderReskin/Tabs/SummaryTab.vue",
+          "line": 30,
+          "snippet": "<span>Minimum Order Quantity</span>"
+        }
+      ]
+    },
+    {
+      "id": "BLD-112",
+      "title": "Pricing by user role",
+      "description": "The builder shall load dealer pricing for dealers and rep cost for others, and MOQ settings by factory.",
+      "category": "Pricing & MOQ",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in BuilderReskin.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/BuilderReskin.vue",
+          "line": 1642,
+          "snippet": "customizerStore.factoryWithMOQ = await fetchMOQByFactory();"
+        }
+      ]
+    },
+    {
+      "id": "BLD-113",
+      "title": "Retail vs dealer prices",
+      "description": "The builder shall show MSRP Adult/Youth prices under retail cost and dealer prices under dealer cost.",
+      "category": "Pricing & MOQ",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in DesignInformation.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/Builder/DesignInformation.vue",
+          "line": 107,
+          "snippet": "<div v-if=\"costSettingsStore.isDealerCost\""
+        }
+      ]
+    },
+    {
+      "id": "BLD-114",
+      "title": "Summary subtotal and base price",
+      "description": "The Summary tab shall show the item subtotal and base price.",
+      "category": "Pricing & MOQ",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in SummaryTab.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/Tabs/SummaryTab.vue",
+          "line": 6,
+          "snippet": "<div>Item Subtotal</div>"
+        },
+        {
+          "file": "resources/js/Components/BuilderReskin/Tabs/SummaryTab.vue",
+          "line": 38,
+          "snippet": "<div>Base Price</div>"
+        }
+      ]
+    },
+    {
+      "id": "BLD-115",
+      "title": "Add-ons recalculated",
+      "description": "The builder shall recalculate add-ons whenever active applications, locations or add-ons change.",
+      "category": "Add-ons",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in BuilderReskin.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/BuilderReskin.vue",
+          "line": 1398,
+          "snippet": "() => customizerStore.getActiveApplicationsLength,"
+        }
+      ]
+    },
+    {
+      "id": "BLD-116",
+      "title": "Edit add-on from Summary",
+      "description": "The Summary tab shall let users jump to the tab that controls an add-on.",
+      "category": "Add-ons",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in BuilderReskin.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/BuilderReskin.vue",
+          "line": 28,
+          "snippet": "<SummaryTab v-show=\"activeTab === 'summary'\" @edit-add-on=\"onEditAddOn\" />"
+        }
+      ]
+    },
+    {
+      "id": "BLD-117",
+      "title": "Rush not allowed with Custom Pro",
+      "description": "The builder shall warn that adding a Custom Pro item removes Rush Production from the shipping group, and the server shall remove rush from that factory group.",
+      "category": "Add-ons",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in SelectCart.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/Builder/Modals/SelectCart.vue",
+          "line": 367,
+          "snippet": "header: 'Adding Item to Cart',"
+        },
+        {
+          "file": "app/Http/Controllers/Pages/CartItemController.php",
+          "line": 602,
+          "snippet": "$this->removeRushManufacture($cart, $request->factory_code);"
+        }
+      ]
+    },
+    {
+      "id": "BLD-118",
+      "title": "Design file upload types",
+      "description": "Custom Pro shall accept JPG, JPEG, PNG and PDF design files.",
+      "category": "Custom Pro",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in CustomProPanel.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/Builder/CustomPro/CustomProPanel.vue",
+          "line": 121,
+          "snippet": "accept=\".jpg,.jpeg,.png,.pdf\" @change=\"handleFileUpload\">"
+        }
+      ]
+    },
+    {
+      "id": "BLD-119",
+      "title": "PDF size limit and compression",
+      "description": "Custom Pro shall reject PDFs over 50 MB and compress images over 3 MB.",
+      "category": "Custom Pro",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in CustomProPanel.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/Builder/CustomPro/CustomProPanel.vue",
+          "line": 193,
+          "snippet": "const PDF_MAX_SIZE_BYTES = 50 * 1024 * 1024;"
+        },
+        {
+          "file": "resources/js/Components/Builder/CustomPro/CustomProPanel.vue",
+          "line": 205,
+          "snippet": "message: \"The PDF exceeds the 50MB limit and needs to be optimized before uploading.\","
+        }
+      ]
+    },
+    {
+      "id": "BLD-120",
+      "title": "Remove design file",
+      "description": "Custom Pro shall confirm before removing an uploaded design file.",
+      "category": "Custom Pro",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in CustomProPanel.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/Builder/CustomPro/CustomProPanel.vue",
+          "line": 279,
+          "snippet": "header: 'Remove Design File',"
+        }
+      ]
+    },
+    {
+      "id": "BLD-121",
+      "title": "Missing Custom Pro items",
+      "description": "The builder shall block cart/save until a design file, fabric and main body color are provided for Custom Pro.",
+      "category": "Custom Pro",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in BuilderReskin.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/BuilderReskin.vue",
+          "line": 1599,
+          "snippet": "header: 'Missing Items',"
+        }
+      ]
+    },
+    {
+      "id": "BLD-122",
+      "title": "Enable/disable erases design",
+      "description": "Custom Pro shall warn that enabling or disabling it erases roster and design information.",
+      "category": "Custom Pro",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in CustomProPanel.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/Builder/CustomPro/CustomProPanel.vue",
+          "line": 350,
+          "snippet": "message: `You’re about to enable ${manualOrderInfo.name?.toTitleCase()} for this item. This will erase any roster and design information already applied. Continue?`"
+        }
+      ]
+    },
+    {
+      "id": "BLD-123",
+      "title": "Save and Share modal",
+      "description": "The builder shall open a Save and Share modal with design preview (including Side B) after switching to Side A and refreshing thumbnails.",
+      "category": "Save & Share",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in SaveAndShare.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/Builder/Modals/SaveAndShare.vue",
+          "line": 9,
+          "snippet": "<h1 class=\"uk-modal-title heading\">Save and Share</h1>"
+        },
+        {
+          "file": "resources/js/Components/BuilderReskin/BuilderReskin.vue",
+          "line": 801,
+          "snippet": "const saveAndShare = async () => {"
+        }
+      ]
+    },
+    {
+      "id": "BLD-124",
+      "title": "Design name required",
+      "description": "The Save and Share form shall require a Design Name and accept notes.",
+      "category": "Save & Share",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in SaveAndShare.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/Builder/Modals/SaveAndShare.vue",
+          "line": 117,
+          "snippet": "<span>Design Name</span><span class=\"required\">*</span>"
+        }
+      ]
+    },
+    {
+      "id": "BLD-125",
+      "title": "Save, update, save as new",
+      "description": "The builder shall let users Save, Update an existing saved design or Save as New.",
+      "category": "Save & Share",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in SaveAndShare.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/Builder/Modals/SaveAndShare.vue",
+          "line": 275,
+          "snippet": ":text=\"'Save as New'\""
+        },
+        {
+          "file": "resources/js/Components/Builder/Modals/SaveAndShare.vue",
+          "line": 540,
+          "snippet": "message: `We cannot update your design for now`,"
+        }
+      ]
+    },
+    {
+      "id": "BLD-126",
+      "title": "Share design after saving",
+      "description": "The builder shall let users share a design only after it is saved.",
+      "category": "Save & Share",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in SaveAndShare.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/Builder/Modals/SaveAndShare.vue",
+          "line": 321,
+          "snippet": "Save before sharing</div>"
+        },
+        {
+          "file": "resources/js/Components/BuilderReskin/BuilderReskin.vue",
+          "line": 818,
+          "snippet": "shareDesignModal.value.show({ id: design.id, name: design.name });"
+        }
+      ]
+    },
+    {
+      "id": "BLD-127",
+      "title": "Download PDF",
+      "description": "The builder shall generate and download a design PDF.",
+      "category": "Save & Share",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in SaveAndShare.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/Builder/Modals/SaveAndShare.vue",
+          "line": 592,
+          "snippet": "const pdf_url = await customizerStore.generatePdfUrl(payload);"
+        }
+      ]
+    },
+    {
+      "id": "BLD-128",
+      "title": "Download images",
+      "description": "The reskinned builder shall let users download design images from the Save modal.",
+      "category": "Save & Share",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in BuilderReskin.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/BuilderReskin.vue",
+          "line": 148,
+          "snippet": "<SaveAndShare ref=\"saveAndShareModal\" @share=\"shareDesign\" @download-images=\"downloadImagesModal?.show()\" />"
+        }
+      ]
+    },
+    {
+      "id": "BLD-129",
+      "title": "Save disabled during reorder",
+      "description": "The classic builder shall disable Save & Share in reorder mode.",
+      "category": "Save & Share",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in Sidebar.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/Builder/Sidebar.vue",
+          "line": 67,
+          "snippet": ":class=\"{'uk-disabled': isReorder || is_reorder}\""
+        }
+      ]
+    },
+    {
+      "id": "BLD-130",
+      "title": "Add-to-cart validation chain",
+      "description": "Before opening cart selection the builder shall check team selection, color minimum, logo conflicts, brand logo color, Custom Pro data, unavailable sizes and roster rules.",
+      "category": "Add to Cart",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in BuilderReskin.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/BuilderReskin.vue",
+          "line": 1162,
+          "snippet": "if (await checkRosterValidations(() => selectCartModal.value.showModal(props.sports))) return;"
+        }
+      ]
+    },
+    {
+      "id": "BLD-131",
+      "title": "Add or Update label",
+      "description": "The builder shall show \"Update Item\" when editing a cart item, quote, ask-for-changes request or edit-reorder item, otherwise \"Add to Cart\".",
+      "category": "Add to Cart",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in Header.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/Layout/Header.vue",
+          "line": 251,
+          "snippet": "return ctaEvent.value === 'updateCart' ? 'Update Item' : 'Add to Cart';"
+        }
+      ]
+    },
+    {
+      "id": "BLD-132",
+      "title": "Cart must be selected",
+      "description": "The cart selection shall require a cart to be selected before saving the item.",
+      "category": "Add to Cart",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in SelectCart.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/Builder/Modals/SelectCart.vue",
+          "line": 396,
+          "snippet": "notify({ message: 'Please select a cart first.', type: 'danger', position: 'right' });"
+        }
+      ]
+    },
+    {
+      "id": "BLD-133",
+      "title": "Save reorder to multiple carts",
+      "description": "For a reorder in the reskinned builder, cart selection shall allow saving to several carts at once.",
+      "category": "Add to Cart",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in SelectCart.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/Builder/Modals/SelectCart.vue",
+          "line": 249,
+          "snippet": "return `SAVE TO ${n} CARTS`;"
+        }
+      ]
+    },
+    {
+      "id": "BLD-134",
+      "title": "Create a new cart",
+      "description": "The cart selection shall let users create a new named cart (and team for Team DB) for the item.",
+      "category": "Add to Cart",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in CartForm.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/Builder/Cart/CartForm.vue",
+          "line": 142,
+          "snippet": ":placeholder=\"`Cart name`\""
+        }
+      ]
+    },
+    {
+      "id": "BLD-135",
+      "title": "Server validates cart item",
+      "description": "The server shall validate cart item data (name, sport, style, builder customization, PDF JSON, images, team DB and reversible fields) on store.",
+      "category": "Add to Cart",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in CartItemController.php implements this behaviour.",
+      "evidence": [
+        {
+          "file": "app/Http/Controllers/Pages/CartItemController.php",
+          "line": 482,
+          "snippet": "'pdf_json' => ['required', 'json', new NotEmptyJson],"
+        },
+        {
+          "file": "app/Http/Controllers/Pages/CartItemController.php",
+          "line": 503,
+          "snippet": "'style_id_b' => 'required_if:is_reversible,1|numeric|digits_between:1,20',"
+        }
+      ]
+    },
+    {
+      "id": "BLD-136",
+      "title": "Team cart must match team",
+      "description": "The server shall reject a cart item whose Team Database team differs from the cart's team.",
+      "category": "Add to Cart",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in CartItemController.php implements this behaviour.",
+      "evidence": [
+        {
+          "file": "app/Http/Controllers/Pages/CartItemController.php",
+          "line": 568,
+          "snippet": "Log::error('Cart Team ID does not match request team ID');"
+        }
+      ]
+    },
+    {
+      "id": "BLD-137",
+      "title": "Rep adds to customer cart",
+      "description": "The server shall let a sales representative add an item to a cart owned by one of their customers.",
+      "category": "Add to Cart",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in CartItemController.php implements this behaviour.",
+      "evidence": [
+        {
+          "file": "app/Http/Controllers/Pages/CartItemController.php",
+          "line": 541,
+          "snippet": "if ($cartOwner->sales_representative_id === $user->id) {"
+        }
+      ]
+    },
+    {
+      "id": "BLD-138",
+      "title": "Update cart item",
+      "description": "The builder shall update an existing cart item via PUT after uploading item images, and the server shall reject a change to a different team.",
+      "category": "Add to Cart",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in BuilderReskin.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/BuilderReskin.vue",
+          "line": 1280,
+          "snippet": "const imageUploadResult = await storeItemImage(cartItem.id, images, { notify });"
+        },
+        {
+          "file": "app/Http/Controllers/Pages/CartItemController.php",
+          "line": 2324,
+          "snippet": "return $this->redirectBackWithNotification('danger', \"Unable to update the item with a different team.\");"
+        }
+      ]
+    },
+    {
+      "id": "BLD-139",
+      "title": "Locked design notice",
+      "description": "In reorder mode the builder shall show a LOCKED badge explaining the design is locked to match the original.",
+      "category": "Reorder Lock",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in BuilderReskin.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/BuilderReskin.vue",
+          "line": 113,
+          "snippet": "<p>Jersey design is locked to be sure the design is the same as the original design.</p>"
+        }
+      ]
+    },
+    {
+      "id": "BLD-140",
+      "title": "Reorder limits tabs",
+      "description": "In reorder mode the reskinned builder shall only allow the Roster and Applications tabs.",
+      "category": "Reorder Lock",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in Sidebar.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/Layout/Sidebar.vue",
+          "line": 113,
+          "snippet": "return tab.code !== 'roster' && tab.code !== 'applications';"
+        }
+      ]
+    },
+    {
+      "id": "BLD-141",
+      "title": "Reorder order references",
+      "description": "In reorder mode the builder shall capture factory order, part and order item IDs from the URL.",
+      "category": "Reorder Lock",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in BuilderReskin.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/BuilderReskin.vue",
+          "line": 667,
+          "snippet": "const foid = getQueryStringValue('foid');"
+        }
+      ]
+    },
+    {
+      "id": "BLD-142",
+      "title": "Classic reorder panels",
+      "description": "In classic reorder mode only the Roster panel (plus Text when player applications exist) is enabled.",
+      "category": "Reorder Lock",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in Sidebar.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/Builder/Sidebar.vue",
+          "line": 175,
+          "snippet": "return panel.code !== 'roster';"
+        }
+      ]
+    },
+    {
+      "id": "BLD-143",
+      "title": "Resolve and Submit action",
+      "description": "When the item is rejected, the builder header shall replace Save/Add to Cart with Cancel and Resolve and Submit.",
+      "category": "Rework Mode",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in Header.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/Layout/Header.vue",
+          "line": 69,
+          "snippet": "<div class=\"nav-cta\" v-if=\"!isViewOnly && isBrandStyle && cartItemStore.isRejected\">"
+        }
+      ],
+      "relatedBrd": [
+        "REQ-020"
+      ]
+    },
+    {
+      "id": "BLD-144",
+      "title": "Cancel rework",
+      "description": "Cancelling rework shall return the user to the Orders page (or the referring orders URL).",
+      "category": "Rework Mode",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in Header.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/Layout/Header.vue",
+          "line": 266,
+          "snippet": "return route('users.orders');"
+        }
+      ]
+    },
+    {
+      "id": "BLD-145",
+      "title": "Issues and Logs tabs",
+      "description": "The Notes dropdown shall have Issues and Logs tabs.",
+      "category": "Rework Mode",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in NotesDropdown.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/Layout/NotesDropdown.vue",
+          "line": 24,
+          "snippet": "<li class=\"uk-active\"><a class=\"switch-item\" href=\"#\">Issues</a></li>"
+        }
+      ],
+      "relatedBrd": [
+        "REQ-026",
+        "REQ-030"
+      ]
+    },
+    {
+      "id": "BLD-146",
+      "title": "Rework notes and badge",
+      "description": "The Issues tab shall show a Rework badge with date, the rework notes and attachments.",
+      "category": "Rework Mode",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in NotesDropdown.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/Layout/NotesDropdown.vue",
+          "line": 124,
+          "snippet": "<span class=\"logs-rework-label\">Rework</span>"
+        },
+        {
+          "file": "resources/js/Components/BuilderReskin/Layout/NotesDropdown.vue",
+          "line": 133,
+          "snippet": "{{ currentReworkLog.rework_notes }}"
+        }
+      ],
+      "relatedBrd": [
+        "REQ-017",
+        "REQ-033"
+      ]
+    },
+    {
+      "id": "BLD-147",
+      "title": "Do-not-change warning",
+      "description": "The Issues tab shall warn that changes beyond the rework notes may affect pricing or delay production.",
+      "category": "Rework Mode",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in NotesDropdown.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/Layout/NotesDropdown.vue",
+          "line": 129,
+          "snippet": "Making any changes other than those outlined below may affect pricing or delay production."
+        }
+      ],
+      "relatedBrd": [
+        "REQ-021"
+      ]
+    },
+    {
+      "id": "BLD-148",
+      "title": "Notes and attachments field",
+      "description": "The rework form shall offer optional notes and attachments, becoming a required explanation when additional changes are selected.",
+      "category": "Rework Mode",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in NotesDropdown.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/Layout/NotesDropdown.vue",
+          "line": 155,
+          "snippet": "Add Notes &amp; Attachments (Optional)"
+        },
+        {
+          "file": "resources/js/Components/BuilderReskin/Layout/NotesDropdown.vue",
+          "line": 152,
+          "snippet": "Explanation of Changes Made (Required)"
+        }
+      ],
+      "relatedBrd": [
+        "REQ-018",
+        "REQ-035",
+        "REQ-039",
+        "REQ-045"
+      ]
+    },
+    {
+      "id": "BLD-149",
+      "title": "Confirmation option 1",
+      "description": "The rework form shall offer \"I only made the changes listed in the rework notes.\"",
+      "category": "Rework Mode",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in NotesDropdown.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/Layout/NotesDropdown.vue",
+          "line": 254,
+          "snippet": "I only made the changes listed in the rework notes."
+        }
+      ],
+      "relatedBrd": [
+        "REQ-037"
+      ]
+    },
+    {
+      "id": "BLD-150",
+      "title": "Confirmation option 2 (not reorder)",
+      "description": "The rework form shall offer an \"additional changes\" option, hidden for reorders.",
+      "category": "Rework Mode",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in NotesDropdown.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/Layout/NotesDropdown.vue",
+          "line": 271,
+          "snippet": "I made additional changes and need to provide an explanation. This may affect pricing or delay production."
+        }
+      ],
+      "relatedBrd": [
+        "REQ-038",
+        "REQ-059"
+      ]
+    },
+    {
+      "id": "BLD-151",
+      "title": "Confirmation choice required",
+      "description": "Resolve and Submit shall require a confirmation option and an explanation for additional changes, showing \"Select one option.\" otherwise.",
+      "category": "Rework Mode",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in BuilderReskin.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/BuilderReskin.vue",
+          "line": 1331,
+          "snippet": "cartItemStore.rejectionForm.hasNotesError = true;"
+        },
+        {
+          "file": "resources/js/Components/BuilderReskin/Layout/NotesDropdown.vue",
+          "line": 279,
+          "snippet": "Select one option."
+        }
+      ],
+      "relatedBrd": [
+        "REQ-040",
+        "REQ-043",
+        "REQ-045"
+      ]
+    },
+    {
+      "id": "BLD-152",
+      "title": "Confirmation modal",
+      "description": "Resolve and Submit shall open a confirmation modal that, for additional changes, requires an acknowledgement checkbox; Cancel closes it.",
+      "category": "Rework Mode",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in ReskinResolveAndSubmit.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/Modals/ReskinResolveAndSubmit.vue",
+          "line": 11,
+          "snippet": "This will finalize your fixes and return the order to the factory for review. You won't be able to edit issues after submitting."
+        },
+        {
+          "file": "resources/js/Components/BuilderReskin/Modals/ReskinResolveAndSubmit.vue",
+          "line": 28,
+          "snippet": "I understand that my additional changes may affect pricing or delay production."
+        }
+      ],
+      "relatedBrd": [
+        "REQ-041",
+        "REQ-049",
+        "REQ-050",
+        "REQ-051"
+      ]
+    },
+    {
+      "id": "BLD-153",
+      "title": "Resubmit rejected item",
+      "description": "Submitting shall post the revised design, notes and attachments to the resubmit endpoint and confirm \"Item Resubmitted\".",
+      "category": "Rework Mode",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in ReskinResolveAndSubmit.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/Modals/ReskinResolveAndSubmit.vue",
+          "line": 168,
+          "snippet": "router.post(route('carts.items.resubmit-rejected-item', cartItem.id), payload, {"
+        },
+        {
+          "file": "resources/js/Components/BuilderReskin/Modals/ReskinResolveAndSubmit.vue",
+          "line": 187,
+          "snippet": "title: 'Item Resubmitted',"
+        }
+      ],
+      "relatedBrd": [
+        "REQ-020",
+        "REQ-046",
+        "REQ-052"
+      ]
+    },
+    {
+      "id": "BLD-154",
+      "title": "Attachment upload failure",
+      "description": "Submission shall stop with an error when an attachment fails to upload.",
+      "category": "Rework Mode",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in ReskinResolveAndSubmit.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/Modals/ReskinResolveAndSubmit.vue",
+          "line": 115,
+          "snippet": "message: 'One or more attachments failed to upload. Remove or retry before submitting.',"
+        }
+      ],
+      "relatedBrd": [
+        "REQ-043"
+      ]
+    },
+    {
+      "id": "BLD-155",
+      "title": "Server resubmit validation",
+      "description": "The server shall require rejection details and require justification notes when additional changes are declared.",
+      "category": "Rework Mode",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in CartItemController.php implements this behaviour.",
+      "evidence": [
+        {
+          "file": "app/Http/Controllers/Pages/CartItemController.php",
+          "line": 3542,
+          "snippet": "'justification_notes' => 'required_if:has_additional_changes,true|nullable|string',"
+        },
+        {
+          "file": "app/Http/Controllers/Pages/CartItemController.php",
+          "line": 3534,
+          "snippet": "return back()->withErrors([ 'error' => \"Rejection Details missing!\" ]);"
+        }
+      ],
+      "relatedBrd": [
+        "REQ-045"
+      ]
+    },
+    {
+      "id": "BLD-156",
+      "title": "Classic Issues & Logs panel",
+      "description": "The classic builder shall show an Issues & Logs panel and a Resolve and Submit modal for rejected items.",
+      "category": "Rework Mode",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in Builder.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/Builder/Builder.vue",
+          "line": 220,
+          "snippet": "<IssuesAndLogsPanel />"
+        },
+        {
+          "file": "resources/js/Components/Builder/Builder.vue",
+          "line": 266,
+          "snippet": "<ResolveAndSubmitModal v-if=\"cartItemStore.isRejected\" ref=\"resolveAndSubmitModal\" />"
+        }
+      ],
+      "relatedBrd": [
+        "REQ-026"
+      ]
+    },
+    {
+      "id": "BLD-157",
+      "title": "Hide Custom Pro during fix",
+      "description": "The reskinned builder shall hide the Custom Pro tab while fixing an order issue unless Custom Pro is already active.",
+      "category": "Rework Mode",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in BuilderReskin.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/BuilderReskin.vue",
+          "line": 330,
+          "snippet": "return !isAllowed || (cartItemStore.isFixingOrderIssue && !manualOrderStore.isActive);"
+        }
+      ]
+    },
+    {
+      "id": "BLD-158",
+      "title": "Order access for managing reps",
+      "description": "The server shall grant order-tracking access on a cart item only to managing reps or the order's sales representative.",
+      "category": "Permissions",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in CartItemController.php implements this behaviour.",
+      "evidence": [
+        {
+          "file": "app/Http/Controllers/Pages/CartItemController.php",
+          "line": 96,
+          "snippet": "? $user->isManagingRep() || $cart?->order?->sales_representative_id == $user->id"
+        }
+      ],
+      "relatedBrd": [
+        "REQ-062"
+      ]
+    },
+    {
+      "id": "BLD-159",
+      "title": "Sales rep context for customers",
+      "description": "For non-sales-rep users the server shall pass the user's sales rep details to the builder.",
+      "category": "Permissions",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in SportController.php implements this behaviour.",
+      "evidence": [
+        {
+          "file": "app/Http/Controllers/Pages/SportController.php",
+          "line": 78,
+          "snippet": "if (!$user->isSalesRepresentative()) {"
+        }
+      ]
+    },
+    {
+      "id": "BLD-160",
+      "title": "Dealer and rep price visibility",
+      "description": "The builder shall show dealer adult/youth prices to dealers and sales reps.",
+      "category": "Permissions",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in DesignInformation.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/Builder/DesignInformation.vue",
+          "line": 119,
+          "snippet": "<div v-if=\"userStore.isDealer || userStore.isSalesRep && !isNaN(customizerStore.adultPricing)\" class=\"t-w-light price-name\">"
+        }
+      ]
+    },
+    {
+      "id": "BLD-161",
+      "title": "Owner flag on cart item",
+      "description": "The server shall flag whether the current user owns the cart item's cart.",
+      "category": "Permissions",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in CartItemController.php implements this behaviour.",
+      "evidence": [
+        {
+          "file": "app/Http/Controllers/Pages/CartItemController.php",
+          "line": 92,
+          "snippet": "$isOwner = $cart->user->id === $user->id;"
+        }
+      ]
+    },
+    {
+      "id": "BLD-162",
+      "title": "Hard-coded super users",
+      "description": "The builder shall grant a hard-coded list of super-user emails the Show Locations tool on brand styles.",
+      "category": "Permissions",
+      "priority": "Code-derived",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Verbatim code in BuilderReskin.vue implements this behaviour.",
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/BuilderReskin.vue",
+          "line": 468,
+          "snippet": "const SUPER_USER = ["
+        }
+      ]
+    }
+  ]
+}

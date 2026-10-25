@@ -1,0 +1,284 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>BRD Analysis Requests</title>
+<style>
+  :root {
+    --bg: #05070d; --surface: #0c111e; --surface-2: #121a2c; --border: rgba(120,160,255,.16);
+    --text: #e6ecff; --muted: #8b97b8; --soft: #c7d0ea; --accent: #7cc4ff; --ok: #4fe3a0; --warn: #ffcf5c; --bad: #ff7a85;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body { background: radial-gradient(ellipse at 50% -10%, #0f1830 0%, var(--bg) 55%) fixed; color: var(--text); min-height: 100vh;
+    font: 15px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  a { color: var(--accent); }
+  code { font: 12.5px/1.4 ui-monospace, "Cascadia Code", Consolas, monospace; }
+
+  .topbar { display: flex; align-items: center; gap: 12px; padding: 10px 20px; border-bottom: 1px solid var(--border);
+    background: rgba(5,7,13,.9); backdrop-filter: blur(10px); flex-wrap: wrap; position: sticky; top: var(--appnav-h, 0px); z-index: 2; }
+  .topbar b { font-size: 15px; }
+  .topbar .meta { color: var(--muted); font-size: 12.5px; }
+  .btn { display: inline-flex; align-items: center; gap: 6px; font: inherit; font-size: 13px; padding: 6px 12px; border-radius: 8px;
+    border: 1px solid var(--border); color: var(--text); text-decoration: none; background: rgba(255,255,255,.04); cursor: pointer; white-space: nowrap; }
+  .btn:hover { border-color: var(--accent); }
+
+  main { max-width: 1080px; margin: 0 auto; padding: 24px 16px 80px; display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+  @media (max-width: 860px) { main { grid-template-columns: 1fr; } }
+  .card { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 22px; }
+  h1 { font-size: 20px; margin: 0 0 4px; }
+  h2 { font-size: 16px; margin: 0 0 12px; }
+  .lead { color: var(--soft); font-size: 13.5px; margin: 0 0 18px; }
+
+  label { display: block; font-size: 13px; font-weight: 600; margin: 16px 0 6px; }
+  label .opt { color: var(--muted); font-weight: 400; }
+  input[type=email], input[type=url], textarea { width: 100%; font: inherit; font-size: 14px; color: var(--text); background: var(--surface-2);
+    border: 1px solid var(--border); border-radius: 9px; padding: 9px 11px; }
+  textarea { min-height: 140px; resize: vertical; }
+  input:focus, textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(124,196,255,.15); }
+  .invalid { border-color: var(--bad) !important; }
+  .ferr { color: var(--bad); font-size: 12.5px; margin-top: 5px; min-height: 0; }
+  .hint { color: var(--muted); font-size: 12.5px; margin-top: 5px; }
+
+  .seg { display: inline-flex; border: 1px solid var(--border); border-radius: 9px; overflow: hidden; margin-bottom: 10px; }
+  .seg button { font: inherit; font-size: 13px; padding: 6px 14px; background: none; border: 0; color: var(--muted); cursor: pointer; }
+  .seg button[aria-pressed=true] { background: rgba(124,196,255,.16); color: var(--text); }
+  .drop { border: 1.5px dashed var(--border); border-radius: 10px; padding: 18px; text-align: center; color: var(--soft); cursor: pointer; background: var(--surface-2); }
+  .drop.over, .drop:hover { border-color: var(--accent); }
+  .drop b { color: var(--text); }
+  .drop input { display: none; }
+
+  .submit { margin-top: 20px; display: flex; gap: 12px; align-items: center; flex-wrap: wrap; }
+  .primary { font: inherit; font-weight: 600; font-size: 14px; padding: 10px 18px; border-radius: 9px; border: 0; cursor: pointer;
+    background: var(--accent); color: #05101f; }
+  .primary:disabled { opacity: .55; cursor: progress; }
+
+  .notice { border-radius: 10px; padding: 12px 14px; font-size: 14px; margin-top: 16px; border: 1px solid; }
+  .notice.ok { border-color: rgba(79,227,160,.4); background: rgba(79,227,160,.08); }
+  .notice.bad { border-color: rgba(255,122,133,.45); background: rgba(255,122,133,.08); }
+  .notice.warn { border-color: rgba(255,207,92,.45); background: rgba(255,207,92,.08); margin: 0 0 16px; }
+  .notice small { display: block; color: var(--muted); margin-top: 4px; }
+
+  .flow { margin: 0; padding-left: 20px; color: var(--soft); font-size: 13.5px; }
+  .flow li { margin: 4px 0; }
+  .flow .you { color: var(--warn); }
+
+  .reqs { list-style: none; margin: 0; padding: 0; }
+  .reqs li { border-top: 1px solid var(--border); padding: 10px 0; font-size: 13.5px; }
+  .reqs li:first-child { border-top: 0; }
+  .reqs .row { display: flex; gap: 8px; align-items: center; justify-content: space-between; flex-wrap: wrap; }
+  .reqs .name { font-weight: 600; overflow-wrap: anywhere; }
+  .reqs .sub { color: var(--muted); font-size: 12.5px; }
+  .reqs .err { color: var(--bad); font-size: 12.5px; margin-top: 3px; }
+  .pill { font-size: 11.5px; padding: 2px 9px; border-radius: 999px; font-weight: 600; white-space: nowrap; }
+  .s-pending { background: rgba(255,207,92,.14); color: var(--warn); }
+  .s-analysis { background: rgba(124,196,255,.16); color: var(--accent); }
+  .s-completed { background: rgba(79,227,160,.14); color: var(--ok); }
+  .s-failed { background: rgba(255,122,133,.14); color: var(--bad); }
+  .empty { color: var(--muted); font-size: 13.5px; }
+</style>
+</head>
+<body>
+<script src="assets/nav.js"></script>
+<header class="topbar">
+  <b>BRD analysis requests</b><span class="meta">New requirements · analyzed without checking the Customizer code</span>
+</header>
+
+<main>
+  <section class="card" aria-labelledby="formTitle">
+    <h1 id="formTitle">Request a BRD analysis</h1>
+    <p class="lead">The analyst checks the BRD for conflicts, ambiguities, missing requirements, dependencies and risks, and emails you a report with recommendations and clarification questions.</p>
+    <div id="serverNotice"></div>
+
+    <form id="form" novalidate>
+      <label for="email">Your email address</label>
+      <input id="email" name="email" type="email" autocomplete="email" placeholder="name@company.com" required>
+      <div class="ferr" id="err-email"></div>
+
+      <label for="message">What do you need analyzed?</label>
+      <textarea id="message" name="message" maxlength="10000" required
+        placeholder="Objectives, questions or concerns. E.g. &quot;Is this ready for development? Check the reorder rules in section 4 against the rejection flow, and list anything QA would need clarified.&quot;"></textarea>
+      <div class="ferr" id="err-message"></div>
+
+      <label>BRD</label>
+      <div class="seg" role="group" aria-label="How to provide the BRD">
+        <button type="button" id="modeFile" aria-pressed="true">Upload file</button>
+        <button type="button" id="modeLink" aria-pressed="false">Link</button>
+      </div>
+      <div id="fileBox">
+        <label class="drop" id="drop" for="file" style="margin:0;font-weight:400">
+          <input id="file" type="file">
+          <span id="fileText"><b>Choose a file</b> or drop it here</span>
+          <div class="hint" id="fileHint"></div>
+        </label>
+      </div>
+      <div id="linkBox" hidden>
+        <input id="link" type="url" placeholder="https://docs.google.com/document/d/… or a direct file link">
+        <div class="hint">The link must be viewable by anyone with it (Google Docs/Drive and Dropbox share links work). The file is downloaded and attached to the request.</div>
+      </div>
+      <div class="ferr" id="err-brd"></div>
+
+      <div class="submit">
+        <button class="primary" id="send" type="submit">Send request</button>
+        <span class="hint" id="sending" hidden>Sending…</span>
+      </div>
+      <div id="result" aria-live="polite"></div>
+    </form>
+  </section>
+
+  <div style="display:grid;gap:20px">
+    <section class="card" aria-labelledby="listTitle">
+      <div class="row" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <h2 id="listTitle" style="margin:0">Request status</h2>
+        <button class="btn" id="refresh" type="button">Refresh</button>
+      </div>
+      <ul class="reqs" id="reqs"><li class="empty">Loading…</li></ul>
+    </section>
+
+    <section class="card" aria-labelledby="flowTitle">
+      <h2 id="flowTitle">How it works</h2>
+      <ol class="flow">
+        <li>You submit the request. It is emailed to the BRD owner and marked <b>Pending</b>.</li>
+        <li>The BRD analyst reviews the document on its own — it does not look at the Customizer code.</li>
+        <li>You receive the analysis report by email; the request becomes <b>Completed</b>.</li>
+        <li class="you">The team develops the change and updates the Customizer repository manually.</li>
+        <li>The audit agents then check the repository and report whether each requirement is implemented, partially implemented or not implemented.</li>
+      </ol>
+    </section>
+  </div>
+</main>
+
+<script>
+const $ = (id) => document.getElementById(id);
+const esc = (s) => String(s ?? '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const EMAIL_RE = /^[^\s@<>(),;:"[\]\\]+@[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?(?:\.[A-Za-z0-9](?:[A-Za-z0-9-]*[A-Za-z0-9])?)*\.[A-Za-z]{2,}$/;
+let cfg = { maxUploadMB: 20, accept: ['.docx', '.pdf', '.md', '.txt', '.html', '.htm'] };
+let mode = 'file';
+let chosen = null;
+
+// ---------- portal availability ----------
+async function init() {
+  if (location.protocol === 'file:') {
+    $('serverNotice').innerHTML = '<div class="notice warn"><b>Start the portal to send requests.</b><small>In the Master-BRD folder run <code>npm run portal</code>, then open <a href="http://localhost:4180/analysis.html">http://localhost:4180/analysis.html</a>.</small></div>';
+    $('send').disabled = true;
+    $('reqs').innerHTML = '<li class="empty">Request status is shown when the portal is running.</li>';
+    return;
+  }
+  try {
+    cfg = await (await fetch('/api/config')).json();
+    if (!cfg.emailConfigured) {
+      $('serverNotice').innerHTML = '<div class="notice warn"><b>Email is not configured on the portal.</b><small>Requests can\'t be sent until <code>mail.config.json</code> is set up.</small></div>';
+    }
+  } catch {
+    $('serverNotice').innerHTML = '<div class="notice bad"><b>The portal is not responding.</b><small>Restart it with <code>npm run portal</code>.</small></div>';
+  }
+  $('file').accept = cfg.accept.join(',');
+  $('fileHint').textContent = `${cfg.accept.join(', ')} · up to ${cfg.maxUploadMB} MB`;
+  loadRequests();
+}
+
+// ---------- BRD mode ----------
+function setMode(m) {
+  mode = m;
+  $('modeFile').setAttribute('aria-pressed', m === 'file');
+  $('modeLink').setAttribute('aria-pressed', m === 'link');
+  $('fileBox').hidden = m !== 'file';
+  $('linkBox').hidden = m !== 'link';
+  fieldError('brd', '');
+}
+$('modeFile').onclick = () => setMode('file');
+$('modeLink').onclick = () => setMode('link');
+
+function pick(f) {
+  chosen = f || null;
+  $('fileText').innerHTML = chosen ? `<b>${esc(chosen.name)}</b> · ${(chosen.size / 1048576).toFixed(2)} MB <span class="hint">(click to change)</span>` : '<b>Choose a file</b> or drop it here';
+  fieldError('brd', '');
+}
+$('file').onchange = (e) => pick(e.target.files[0]);
+const drop = $('drop');
+drop.ondragover = (e) => { e.preventDefault(); drop.classList.add('over'); };
+drop.ondragleave = () => drop.classList.remove('over');
+drop.ondrop = (e) => { e.preventDefault(); drop.classList.remove('over'); pick(e.dataTransfer.files[0]); };
+
+// ---------- validation ----------
+function fieldError(key, msg) {
+  $(`err-${key}`).textContent = msg || '';
+  const el = key === 'brd' ? (mode === 'file' ? drop : $('link')) : $(key);
+  el.classList.toggle('invalid', !!msg);
+}
+
+function validate() {
+  const errs = {};
+  const email = $('email').value.trim();
+  if (!EMAIL_RE.test(email)) errs.email = 'Enter a valid email address.';
+  if (!$('message').value.trim()) errs.message = 'Describe the analysis you need.';
+  if (mode === 'file') {
+    if (!chosen) errs.brd = 'Attach the BRD file.';
+    else if (!cfg.accept.includes(('.' + chosen.name.split('.').pop()).toLowerCase())) errs.brd = `Unsupported file type. Use one of: ${cfg.accept.join(', ')}.`;
+    else if (chosen.size > cfg.maxUploadMB * 1048576) errs.brd = `The file is larger than ${cfg.maxUploadMB} MB.`;
+    else if (!chosen.size) errs.brd = 'The file is empty.';
+  } else {
+    try { const u = new URL($('link').value.trim()); if (!/^https?:$/.test(u.protocol)) throw 0; }
+    catch { errs.brd = 'Enter a valid http(s) link to the BRD.'; }
+  }
+  ['email', 'message', 'brd'].forEach((k) => fieldError(k, errs[k]));
+  return !Object.keys(errs).length;
+}
+['email', 'message', 'link'].forEach((id) => $(id).addEventListener('input', () => fieldError(id === 'link' ? 'brd' : id, '')));
+
+const toBase64 = (file) => new Promise((resolve, reject) => {
+  const r = new FileReader();
+  r.onload = () => resolve(String(r.result).split(',')[1] || '');
+  r.onerror = () => reject(new Error('Could not read the file.'));
+  r.readAsDataURL(file);
+});
+
+// ---------- submit ----------
+$('form').onsubmit = async (e) => {
+  e.preventDefault();
+  $('result').innerHTML = '';
+  if (!validate()) return;
+  $('send').disabled = true; $('sending').hidden = false;
+  try {
+    const body = { email: $('email').value.trim(), message: $('message').value.trim() };
+    if (mode === 'file') body.file = { name: chosen.name, data: await toBase64(chosen) };
+    else body.link = $('link').value.trim();
+
+    const res = await fetch('/api/requests', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body) });
+    let out = {};
+    try { out = await res.json(); } catch {}
+    if (res.ok && out.ok) {
+      $('result').innerHTML = `<div class="notice ok">${esc(out.message)}<small>Request ID: <code>${esc(out.id)}</code> · Status: <b>${esc(out.status)}</b></small></div>`;
+      $('form').reset(); pick(null);
+    } else {
+      Object.entries(out.fields || {}).forEach(([k, v]) => fieldError(k, v));
+      $('result').innerHTML = `<div class="notice bad"><b>Not sent.</b> ${esc(out.error || `The server returned an error (HTTP ${res.status}).`)}</div>`;
+    }
+  } catch (err) {
+    $('result').innerHTML = `<div class="notice bad"><b>Not sent.</b> Could not reach the portal (${esc(err.message)}). Your request was not submitted.</div>`;
+  } finally {
+    $('send').disabled = false; $('sending').hidden = true;
+    loadRequests();
+  }
+};
+
+// ---------- status list ----------
+const PILL = { 'Pending': 's-pending', 'In Analysis': 's-analysis', 'Completed': 's-completed', 'Failed': 's-failed', 'Submission Failed': 's-failed', 'Submitting': 's-analysis' };
+async function loadRequests() {
+  if (location.protocol === 'file:') return;
+  try {
+    const { requests } = await (await fetch('/api/requests')).json();
+    $('reqs').innerHTML = requests.length ? requests.map((r) => `<li>
+      <div class="row"><span class="name">${esc(r.brd ? r.brd.name : r.id)}</span><span class="pill ${PILL[r.status] || ''}">${esc(r.status)}</span></div>
+      <div class="sub">${esc(r.id)} · ${esc(r.requester)} · ${esc(new Date(r.submittedAt).toLocaleString())}${r.completedAt ? ` · completed ${esc(new Date(r.completedAt).toLocaleString())}` : ''}</div>
+      ${r.error ? `<div class="err">${esc(r.error)}</div>` : ''}</li>`).join('') : '<li class="empty">No requests yet.</li>';
+  } catch {
+    $('reqs').innerHTML = '<li class="empty">Could not load request status.</li>';
+  }
+}
+$('refresh').onclick = loadRequests;
+init();
+</script>
+</body>
+</html>
