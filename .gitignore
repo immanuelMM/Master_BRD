@@ -4,3 +4,4 @@ requests/*
 !requests/.gitkeep
 brd-inbox/*
 !brd-inbox/.gitkeep
+.claude/

@@ -1,0 +1,75 @@
+{
+  "systemPath": "C:/Users/merin/laravel-docker/core/src/customizer-core",
+  "scannedAt": "2026-10-25T00:00:00Z",
+  "findings": [
+    { "reqId": "REQ-387", "candidates": [
+      { "file": "resources/js/core/customizer/resources.ts", "line": 195, "snippet": "resources?.colors?.map((color: any) => [color?.id, color?.core_color]) ?? []", "note": "Customizer only CONSUMES a core_color flag from the uniform resources payload (external API); no code here lets an admin mark a color." }
+    ] },
+    { "reqId": "REQ-002", "candidates": [] },
+    { "reqId": "REQ-003", "candidates": [] },
+    { "reqId": "REQ-004", "candidates": [
+      { "file": "app/ApiClient/QX7.php", "line": 9, "snippet": "class QX7", "note": "Only an API client to the external QX7 admin system exists here; no Master Data > Colors > Colors By Brand page, route or controller in this repo." }
+    ] },
+    { "reqId": "REQ-005", "candidates": [
+      { "file": "resources/js/core/customizer/resources.ts", "line": 200, "snippet": "core_color: coreColorMap.get(color?.id) ?? 0", "note": "Core color classification is applied generically per color for whichever brand the customizer instance is configured for; no brand-specific gating found." }
+    ] },
+    { "reqId": "REQ-006", "candidates": [] },
+    { "reqId": "REQ-388", "candidates": [] },
+    { "reqId": "REQ-008", "candidates": [] },
+    { "reqId": "REQ-009", "candidates": [] },
+    { "reqId": "REQ-389", "candidates": [] },
+    { "reqId": "REQ-011", "candidates": [] },
+    { "reqId": "REQ-012", "candidates": [] },
+    { "reqId": "REQ-013", "candidates": [] },
+    { "reqId": "REQ-014", "candidates": [] },
+    { "reqId": "REQ-015", "candidates": [
+      { "file": "resources/js/Components/BuilderReskin/Color/ReskinActiveColorRow.vue", "line": 47, "snippet": "<label class=\"\">Colors in Use</label>", "note": "Reskin Colors in Use row rendering the uniform's colors as tiles." },
+      { "file": "resources/js/Components/BuilderReskin/Color/ReskinActiveColorRow.vue", "line": 260, "snippet": "customizerStore.colorsInUse = [...newColorSet];", "note": "Colors in Use initialised from active selected colors or the default team colors on load." },
+      { "file": "resources/js/Components/BuilderReskin/Color/ReskinActiveColorRow.vue", "line": 277, "snippet": "colorsInUse.value =  newColorSet;", "note": "Displayed colors follow the active selected colors (defaults or colors applied from picker)." }
+    ] },
+    { "reqId": "REQ-016", "candidates": [
+      { "file": "resources/js/Components/BuilderReskin/Color/ReskinActiveColorRow.vue", "line": 59, "snippet": "@click=\"openColorPicker($event, color)\"", "note": "Clicking a Colors in Use tile opens the picker for that color." },
+      { "file": "resources/js/Components/BuilderReskin/Color/ReskinColorPickerModal.vue", "line": 21, "snippet": "@click.prevent=\"selectColor(color)\"", "note": "Selecting a tile in the picker applies the new color." }
+    ] },
+    { "reqId": "REQ-017", "candidates": [
+      { "file": "resources/js/Components/BuilderReskin/Color/ReskinColorPickerModal.vue", "line": 2, "snippet": "uk-dropdown=\"mode: click; pos: bottom-left; flip: false; toggle: false\"", "note": "Picker is a dropdown positioned bottom-left of the clicked tile (below it)." },
+      { "file": "resources/js/Components/BuilderReskin/Color/ReskinActiveColorRow.vue", "line": 301, "snippet": "drop.show(triggerEl);", "note": "Shows the picker dropdown anchored to the clicked tile." }
+    ] },
+    { "reqId": "REQ-018", "candidates": [
+      { "file": "resources/js/Components/BuilderReskin/Color/ReskinColorPickerModal.vue", "line": 5, "snippet": "<h4 class=\"card-title subtitle my-2xs text-sm uk-flex uk-flex-middle\">Core Colors", "note": "Core Colors group heading in the reskin picker." },
+      { "file": "resources/js/Components/BuilderReskin/Color/ReskinColorPickerModal.vue", "line": 155, "snippet": "acc[color.core_color ? 0 : 1].push(color);", "note": "Splits colors by core_color flag into core group." },
+      { "file": "resources/js/Components/BuilderReskin/Color/ReskinCustomProColorPickerModal.vue", "line": 98, "snippet": "const coreColors = computed(() => availableColors.value?.filter(color => color.core_color && isRenderableColor(color)) || []);", "note": "Custom Pro picker also filters core colors." },
+      { "file": "resources/js/Components/BuilderReskin/Color/ColorsInUseModal.vue", "line": 210, "snippet": "<h4 class=\"card-title subtitle my-2xs text-sm\">Core Colors</h4>", "note": "Core Colors group in the replacement picker of Colors In Use modal." }
+    ] },
+    { "reqId": "REQ-019", "candidates": [
+      { "file": "resources/js/Components/BuilderReskin/Color/ReskinColorPickerModal.vue", "line": 38, "snippet": "<span v-if=\"coreColors.length\">Additional Colors</span>", "note": "Additional Colors heading (falls back to 'Colors' when no core colors)." },
+      { "file": "resources/js/Components/BuilderReskin/Color/ReskinCustomProColorPickerModal.vue", "line": 99, "snippet": "const nonCoreColors = computed(() => availableColors.value?.filter(color => !color.core_color && isRenderableColor(color)) || []);", "note": "Non-core colors form the Additional Colors group." },
+      { "file": "resources/js/Components/BuilderReskin/Color/ColorsInUseModal.vue", "line": 245, "snippet": "<span v-if=\"coreColors.length\">Additional Colors</span>", "note": "Additional Colors group in Colors In Use modal." }
+    ] },
+    { "reqId": "REQ-020", "candidates": [
+      { "file": "resources/js/Components/BuilderReskin/Color/ReskinColorPickerModal.vue", "line": 4, "snippet": "<div class=\"card-body body\" v-if=\"coreColors.length\">", "note": "Core Colors block precedes the Additional Colors block in the template (rendered first)." }
+    ] },
+    { "reqId": "REQ-021", "candidates": [] },
+    { "reqId": "REQ-022", "candidates": [
+      { "file": "resources/js/Components/BuilderReskin/Color/ReskinColorPickerModal.vue", "line": 24, "snippet": "<svg class=\"check-icon icon-base\" viewBox=\"0 0 116 116\" xmlns=\"http://www.w3.org/2000/svg\">", "note": "Red checkmark badge on each tile, shown for the active/selected color via checked radio." },
+      { "file": "resources/js/Components/BuilderReskin/Color/ReskinColorPickerModal.vue", "line": 20, "snippet": ":checked=\"!isReplaceColor && color?.color_code === activeColor?.color_code\"", "note": "Marks the currently active color as checked." }
+    ] },
+    { "reqId": "REQ-023", "candidates": [
+      { "file": "resources/js/Components/BuilderReskin/Color/ReskinActiveColorRow.vue", "line": 62, "snippet": "<XCircleIcon class=\"icon-md remove-btn\"", "note": "X control on each Colors in Use tile to remove the color." },
+      { "file": "resources/js/Components/BuilderReskin/Color/ReskinActiveColorRow.vue", "line": 77, "snippet": "uk-tooltip=\"title: Add Colors\"", "note": "+ control to add colors in Colors in Use." }
+    ] },
+    { "reqId": "REQ-024", "candidates": [
+      { "file": "resources/js/Components/BuilderReskin/Color/ReskinColorPickerModal.vue", "line": 70, "snippet": "Some unavailable colors are not shown.</div>", "note": "Footer message under the color groups, but wording differs from BRD 'Some colors are not available on Twill.' and no Twill-specific text found." }
+    ] },
+    { "reqId": "REQ-025", "candidates": [
+      { "file": "resources/js/Components/BuilderReskin/Color/ReskinColorPickerModal.vue", "line": 23, "snippet": "<span class=\"color-code\" :class=\"colorCodeSizeClass(color.color_code)\">{{ color.color_code }}</span>", "note": "Tile shows the color code (abbreviation) on the swatch." },
+      { "file": "resources/js/Components/BuilderReskin/Color/ReskinActiveColorRow.vue", "line": 67, "snippet": "<div class=\"color-code\" :class=\"colorCodeSizeClass(color.color_code)\">{{ color.color_code }}</div>", "note": "Colors in Use tile shows color code." }
+    ] },
+    { "reqId": "REQ-390", "candidates": [
+      { "file": "resources/js/Components/BuilderReskin/Color/ReskinColorPickerModal.vue", "line": 152, "snippet": "const list = populateCoreColors(chosenColors) ?? [];", "note": "Builder reskin picker classifies colors core vs additional." },
+      { "file": "resources/js/stores/master-feature.js", "line": 54, "snippet": "return import.meta.env.VITE_FEATURE_BUILDER_RESKIN === 'true';", "note": "Reskin builder feature flag gating the picker." },
+      { "file": "resources/js/stores/manual-order.js", "line": 60, "snippet": "return populateCoreColors(colors) ?? [];", "note": "Manual order (Custom Pro) store also classifies core colors." },
+      { "file": "resources/js/Components/BuilderReskin/Color/ColorsInUseModal.vue", "line": 368, "snippet": "acc[color.core_color ? 0 : 1].push(color);", "note": "Colors In Use modal splits core vs non-core." }
+    ] }
+  ]
+}

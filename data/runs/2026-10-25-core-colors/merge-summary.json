@@ -1,0 +1,79 @@
+{
+  "runId": "2026-10-25-core-colors",
+  "mergedAt": "2026-10-25T15:47:00.166Z",
+  "scope": [
+    "brd/RD_Core Colors Toggle in Colors By Brand Page.docx"
+  ],
+  "runRequirements": 26,
+  "added": [
+    "REQ-466",
+    "REQ-467",
+    "REQ-468",
+    "REQ-469",
+    "REQ-470",
+    "REQ-471",
+    "REQ-472",
+    "REQ-473",
+    "REQ-474",
+    "REQ-475",
+    "REQ-476",
+    "REQ-477",
+    "REQ-478",
+    "REQ-479",
+    "REQ-480",
+    "REQ-481",
+    "REQ-482",
+    "REQ-483",
+    "REQ-484",
+    "REQ-485",
+    "REQ-486",
+    "REQ-487"
+  ],
+  "refound": [
+    "REQ-387",
+    "REQ-388",
+    "REQ-389",
+    "REQ-390"
+  ],
+  "notRefound": [],
+  "changes": [],
+  "idMap": {
+    "REQ-387": "REQ-387",
+    "REQ-002": "REQ-466",
+    "REQ-003": "REQ-467",
+    "REQ-004": "REQ-468",
+    "REQ-005": "REQ-469",
+    "REQ-006": "REQ-470",
+    "REQ-388": "REQ-388",
+    "REQ-008": "REQ-471",
+    "REQ-009": "REQ-472",
+    "REQ-389": "REQ-389",
+    "REQ-011": "REQ-473",
+    "REQ-012": "REQ-474",
+    "REQ-013": "REQ-475",
+    "REQ-014": "REQ-476",
+    "REQ-015": "REQ-477",
+    "REQ-016": "REQ-478",
+    "REQ-017": "REQ-479",
+    "REQ-018": "REQ-480",
+    "REQ-019": "REQ-481",
+    "REQ-020": "REQ-482",
+    "REQ-021": "REQ-483",
+    "REQ-022": "REQ-484",
+    "REQ-023": "REQ-485",
+    "REQ-024": "REQ-486",
+    "REQ-025": "REQ-487",
+    "REQ-390": "REQ-390"
+  },
+  "perBrd": {
+    "brd/RD_Core Colors Toggle in Colors By Brand Page.docx": {
+      "IMPLEMENTED": 9,
+      "PARTIAL": 3,
+      "NOT_IMPLEMENTED": 14
+    }
+  },
+  "totals": {
+    "requirements": 487,
+    "verified": 384
+  }
+}

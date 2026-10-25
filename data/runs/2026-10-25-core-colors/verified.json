@@ -1,0 +1,142 @@
+{
+  "verifiedAt": "2026-10-25T23:50:00+08:00",
+  "systemPath": "C:/Users/merin/laravel-docker/core/src/customizer-core",
+  "systemBranch": "pre-staging",
+  "notes": "All verified items live in the Builder Reskin UI, gated by VITE_FEATURE_BUILDER_RESKIN (master-feature.js:54). The local .env sets it to true (line 291); .env.example does not define it, so the deployed value must be confirmed per environment. The core_color flag is consumed from the external QX7 uniform resources payload; the admin side is not in this repo.",
+  "requirements": [
+    {
+      "id": "REQ-015",
+      "title": "Colors In Use default display",
+      "description": "Colors in Use displays the default colors of the uniform upon loading, or the colors applied from the Picker page.",
+      "category": "Customizer Color Picker",
+      "priority": "Must",
+      "verdict": "VERIFIED",
+      "confidence": 0.85,
+      "reasoning": "An immediate watcher fills colorsInUse with the selected colors, falling back to the uniform's default team colors. The Colors in Use row then renders those tiles. The component is mounted in CustomizeTab, which is part of the reskin builder.",
+      "evidence": [
+        { "file": "resources/js/Components/BuilderReskin/Color/ReskinActiveColorRow.vue", "line": 47, "snippet": "<label class=\"\">Colors in Use</label>" },
+        { "file": "resources/js/Components/BuilderReskin/Color/ReskinActiveColorRow.vue", "line": 258, "snippet": ": customizerStore.getTeamColors || [];" },
+        { "file": "resources/js/Components/BuilderReskin/Color/ReskinActiveColorRow.vue", "line": 260, "snippet": "customizerStore.colorsInUse = [...newColorSet];" },
+        { "file": "resources/js/Components/BuilderReskin/Tabs/CustomizeTab.vue", "line": 16, "snippet": "<ReskinActiveColorRow @patternClick=\"onPatternClick\"/>" }
+      ]
+    },
+    {
+      "id": "REQ-016",
+      "title": "Change color via tile click",
+      "description": "The user can change colors by clicking each color tile in Colors In Use.",
+      "category": "Customizer Color Picker",
+      "priority": "Must",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Clicking a Colors in Use tile opens the picker for that color. Choosing a swatch calls selectColor, then updateSelectedColor, which swaps the new color in at the active index.",
+      "evidence": [
+        { "file": "resources/js/Components/BuilderReskin/Color/ReskinActiveColorRow.vue", "line": 59, "snippet": "@click=\"openColorPicker($event, color)\"" },
+        { "file": "resources/js/Components/BuilderReskin/Color/ReskinColorPickerModal.vue", "line": 21, "snippet": "@click.prevent=\"selectColor(color)\"" },
+        { "file": "resources/js/Components/BuilderReskin/Color/ReskinColorPickerModal.vue", "line": 236, "snippet": "currentColor[activeColorIndex] = newColor;" }
+      ]
+    },
+    {
+      "id": "REQ-017",
+      "title": "Picker opens below selected section",
+      "description": "Upon clicking a color tile, the color picker is displayed below the selected section.",
+      "category": "Customizer Color Picker",
+      "priority": "Must",
+      "verdict": "VERIFIED",
+      "confidence": 0.8,
+      "reasoning": "The picker is a UIkit dropdown set to pos: bottom-left with flip disabled. It is shown anchored to the clicked tile, so it opens below the Colors in Use section.",
+      "evidence": [
+        { "file": "resources/js/Components/BuilderReskin/Color/ReskinColorPickerModal.vue", "line": 2, "snippet": "<div :id=\"dropdownId\" uk-dropdown=\"mode: click; pos: bottom-left; flip: false; toggle: false\" class=\"drpdwn-v2 uk-width-large color-v2\">" },
+        { "file": "resources/js/Components/BuilderReskin/Color/ReskinActiveColorRow.vue", "line": 301, "snippet": "drop.show(triggerEl);" }
+      ]
+    },
+    {
+      "id": "REQ-018",
+      "title": "Core Colors group definition",
+      "description": "Core Colors are the set of colors determined by the brand (those flagged as Core Color) and are displayed in a \"Core Colors\" group in the color picker.",
+      "category": "Customizer Color Picker",
+      "priority": "Must",
+      "verdict": "VERIFIED",
+      "confidence": 0.85,
+      "reasoning": "populateCoreColors copies the brand's core_color flag from the uniform resources onto each color. The picker puts flagged colors into the group under the 'Core Colors' heading. The flag itself is set outside this repo, in QX7.",
+      "evidence": [
+        { "file": "resources/js/core/customizer/resources.ts", "line": 195, "snippet": "resources?.colors?.map((color: any) => [color?.id, color?.core_color]) ?? []" },
+        { "file": "resources/js/Components/BuilderReskin/Color/ReskinColorPickerModal.vue", "line": 155, "snippet": "acc[color.core_color ? 0 : 1].push(color);" },
+        { "file": "resources/js/Components/BuilderReskin/Color/ReskinColorPickerModal.vue", "line": 5, "snippet": "<h4 class=\"card-title subtitle my-2xs text-sm uk-flex uk-flex-middle\">Core Colors" }
+      ]
+    },
+    {
+      "id": "REQ-019",
+      "title": "Additional Colors group definition",
+      "description": "Additional Colors are all colors other than the Core Colors and are displayed in an \"Additional Colors\" group in the color picker.",
+      "category": "Customizer Color Picker",
+      "priority": "Must",
+      "verdict": "VERIFIED",
+      "confidence": 0.85,
+      "reasoning": "Colors without core_color go into the second bucket, shown under 'Additional Colors'. If a brand has no core colors, the heading falls back to 'Colors'.",
+      "evidence": [
+        { "file": "resources/js/Components/BuilderReskin/Color/ReskinColorPickerModal.vue", "line": 155, "snippet": "acc[color.core_color ? 0 : 1].push(color);" },
+        { "file": "resources/js/Components/BuilderReskin/Color/ReskinColorPickerModal.vue", "line": 38, "snippet": "<span v-if=\"coreColors.length\">Additional Colors</span>" },
+        { "file": "resources/js/Components/BuilderReskin/Color/ReskinCustomProColorPickerModal.vue", "line": 99, "snippet": "const nonCoreColors = computed(() => availableColors.value?.filter(color => !color.core_color && isRenderableColor(color)) || []);" }
+      ]
+    },
+    {
+      "id": "REQ-020",
+      "title": "Core Colors group listed first",
+      "description": "The Core Colors group is displayed above the Additional Colors group, beneath Colors In Use.",
+      "category": "Customizer Color Picker",
+      "priority": "Should",
+      "verdict": "VERIFIED",
+      "confidence": 0.85,
+      "reasoning": "In the picker template, the Core Colors card-body (lines 4-35) comes before the Additional Colors card-body (line 36+). The dropdown opens below the Colors in Use tiles.",
+      "evidence": [
+        { "file": "resources/js/Components/BuilderReskin/Color/ReskinColorPickerModal.vue", "line": 4, "snippet": "<div class=\"card-body body\" v-if=\"coreColors.length\">" },
+        { "file": "resources/js/Components/BuilderReskin/Color/ReskinColorPickerModal.vue", "line": 38, "snippet": "<span v-if=\"coreColors.length\">Additional Colors</span>" }
+      ]
+    },
+    {
+      "id": "REQ-023",
+      "title": "Removable colors in Colors In Use",
+      "description": "Each color in Colors In Use can be removed via an x control, and more can be added via a + control.",
+      "category": "Customizer Color Picker",
+      "priority": "Could",
+      "verdict": "VERIFIED",
+      "confidence": 0.9,
+      "reasoning": "Each Colors in Use tile has an XCircleIcon wired to removeColor. A separate + button labelled 'Add Colors' opens the picker in add mode.",
+      "evidence": [
+        { "file": "resources/js/Components/BuilderReskin/Color/ReskinActiveColorRow.vue", "line": 62, "snippet": "<XCircleIcon class=\"icon-md remove-btn\"" },
+        { "file": "resources/js/Components/BuilderReskin/Color/ReskinActiveColorRow.vue", "line": 63, "snippet": "@click.stop.prevent=\"removeColor(color)\"" },
+        { "file": "resources/js/Components/BuilderReskin/Color/ReskinActiveColorRow.vue", "line": 77, "snippet": "uk-tooltip=\"title: Add Colors\"" }
+      ]
+    },
+    {
+      "id": "REQ-025",
+      "title": "Tiles show color abbreviation",
+      "description": "Each color tile shows the brand color abbreviation on its brand color swatch.",
+      "category": "Customizer Color Picker",
+      "priority": "Should",
+      "verdict": "VERIFIED",
+      "confidence": 0.85,
+      "reasoning": "Both picker swatches and Colors in Use tiles print color_code, the brand abbreviation shown as '(CODE) Name' in the tooltip, on top of the swatch background.",
+      "evidence": [
+        { "file": "resources/js/Components/BuilderReskin/Color/ReskinColorPickerModal.vue", "line": 23, "snippet": "<span class=\"color-code\" :class=\"colorCodeSizeClass(color.color_code)\">{{ color.color_code }}</span>" },
+        { "file": "resources/js/Components/BuilderReskin/Color/ReskinActiveColorRow.vue", "line": 67, "snippet": "<div class=\"color-code\" :class=\"colorCodeSizeClass(color.color_code)\">{{ color.color_code }}</div>" }
+      ]
+    },
+    {
+      "id": "REQ-390",
+      "title": "Core Colors in Customizer Builder",
+      "description": "The Customizer Builder color picker modal classifies colors as Core Colors vs Additional Colors (Customizer Reskin 'Core Colors' Classification In Color Picker Modal).",
+      "category": "Customizer Color Picker",
+      "priority": "Must",
+      "verdict": "VERIFIED",
+      "confidence": 0.85,
+      "reasoning": "The reskin builder picker runs populateCoreColors and splits the result into core and non-core groups. The reskin builder is enabled by VITE_FEATURE_BUILDER_RESKIN, which is true in the local .env.",
+      "evidence": [
+        { "file": "resources/js/Components/BuilderReskin/Color/ReskinColorPickerModal.vue", "line": 152, "snippet": "const list = populateCoreColors(chosenColors) ?? [];" },
+        { "file": "resources/js/Components/BuilderReskin/Color/ReskinColorPickerModal.vue", "line": 155, "snippet": "acc[color.core_color ? 0 : 1].push(color);" },
+        { "file": "resources/js/stores/master-feature.js", "line": 54, "snippet": "return import.meta.env.VITE_FEATURE_BUILDER_RESKIN === 'true';" },
+        { "file": ".env", "line": 291, "snippet": "VITE_FEATURE_BUILDER_RESKIN = true" }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,542 @@
+{
+  "checkedAt": "2026-10-25T23:50:00+08:00",
+  "systemPath": "C:/Users/merin/laravel-docker/core/src/customizer-core",
+  "systemBranch": "pre-staging",
+  "notes": "This repo has no Colors By Brand admin code: no route, controller, view, migration or model for a core color flag, and is_core / 'CORE COLOR' never appear. The customizer only reads core_color from the external QX7 uniform resources payload. Admin requirements are therefore NOT_IMPLEMENTED here; they may be implemented in QX7, which was not audited. Picker features are gated by VITE_FEATURE_BUILDER_RESKIN (resources/js/stores/master-feature.js:54). The local .env line 291 sets it to true; .env.example does not define it.",
+  "requirements": [
+    {
+      "id": "REQ-387",
+      "title": "Mark a color as Core Color",
+      "category": "Core Color Flag",
+      "source": {
+        "file": "brd/RD_Core Colors Toggle in Colors By Brand Page.docx",
+        "section": "Goal / Initial Requirements"
+      },
+      "status": "NOT_IMPLEMENTED",
+      "reasoning": "No code in this repo lets a Brand/Admin mark a color as Core Color. The customizer only reads a core_color flag that QX7 has already set.",
+      "gaps": [
+        "No admin UI or API in customizer-core for setting a color's Core Color flag. It may exist in QX7, which was not audited."
+      ],
+      "evidence": [
+        {
+          "file": "resources/js/core/customizer/resources.ts",
+          "line": 195,
+          "snippet": "resources?.colors?.map((color: any) => [color?.id, color?.core_color]) ?? []"
+        }
+      ]
+    },
+    {
+      "id": "REQ-002",
+      "title": "Core color setting on Colors By Brand page",
+      "category": "Core Color Flag",
+      "source": {
+        "file": "brd/RD_Core Colors Toggle in Colors By Brand Page.docx",
+        "section": "Goal / Initial Requirements"
+      },
+      "status": "NOT_IMPLEMENTED",
+      "reasoning": "This repo has no Colors By Brand page, so it has no core color control.",
+      "gaps": [
+        "Colors By Brand page and core color control not in this repo. They may exist in QX7."
+      ],
+      "evidence": []
+    },
+    {
+      "id": "REQ-003",
+      "title": "Core Color toggle follows Active toggle pattern",
+      "category": "Core Color Flag",
+      "source": {
+        "file": "brd/RD_Core Colors Toggle in Colors By Brand Page.docx",
+        "section": "Potential solution"
+      },
+      "status": "NOT_IMPLEMENTED",
+      "reasoning": "This repo has no index toggle and no per-color single-select for Core Color.",
+      "gaps": [
+        "Index toggle linked to a single-select on the color page is not in this repo. It may exist in QX7."
+      ],
+      "evidence": []
+    },
+    {
+      "id": "REQ-004",
+      "title": "Admin access path",
+      "category": "Colors By Brand Admin",
+      "source": {
+        "file": "brd/RD_Core Colors Toggle in Colors By Brand Page.docx",
+        "section": "BR 1 Process Flow / QX7 Checklist"
+      },
+      "status": "NOT_IMPLEMENTED",
+      "reasoning": "This repo only contains an HTTP client for QX7. The Master Data > Colors > Colors By Brand menu path belongs to the QX7 admin app.",
+      "gaps": [
+        "No QX7 > Master Data > Colors > Colors By Brand navigation or page in this repo. It is expected to live in QX7."
+      ],
+      "evidence": []
+    },
+    {
+      "id": "REQ-005",
+      "title": "Applies to all brands",
+      "category": "Core Color Flag",
+      "source": {
+        "file": "brd/RD_Core Colors Toggle in Colors By Brand Page.docx",
+        "section": "Header (Brand: ALL) / Products Checklist"
+      },
+      "status": "PARTIAL",
+      "reasoning": "The customizer applies core_color to every color with no brand-specific gating. Whether every brand can set the flag depends on the QX7 admin side, which this repo does not contain.",
+      "gaps": [
+        "Cannot verify here that the Core Color flag can be set for ALL brands. The admin side may live in QX7."
+      ],
+      "evidence": [
+        {
+          "file": "resources/js/core/customizer/resources.ts",
+          "line": 200,
+          "snippet": "core_color: coreColorMap.get(color?.id) ?? 0"
+        }
+      ]
+    },
+    {
+      "id": "REQ-006",
+      "title": "Core Color column on index",
+      "category": "Colors By Brand Admin",
+      "source": {
+        "file": "brd/RD_Core Colors Toggle in Colors By Brand Page.docx",
+        "section": "FR 1 Colors By Brand Index Page"
+      },
+      "status": "NOT_IMPLEMENTED",
+      "reasoning": "This repo has no Colors By Brand index or datatable, and no 'CORE COLOR' column.",
+      "gaps": [
+        "CORE COLOR index column not in this repo. It may exist in QX7."
+      ],
+      "evidence": []
+    },
+    {
+      "id": "REQ-388",
+      "title": "Core Color column shows toggle per row",
+      "category": "Colors By Brand Admin",
+      "source": {
+        "file": "brd/RD_Core Colors Toggle in Colors By Brand Page.docx",
+        "section": "FR 1 Colors By Brand Index Page"
+      },
+      "status": "NOT_IMPLEMENTED",
+      "reasoning": "No admin index rows exist in this repo.",
+      "gaps": [
+        "Per-row Core Color toggle not in this repo. It may exist in QX7."
+      ],
+      "evidence": []
+    },
+    {
+      "id": "REQ-008",
+      "title": "Core Color column placement",
+      "category": "Colors By Brand Admin",
+      "source": {
+        "file": "brd/RD_Core Colors Toggle in Colors By Brand Page.docx",
+        "section": "FR 1 Colors By Brand Index Page"
+      },
+      "status": "NOT_IMPLEMENTED",
+      "reasoning": "There is no index column here, so its order cannot be checked.",
+      "gaps": [
+        "Column placement between Sort Order and Active Status cannot be checked here. It may live in QX7."
+      ],
+      "evidence": []
+    },
+    {
+      "id": "REQ-009",
+      "title": "Core Color toggle editable from index",
+      "category": "Colors By Brand Admin",
+      "source": {
+        "file": "brd/RD_Core Colors Toggle in Colors By Brand Page.docx",
+        "section": "FR 1 Colors By Brand Index Page"
+      },
+      "status": "NOT_IMPLEMENTED",
+      "reasoning": "This repo has no index toggle and no endpoint to update a color's core flag.",
+      "gaps": [
+        "Inline index toggle and its update endpoint not in this repo. They may exist in QX7."
+      ],
+      "evidence": []
+    },
+    {
+      "id": "REQ-389",
+      "title": "Core Color toggle on edit form",
+      "category": "Colors By Brand Admin",
+      "source": {
+        "file": "brd/RD_Core Colors Toggle in Colors By Brand Page.docx",
+        "section": "FR 2 Edit Color By Brand"
+      },
+      "status": "NOT_IMPLEMENTED",
+      "reasoning": "This repo has no Edit Color By Brand form.",
+      "gaps": [
+        "Edit form Core Color On/Off toggle not in this repo. It may exist in QX7."
+      ],
+      "evidence": []
+    },
+    {
+      "id": "REQ-011",
+      "title": "Core Color toggle placement on edit form",
+      "category": "Colors By Brand Admin",
+      "source": {
+        "file": "brd/RD_Core Colors Toggle in Colors By Brand Page.docx",
+        "section": "FR 2 Edit Color By Brand"
+      },
+      "status": "NOT_IMPLEMENTED",
+      "reasoning": "There is no edit form here, so field order cannot be checked.",
+      "gaps": [
+        "Field placement between Sort Order and Active Status cannot be checked here. It may live in QX7."
+      ],
+      "evidence": []
+    },
+    {
+      "id": "REQ-012",
+      "title": "Core Color saved on Save",
+      "category": "Core Color Flag",
+      "source": {
+        "file": "brd/RD_Core Colors Toggle in Colors By Brand Page.docx",
+        "section": "FR 2 Edit Color By Brand"
+      },
+      "status": "NOT_IMPLEMENTED",
+      "reasoning": "No save, update or persistence path for core_color exists here: no controller, model or migration. The customizer only reads the value.",
+      "gaps": [
+        "Saving the Core Color value is not in this repo. It may exist in QX7."
+      ],
+      "evidence": []
+    },
+    {
+      "id": "REQ-013",
+      "title": "Edit form value reflects stored state",
+      "category": "Colors By Brand Admin",
+      "source": {
+        "file": "brd/RD_Core Colors Toggle in Colors By Brand Page.docx",
+        "section": "FR 2 Edit Color By Brand"
+      },
+      "status": "NOT_IMPLEMENTED",
+      "reasoning": "There is no edit form here, so no stored value is pre-filled.",
+      "gaps": [
+        "Pre-filling the edit toggle from the stored value is not in this repo. It may exist in QX7."
+      ],
+      "evidence": []
+    },
+    {
+      "id": "REQ-014",
+      "title": "Index and edit toggle stay in sync",
+      "category": "Core Color Flag",
+      "source": {
+        "file": "brd/RD_Core Colors Toggle in Colors By Brand Page.docx",
+        "section": "Potential solution / FR 1-2"
+      },
+      "status": "NOT_IMPLEMENTED",
+      "reasoning": "Neither the index toggle nor the edit toggle exists in this repo.",
+      "gaps": [
+        "Index/edit toggle sync not in this repo. It may exist in QX7."
+      ],
+      "evidence": []
+    },
+    {
+      "id": "REQ-015",
+      "title": "Colors In Use default display",
+      "category": "Customizer Color Picker",
+      "source": {
+        "file": "brd/RD_Core Colors Toggle in Colors By Brand Page.docx",
+        "section": "FR 3 FE Implementation - Colors In Use modal"
+      },
+      "status": "IMPLEMENTED",
+      "reasoning": "colorsInUse is filled from the selected colors (applied from the picker), falling back to the default team colors on load, and is rendered in the Colors in Use row. This is reskin-only; VITE_FEATURE_BUILDER_RESKIN is true in .env.",
+      "gaps": [],
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/Color/ReskinActiveColorRow.vue",
+          "line": 47,
+          "snippet": "<label class=\"\">Colors in Use</label>"
+        },
+        {
+          "file": "resources/js/Components/BuilderReskin/Color/ReskinActiveColorRow.vue",
+          "line": 258,
+          "snippet": ": customizerStore.getTeamColors || [];"
+        },
+        {
+          "file": "resources/js/Components/BuilderReskin/Color/ReskinActiveColorRow.vue",
+          "line": 260,
+          "snippet": "customizerStore.colorsInUse = [...newColorSet];"
+        }
+      ]
+    },
+    {
+      "id": "REQ-016",
+      "title": "Change color via tile click",
+      "category": "Customizer Color Picker",
+      "source": {
+        "file": "brd/RD_Core Colors Toggle in Colors By Brand Page.docx",
+        "section": "FR 3 FE Implementation - Colors In Use modal"
+      },
+      "status": "IMPLEMENTED",
+      "reasoning": "Clicking a tile opens the picker for that color. Picking a swatch replaces the color at the active index.",
+      "gaps": [],
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/Color/ReskinActiveColorRow.vue",
+          "line": 59,
+          "snippet": "@click=\"openColorPicker($event, color)\""
+        },
+        {
+          "file": "resources/js/Components/BuilderReskin/Color/ReskinColorPickerModal.vue",
+          "line": 21,
+          "snippet": "@click.prevent=\"selectColor(color)\""
+        },
+        {
+          "file": "resources/js/Components/BuilderReskin/Color/ReskinColorPickerModal.vue",
+          "line": 236,
+          "snippet": "currentColor[activeColorIndex] = newColor;"
+        }
+      ]
+    },
+    {
+      "id": "REQ-017",
+      "title": "Picker opens below selected section",
+      "category": "Customizer Color Picker",
+      "source": {
+        "file": "brd/RD_Core Colors Toggle in Colors By Brand Page.docx",
+        "section": "FR 3 FE Implementation - Colors In Use modal"
+      },
+      "status": "IMPLEMENTED",
+      "reasoning": "The dropdown is set to pos: bottom-left with flip disabled and is shown anchored to the clicked tile.",
+      "gaps": [],
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/Color/ReskinColorPickerModal.vue",
+          "line": 2,
+          "snippet": "<div :id=\"dropdownId\" uk-dropdown=\"mode: click; pos: bottom-left; flip: false; toggle: false\" class=\"drpdwn-v2 uk-width-large color-v2\">"
+        },
+        {
+          "file": "resources/js/Components/BuilderReskin/Color/ReskinActiveColorRow.vue",
+          "line": 301,
+          "snippet": "drop.show(triggerEl);"
+        }
+      ]
+    },
+    {
+      "id": "REQ-018",
+      "title": "Core Colors group definition",
+      "category": "Customizer Color Picker",
+      "source": {
+        "file": "brd/RD_Core Colors Toggle in Colors By Brand Page.docx",
+        "section": "FR 3 FE Implementation - Colors In Use modal"
+      },
+      "status": "IMPLEMENTED",
+      "reasoning": "Colors flagged core_color (taken from the brand's QX7 resources) are shown under the 'Core Colors' heading. The customizer side is complete; setting the flag depends on QX7.",
+      "gaps": [],
+      "evidence": [
+        {
+          "file": "resources/js/core/customizer/resources.ts",
+          "line": 195,
+          "snippet": "resources?.colors?.map((color: any) => [color?.id, color?.core_color]) ?? []"
+        },
+        {
+          "file": "resources/js/Components/BuilderReskin/Color/ReskinColorPickerModal.vue",
+          "line": 155,
+          "snippet": "acc[color.core_color ? 0 : 1].push(color);"
+        },
+        {
+          "file": "resources/js/Components/BuilderReskin/Color/ReskinColorPickerModal.vue",
+          "line": 5,
+          "snippet": "<h4 class=\"card-title subtitle my-2xs text-sm uk-flex uk-flex-middle\">Core Colors"
+        }
+      ]
+    },
+    {
+      "id": "REQ-019",
+      "title": "Additional Colors group definition",
+      "category": "Customizer Color Picker",
+      "source": {
+        "file": "brd/RD_Core Colors Toggle in Colors By Brand Page.docx",
+        "section": "FR 3 FE Implementation - Colors In Use modal"
+      },
+      "status": "IMPLEMENTED",
+      "reasoning": "Colors that are not core are shown under 'Additional Colors'. The heading falls back to 'Colors' when there are no core colors.",
+      "gaps": [],
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/Color/ReskinColorPickerModal.vue",
+          "line": 38,
+          "snippet": "<span v-if=\"coreColors.length\">Additional Colors</span>"
+        },
+        {
+          "file": "resources/js/Components/BuilderReskin/Color/ReskinCustomProColorPickerModal.vue",
+          "line": 99,
+          "snippet": "const nonCoreColors = computed(() => availableColors.value?.filter(color => !color.core_color && isRenderableColor(color)) || []);"
+        }
+      ]
+    },
+    {
+      "id": "REQ-020",
+      "title": "Core Colors group listed first",
+      "category": "Customizer Color Picker",
+      "source": {
+        "file": "brd/RD_Core Colors Toggle in Colors By Brand Page.docx",
+        "section": "FR 3 FE Implementation - Colors In Use modal"
+      },
+      "status": "IMPLEMENTED",
+      "reasoning": "In the template, the Core Colors block comes before the Additional Colors block. The dropdown opens beneath the Colors in Use tiles.",
+      "gaps": [],
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/Color/ReskinColorPickerModal.vue",
+          "line": 4,
+          "snippet": "<div class=\"card-body body\" v-if=\"coreColors.length\">"
+        },
+        {
+          "file": "resources/js/Components/BuilderReskin/Color/ReskinColorPickerModal.vue",
+          "line": 38,
+          "snippet": "<span v-if=\"coreColors.length\">Additional Colors</span>"
+        }
+      ]
+    },
+    {
+      "id": "REQ-021",
+      "title": "Core Colors info icon",
+      "category": "Customizer Color Picker",
+      "source": {
+        "file": "brd/RD_Core Colors Toggle in Colors By Brand Page.docx",
+        "section": "FR 3 FE Implementation - Colors In Use modal"
+      },
+      "status": "NOT_IMPLEMENTED",
+      "reasoning": "The Core Colors heading is plain text. It has a flex class but no icon element, and no info icon or tooltip appears in any BuilderReskin/Color component.",
+      "gaps": [
+        "No (i) info icon next to the Core Colors heading in any picker: ReskinColorPickerModal, ReskinCustomProColorPickerModal or ColorsInUseModal."
+      ],
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/Color/ReskinColorPickerModal.vue",
+          "line": 5,
+          "snippet": "<h4 class=\"card-title subtitle my-2xs text-sm uk-flex uk-flex-middle\">Core Colors"
+        }
+      ]
+    },
+    {
+      "id": "REQ-022",
+      "title": "Selected color check indicator",
+      "category": "Customizer Color Picker",
+      "source": {
+        "file": "brd/RD_Core Colors Toggle in Colors By Brand Page.docx",
+        "section": "FR 3 FE Implementation - Colors In Use modal"
+      },
+      "status": "PARTIAL",
+      "reasoning": "Every swatch has a red checkmark SVG. CSS (.color-lib-option:checked ~ .check-icon) shows it only when the radio is checked, and the radio is checked only for the single color whose tile was clicked (activeColor). Other colors that are currently in use get no checkmark, and in add (+) mode or replace mode none is checked.",
+      "gaps": [
+        "The checkmark marks only the tile being edited, not every color currently in use. This matches the BRD only if 'in use' means the tile that was clicked.",
+        "No checkmark is shown in add (+) mode or when isReplaceColor is true."
+      ],
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/Color/ReskinColorPickerModal.vue",
+          "line": 20,
+          "snippet": ":checked=\"!isReplaceColor && color?.color_code === activeColor?.color_code\""
+        },
+        {
+          "file": "resources/js/Components/BuilderReskin/Color/ReskinColorPickerModal.vue",
+          "line": 24,
+          "snippet": "<svg class=\"check-icon icon-base\" viewBox=\"0 0 116 116\" xmlns=\"http://www.w3.org/2000/svg\">"
+        }
+      ]
+    },
+    {
+      "id": "REQ-023",
+      "title": "Removable colors in Colors In Use",
+      "category": "Customizer Color Picker",
+      "source": {
+        "file": "brd/RD_Core Colors Toggle in Colors By Brand Page.docx",
+        "section": "FR 3 FE Implementation - Colors In Use modal"
+      },
+      "status": "IMPLEMENTED",
+      "reasoning": "Each tile has an X icon that calls removeColor. A + 'Add Colors' button opens the picker in add mode.",
+      "gaps": [],
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/Color/ReskinActiveColorRow.vue",
+          "line": 62,
+          "snippet": "<XCircleIcon class=\"icon-md remove-btn\""
+        },
+        {
+          "file": "resources/js/Components/BuilderReskin/Color/ReskinActiveColorRow.vue",
+          "line": 63,
+          "snippet": "@click.stop.prevent=\"removeColor(color)\""
+        },
+        {
+          "file": "resources/js/Components/BuilderReskin/Color/ReskinActiveColorRow.vue",
+          "line": 77,
+          "snippet": "uk-tooltip=\"title: Add Colors\""
+        }
+      ]
+    },
+    {
+      "id": "REQ-024",
+      "title": "Twill availability message",
+      "category": "Customizer Color Picker",
+      "source": {
+        "file": "brd/RD_Core Colors Toggle in Colors By Brand Page.docx",
+        "section": "FR 3 FE Implementation - Colors In Use modal"
+      },
+      "status": "PARTIAL",
+      "reasoning": "A footer message does appear below the color groups, but it reads 'Some unavailable colors are not shown.' instead of 'Some colors are not available on Twill.' Nothing in the code mentions Twill.",
+      "gaps": [
+        "Footer wording differs from the BRD: 'Some unavailable colors are not shown.' instead of 'Some colors are not available on Twill.'",
+        "The message does not mention Twill and is not tied to Twill availability.",
+        "The footer is hidden for stock items (v-if=\"!customizerStore.isStockItem\")."
+      ],
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/Color/ReskinColorPickerModal.vue",
+          "line": 70,
+          "snippet": "<div v-if=\"!customizerStore.isStockItem\" class=\"text-xs card-footer footer mt-sm\">Some unavailable colors are not shown.</div>"
+        }
+      ]
+    },
+    {
+      "id": "REQ-025",
+      "title": "Tiles show color abbreviation",
+      "category": "Customizer Color Picker",
+      "source": {
+        "file": "brd/RD_Core Colors Toggle in Colors By Brand Page.docx",
+        "section": "FR 3 FE Implementation - Colors In Use modal"
+      },
+      "status": "IMPLEMENTED",
+      "reasoning": "Picker swatches and Colors in Use tiles both render color_code over the swatch background.",
+      "gaps": [],
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/Color/ReskinColorPickerModal.vue",
+          "line": 23,
+          "snippet": "<span class=\"color-code\" :class=\"colorCodeSizeClass(color.color_code)\">{{ color.color_code }}</span>"
+        },
+        {
+          "file": "resources/js/Components/BuilderReskin/Color/ReskinActiveColorRow.vue",
+          "line": 67,
+          "snippet": "<div class=\"color-code\" :class=\"colorCodeSizeClass(color.color_code)\">{{ color.color_code }}</div>"
+        }
+      ]
+    },
+    {
+      "id": "REQ-390",
+      "title": "Core Colors in Customizer Builder",
+      "category": "Customizer Color Picker",
+      "source": {
+        "file": "brd/RD_Core Colors Toggle in Colors By Brand Page.docx",
+        "section": "QX7 / Customizer Checklist"
+      },
+      "status": "IMPLEMENTED",
+      "reasoning": "The reskin builder picker classifies colors as core or additional using populateCoreColors. It is gated by VITE_FEATURE_BUILDER_RESKIN, which is 'true' in the local .env (line 291) but not defined in .env.example, so the deployed value should be confirmed. Note: ColorsInUseModal splits on core_color without calling populateCoreColors, so it depends on core_color already being present in resourceStore colors.",
+      "gaps": [],
+      "evidence": [
+        {
+          "file": "resources/js/Components/BuilderReskin/Color/ReskinColorPickerModal.vue",
+          "line": 152,
+          "snippet": "const list = populateCoreColors(chosenColors) ?? [];"
+        },
+        {
+          "file": "resources/js/stores/master-feature.js",
+          "line": 54,
+          "snippet": "return import.meta.env.VITE_FEATURE_BUILDER_RESKIN === 'true';"
+        },
+        {
+          "file": ".env",
+          "line": 291,
+          "snippet": "VITE_FEATURE_BUILDER_RESKIN = true"
+        }
+      ]
+    }
+  ]
+}

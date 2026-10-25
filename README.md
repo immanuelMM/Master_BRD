@@ -20,8 +20,23 @@ Checks which BRD requirements **really exist** in a system's code. Only proven r
    - `brdPath`: folder with your BRD (`.md`, `.txt`, `.pdf`, `.docx`), e.g. `brd`
    - `systemPath`: the system's source folder (relative or absolute), e.g. `C:/Users/me/source/MySystem`
    - `systemName`: the name shown in the graph
-2. Open Claude Code in this folder and run **`/brd-audit`**
+2. Open Claude Code in this folder and run **`/brd-audit`**, or **`/brd-audit <BRD file>`** for one BRD
 3. Open **`brain.html`** in your browser to see the rotating brain graph
+
+### The knowledge base keeps growing
+Audits are cumulative: no run erases earlier results.
+- Auditing a **new BRD** adds its requirements.
+- Re-running a **BRD you already audited** keeps every requirement found before (with the same ids) and adds any that the earlier reading missed.
+- Status and evidence are refreshed only for the requirements the run re-checked. Each status keeps a `history`, so a change between runs (for example IMPLEMENTED → PARTIAL) is reported.
+
+| Where | What |
+|---|---|
+| `data/requirements.json`, `system-evidence.json`, `verified.json`, `implementation-status.json` | The knowledge base: everything learned so far |
+| `data/run/` | Scratch output of the run in progress (`scope.json` names the BRDs) |
+| `data/runs/<runId>/` | Every finished run, archived with its `merge-summary.json` |
+| `data/kb-log.json` | One line per run: scope, added, re-found, not re-found, status changes |
+
+`node tools/kb-merge.js` does the merge, and `/brd-audit` runs it for you. Add `--dry-run` to preview a merge without changing anything.
 
 ## Pieces
 | File | Role |
@@ -30,7 +45,8 @@ Checks which BRD requirements **really exist** in a system's code. Only proven r
 | `.claude/agents/system-reader.md` | Agent 2: searches the system for candidate evidence per requirement |
 | `.claude/agents/truth-verifier.md` | Agent 3: re-reads the code and records only requirements that are truly implemented |
 | `.claude/skills/brd-audit/SKILL.md` | `/brd-audit`: runs the 3 agents in order |
-| `.claude/hooks/truth-gate.js` | **PostToolUse hook**: when `data/verified.json` is written, checks that every snippet exists verbatim in the system files and drops anything unproven |
+| `.claude/hooks/truth-gate.js` | **PostToolUse hook**: when `data/verified.json` or `data/run/verified.json` is written, checks that every snippet exists verbatim in the system files and drops anything unproven |
+| `tools/kb-merge.js` | Merges a run (`data/run/`) into the cumulative knowledge base, archives it in `data/runs/` and logs it in `data/kb-log.json` |
 | `.claude/hooks/build-graph.js` | Builds `data/graph-data.js` (also runs on **SubagentStop**) |
 | `features.html` | Functional reference: every Customizer page and function (picker, builder, cart/MOQ/promo/PDF, sharing, checkout, orders, account), with rules, messages, flags, routes and open questions, traced from the source |
 | `assets/nav.js` | Shared top navigation loaded by every page (Brain · BRD viewer · System map · Order flow · Analysis requests). Add new pages to its `PAGES` list |

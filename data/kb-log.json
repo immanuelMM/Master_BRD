@@ -1,0 +1,30 @@
+{
+  "runs": [
+    {
+      "runId": "2026-10-25-baseline-4-brds",
+      "mergedAt": "2026-10-25T00:00:00.000Z",
+      "scope": [
+        "brd/BRD_CUSTOMIZER MENU RESKIN.docx",
+        "brd/RD_Core Colors Toggle in Colors By Brand Page.docx",
+        "brd/RD_REJECTIONS.docx",
+        "brd/RD_REORDERS of Legacy Orders (FE).docx"
+      ],
+      "added": 465,
+      "refound": 0,
+      "notRefound": 0,
+      "changes": 0,
+      "note": "Audit made before the knowledge base was cumulative; restored as the starting point."
+    },
+    {
+      "runId": "2026-10-25-core-colors",
+      "mergedAt": "2026-10-25T15:47:00.166Z",
+      "scope": [
+        "brd/RD_Core Colors Toggle in Colors By Brand Page.docx"
+      ],
+      "added": 22,
+      "refound": 4,
+      "notRefound": 0,
+      "changes": 0
+    }
+  ]
+}

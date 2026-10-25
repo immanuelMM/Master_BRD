@@ -1,0 +1,461 @@
+{
+  "brd": [
+    "brd/RD_Core Colors Toggle in Colors By Brand Page.docx"
+  ],
+  "extractedAt": "2026-10-25T23:36:35.777989+08:00",
+  "requirements": [
+    {
+      "id": "REQ-387",
+      "title": "Mark a color as Core Color",
+      "description": "Give the Brand/Admin a way to mark one of their colors as a \"Core Color\" (Brand recommended color) on the Colors By Brand page.",
+      "category": "Core Color Flag",
+      "priority": "Must",
+      "source": {
+        "file": "brd/RD_Core Colors Toggle in Colors By Brand Page.docx",
+        "section": "Goal / Initial Requirements"
+      },
+      "keywords": [
+        "core color",
+        "is_core",
+        "recommended color",
+        "brand color"
+      ]
+    },
+    {
+      "id": "REQ-002",
+      "title": "Core color setting on Colors By Brand page",
+      "description": "Add a control to the Colors By Brand page that an admin can use to indicate whether a color is one of the brand's Core Colors.",
+      "category": "Core Color Flag",
+      "priority": "Must",
+      "source": {
+        "file": "brd/RD_Core Colors Toggle in Colors By Brand Page.docx",
+        "section": "Goal / Initial Requirements"
+      },
+      "keywords": [
+        "colors by brand",
+        "core color",
+        "admin"
+      ]
+    },
+    {
+      "id": "REQ-003",
+      "title": "Core Color toggle follows Active toggle pattern",
+      "description": "The Core Color (recommended color) toggle on the index page is linked to a single-select control on each color's page, like the existing Active toggle (stated as a potential solution).",
+      "category": "Core Color Flag",
+      "priority": "Should",
+      "source": {
+        "file": "brd/RD_Core Colors Toggle in Colors By Brand Page.docx",
+        "section": "Potential solution"
+      },
+      "keywords": [
+        "toggle",
+        "active status",
+        "single select"
+      ]
+    },
+    {
+      "id": "REQ-004",
+      "title": "Admin access path",
+      "description": "The feature is accessed at QX7 > Master Data > Colors > Colors By Brand.",
+      "category": "Colors By Brand Admin",
+      "priority": "Must",
+      "source": {
+        "file": "brd/RD_Core Colors Toggle in Colors By Brand Page.docx",
+        "section": "BR 1 Process Flow / QX7 Checklist"
+      },
+      "keywords": [
+        "qx7",
+        "master data",
+        "colors",
+        "colors by brand"
+      ]
+    },
+    {
+      "id": "REQ-005",
+      "title": "Applies to all brands",
+      "description": "The Core Color feature applies to ALL brands.",
+      "category": "Core Color Flag",
+      "priority": "Must",
+      "source": {
+        "file": "brd/RD_Core Colors Toggle in Colors By Brand Page.docx",
+        "section": "Header (Brand: ALL) / Products Checklist"
+      },
+      "keywords": [
+        "brand",
+        "all brands"
+      ]
+    },
+    {
+      "id": "REQ-006",
+      "title": "Core Color column on index",
+      "description": "The Colors By Brand index page displays a new column titled \"CORE COLOR\".",
+      "category": "Colors By Brand Admin",
+      "priority": "Must",
+      "source": {
+        "file": "brd/RD_Core Colors Toggle in Colors By Brand Page.docx",
+        "section": "FR 1 Colors By Brand Index Page",
+        "type": "image",
+        "image": "data/brd-media/rd-core-colors-toggle-in-colors-by-brand-page/image1.png"
+      },
+      "keywords": [
+        "core color column",
+        "index",
+        "datatable",
+        "colors by brand"
+      ]
+    },
+    {
+      "id": "REQ-388",
+      "title": "Core Color column shows toggle per row",
+      "description": "Each color row on the index page shows a Core Color toggle (on/off) reflecting whether that color is a Core Color.",
+      "category": "Colors By Brand Admin",
+      "priority": "Must",
+      "source": {
+        "file": "brd/RD_Core Colors Toggle in Colors By Brand Page.docx",
+        "section": "FR 1 Colors By Brand Index Page",
+        "type": "image",
+        "image": "data/brd-media/rd-core-colors-toggle-in-colors-by-brand-page/image1.png"
+      },
+      "keywords": [
+        "toggle",
+        "switch",
+        "row",
+        "is_core"
+      ]
+    },
+    {
+      "id": "REQ-008",
+      "title": "Core Color column placement",
+      "description": "The Core Color column is placed after Sort Order and immediately before Active Status.",
+      "category": "Colors By Brand Admin",
+      "priority": "Should",
+      "source": {
+        "file": "brd/RD_Core Colors Toggle in Colors By Brand Page.docx",
+        "section": "FR 1 Colors By Brand Index Page",
+        "type": "image",
+        "image": "data/brd-media/rd-core-colors-toggle-in-colors-by-brand-page/image1.png"
+      },
+      "keywords": [
+        "column order",
+        "sort order",
+        "active status"
+      ]
+    },
+    {
+      "id": "REQ-009",
+      "title": "Core Color toggle editable from index",
+      "description": "The admin can switch the Core Color toggle from the index page, in the same manner as the Active Status toggle (inferred from goal text and image).",
+      "category": "Colors By Brand Admin",
+      "priority": "Should",
+      "source": {
+        "file": "brd/RD_Core Colors Toggle in Colors By Brand Page.docx",
+        "section": "FR 1 Colors By Brand Index Page",
+        "type": "image",
+        "image": "data/brd-media/rd-core-colors-toggle-in-colors-by-brand-page/image1.png"
+      },
+      "keywords": [
+        "toggle",
+        "ajax update",
+        "active status"
+      ]
+    },
+    {
+      "id": "REQ-389",
+      "title": "Core Color toggle on edit form",
+      "description": "The Edit Color By Brand form includes a \"Core Color\" toggle field with an On/Off label.",
+      "category": "Colors By Brand Admin",
+      "priority": "Must",
+      "source": {
+        "file": "brd/RD_Core Colors Toggle in Colors By Brand Page.docx",
+        "section": "FR 2 Edit Color By Brand",
+        "type": "image",
+        "image": "data/brd-media/rd-core-colors-toggle-in-colors-by-brand-page/image3.png"
+      },
+      "keywords": [
+        "edit color by brand",
+        "core color",
+        "toggle",
+        "form"
+      ]
+    },
+    {
+      "id": "REQ-011",
+      "title": "Core Color toggle placement on edit form",
+      "description": "On the Edit form, the Core Color toggle appears after Sort Order and before Active Status.",
+      "category": "Colors By Brand Admin",
+      "priority": "Should",
+      "source": {
+        "file": "brd/RD_Core Colors Toggle in Colors By Brand Page.docx",
+        "section": "FR 2 Edit Color By Brand",
+        "type": "image",
+        "image": "data/brd-media/rd-core-colors-toggle-in-colors-by-brand-page/image3.png"
+      },
+      "keywords": [
+        "form field order",
+        "sort order",
+        "active status"
+      ]
+    },
+    {
+      "id": "REQ-012",
+      "title": "Core Color saved on Save",
+      "description": "Saving the Edit Color By Brand form persists the Core Color toggle value for that brand color.",
+      "category": "Core Color Flag",
+      "priority": "Must",
+      "source": {
+        "file": "brd/RD_Core Colors Toggle in Colors By Brand Page.docx",
+        "section": "FR 2 Edit Color By Brand",
+        "type": "image",
+        "image": "data/brd-media/rd-core-colors-toggle-in-colors-by-brand-page/image3.png"
+      },
+      "keywords": [
+        "save",
+        "persist",
+        "update",
+        "core color"
+      ]
+    },
+    {
+      "id": "REQ-013",
+      "title": "Edit form value reflects stored state",
+      "description": "The Edit form shows the toggle in its currently stored state (e.g. On for White - W in the example).",
+      "category": "Colors By Brand Admin",
+      "priority": "Should",
+      "source": {
+        "file": "brd/RD_Core Colors Toggle in Colors By Brand Page.docx",
+        "section": "FR 2 Edit Color By Brand",
+        "type": "image",
+        "image": "data/brd-media/rd-core-colors-toggle-in-colors-by-brand-page/image3.png"
+      },
+      "keywords": [
+        "edit",
+        "prefill",
+        "core color"
+      ]
+    },
+    {
+      "id": "REQ-014",
+      "title": "Index and edit toggle stay in sync",
+      "description": "The Core Color value set on the index page and on the edit page reflect the same underlying value (linked, as with the Active toggle).",
+      "category": "Core Color Flag",
+      "priority": "Should",
+      "source": {
+        "file": "brd/RD_Core Colors Toggle in Colors By Brand Page.docx",
+        "section": "Potential solution / FR 1-2"
+      },
+      "keywords": [
+        "sync",
+        "linked toggle"
+      ]
+    },
+    {
+      "id": "REQ-015",
+      "title": "Colors In Use default display",
+      "description": "Colors in Use displays the default colors of the uniform upon loading, or the colors applied from the Picker page.",
+      "category": "Customizer Color Picker",
+      "priority": "Must",
+      "source": {
+        "file": "brd/RD_Core Colors Toggle in Colors By Brand Page.docx",
+        "section": "FR 3 FE Implementation - Colors In Use modal"
+      },
+      "keywords": [
+        "colors in use",
+        "default colors",
+        "picker",
+        "customizer"
+      ]
+    },
+    {
+      "id": "REQ-016",
+      "title": "Change color via tile click",
+      "description": "The user can change colors by clicking each color tile in Colors In Use.",
+      "category": "Customizer Color Picker",
+      "priority": "Must",
+      "source": {
+        "file": "brd/RD_Core Colors Toggle in Colors By Brand Page.docx",
+        "section": "FR 3 FE Implementation - Colors In Use modal"
+      },
+      "keywords": [
+        "color tile",
+        "click",
+        "colors in use"
+      ]
+    },
+    {
+      "id": "REQ-017",
+      "title": "Picker opens below selected section",
+      "description": "Upon clicking a color tile, the color picker is displayed below the selected section.",
+      "category": "Customizer Color Picker",
+      "priority": "Must",
+      "source": {
+        "file": "brd/RD_Core Colors Toggle in Colors By Brand Page.docx",
+        "section": "FR 3 FE Implementation - Colors In Use modal"
+      },
+      "keywords": [
+        "color picker",
+        "modal",
+        "section"
+      ]
+    },
+    {
+      "id": "REQ-018",
+      "title": "Core Colors group definition",
+      "description": "Core Colors are the set of colors determined by the brand (those flagged as Core Color) and are displayed in a \"Core Colors\" group in the color picker.",
+      "category": "Customizer Color Picker",
+      "priority": "Must",
+      "source": {
+        "file": "brd/RD_Core Colors Toggle in Colors By Brand Page.docx",
+        "section": "FR 3 FE Implementation - Colors In Use modal",
+        "type": "image",
+        "image": "data/brd-media/rd-core-colors-toggle-in-colors-by-brand-page/image2.png"
+      },
+      "keywords": [
+        "core colors",
+        "brand colors",
+        "picker"
+      ]
+    },
+    {
+      "id": "REQ-019",
+      "title": "Additional Colors group definition",
+      "description": "Additional Colors are all colors other than the Core Colors and are displayed in an \"Additional Colors\" group in the color picker.",
+      "category": "Customizer Color Picker",
+      "priority": "Must",
+      "source": {
+        "file": "brd/RD_Core Colors Toggle in Colors By Brand Page.docx",
+        "section": "FR 3 FE Implementation - Colors In Use modal",
+        "type": "image",
+        "image": "data/brd-media/rd-core-colors-toggle-in-colors-by-brand-page/image2.png"
+      },
+      "keywords": [
+        "additional colors",
+        "picker"
+      ]
+    },
+    {
+      "id": "REQ-020",
+      "title": "Core Colors group listed first",
+      "description": "The Core Colors group is displayed above the Additional Colors group, beneath Colors In Use.",
+      "category": "Customizer Color Picker",
+      "priority": "Should",
+      "source": {
+        "file": "brd/RD_Core Colors Toggle in Colors By Brand Page.docx",
+        "section": "FR 3 FE Implementation - Colors In Use modal",
+        "type": "image",
+        "image": "data/brd-media/rd-core-colors-toggle-in-colors-by-brand-page/image2.png"
+      },
+      "keywords": [
+        "order",
+        "core colors",
+        "additional colors"
+      ]
+    },
+    {
+      "id": "REQ-021",
+      "title": "Core Colors info icon",
+      "description": "The Core Colors heading has an info (i) icon.",
+      "category": "Customizer Color Picker",
+      "priority": "Could",
+      "source": {
+        "file": "brd/RD_Core Colors Toggle in Colors By Brand Page.docx",
+        "section": "FR 3 FE Implementation - Colors In Use modal",
+        "type": "image",
+        "image": "data/brd-media/rd-core-colors-toggle-in-colors-by-brand-page/image2.png"
+      },
+      "keywords": [
+        "info icon",
+        "tooltip",
+        "core colors"
+      ]
+    },
+    {
+      "id": "REQ-022",
+      "title": "Selected color check indicator",
+      "description": "A color in the picker that is currently in use shows a checkmark badge on its tile (e.g. O under Core Colors).",
+      "category": "Customizer Color Picker",
+      "priority": "Should",
+      "source": {
+        "file": "brd/RD_Core Colors Toggle in Colors By Brand Page.docx",
+        "section": "FR 3 FE Implementation - Colors In Use modal",
+        "type": "image",
+        "image": "data/brd-media/rd-core-colors-toggle-in-colors-by-brand-page/image2.png"
+      },
+      "keywords": [
+        "checkmark",
+        "selected",
+        "tile"
+      ]
+    },
+    {
+      "id": "REQ-023",
+      "title": "Removable colors in Colors In Use",
+      "description": "Each color in Colors In Use can be removed via an x control, and more can be added via a + control.",
+      "category": "Customizer Color Picker",
+      "priority": "Could",
+      "source": {
+        "file": "brd/RD_Core Colors Toggle in Colors By Brand Page.docx",
+        "section": "FR 3 FE Implementation - Colors In Use modal",
+        "type": "image",
+        "image": "data/brd-media/rd-core-colors-toggle-in-colors-by-brand-page/image2.png"
+      },
+      "keywords": [
+        "remove color",
+        "add color",
+        "colors in use"
+      ]
+    },
+    {
+      "id": "REQ-024",
+      "title": "Twill availability message",
+      "description": "The color picker shows the message \"Some colors are not available on Twill.\" below the color groups.",
+      "category": "Customizer Color Picker",
+      "priority": "Should",
+      "source": {
+        "file": "brd/RD_Core Colors Toggle in Colors By Brand Page.docx",
+        "section": "FR 3 FE Implementation - Colors In Use modal",
+        "type": "image",
+        "image": "data/brd-media/rd-core-colors-toggle-in-colors-by-brand-page/image2.png"
+      },
+      "keywords": [
+        "twill",
+        "availability",
+        "message"
+      ]
+    },
+    {
+      "id": "REQ-025",
+      "title": "Tiles show color abbreviation",
+      "description": "Each color tile shows the brand color abbreviation on its brand color swatch.",
+      "category": "Customizer Color Picker",
+      "priority": "Should",
+      "source": {
+        "file": "brd/RD_Core Colors Toggle in Colors By Brand Page.docx",
+        "section": "FR 3 FE Implementation - Colors In Use modal",
+        "type": "image",
+        "image": "data/brd-media/rd-core-colors-toggle-in-colors-by-brand-page/image2.png"
+      },
+      "keywords": [
+        "abbreviation",
+        "swatch",
+        "tile"
+      ]
+    },
+    {
+      "id": "REQ-390",
+      "title": "Core Colors in Customizer Builder",
+      "description": "The Customizer Builder color picker modal classifies colors as Core Colors vs Additional Colors (Customizer Reskin 'Core Colors' Classification In Color Picker Modal).",
+      "category": "Customizer Color Picker",
+      "priority": "Must",
+      "source": {
+        "file": "brd/RD_Core Colors Toggle in Colors By Brand Page.docx",
+        "section": "QX7 / Customizer Checklist"
+      },
+      "keywords": [
+        "builder",
+        "reskin",
+        "core colors classification",
+        "color picker modal"
+      ]
+    }
+  ]
+}

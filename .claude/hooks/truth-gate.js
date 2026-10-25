@@ -11,11 +11,14 @@ const { build } = require('./build-graph');
 // Every file listed here is gated: only requirements whose snippets exist in the system survive.
 // verified.part-N.json are written by parallel verifiers before being merged into verified.json.
 const GATED_RE = /^(builder-)?verified(\.part-\d+)?\.json$/;
-const gatedFiles = () => (fs.existsSync(DATA) ? fs.readdirSync(DATA).filter((f) => GATED_RE.test(f)) : []);
+// The knowledge base lives in data/; an audit run writes to data/run/ before tools/kb-merge.js merges it.
+const RUN = path.join(DATA, 'run');
+const listIn = (re) => [DATA, RUN].flatMap((dir) => (fs.existsSync(dir) ? fs.readdirSync(dir).filter((f) => re.test(f)).map((f) => path.join(dir, f)) : []));
+const gatedFiles = () => listIn(GATED_RE);
 // Implementation status (IMPLEMENTED / PARTIAL / NOT_IMPLEMENTED) for every requirement: snippets are
 // checked the same way, but items are downgraded rather than removed.
 const STATUS_RE = /^implementation-status(\.part-\d+)?\.json$/;
-const statusFiles = () => (fs.existsSync(DATA) ? fs.readdirSync(DATA).filter((f) => STATUS_RE.test(f)) : []);
+const statusFiles = () => listIn(STATUS_RE);
 const MIN_CONFIDENCE = 0.7;
 
 function readStdin() {
@@ -118,20 +121,23 @@ function gateStatus(FILE) {
   const target = path.basename(file);
 
   if (!all && !GATED_RE.test(target) && !STATUS_RE.test(target) && !/^(requirements|system-evidence)\.json$/.test(target)) process.exit(0);
-  if (!all && path.basename(path.dirname(path.resolve(file))) !== 'data') process.exit(0);
+  const same = (a, b) => path.resolve(a).toLowerCase() === path.resolve(b).toLowerCase();
+  const dir = path.dirname(path.resolve(file));
+  if (!all && !same(dir, DATA) && !same(dir, RUN)) process.exit(0);
+  const selected = (f) => all || same(f, file);
+  const label = (f) => path.relative(DATA, f).split(path.sep).join('/');
 
   let result = null;
-  for (const name of gatedFiles()) {
-    const file = path.join(DATA, name);
-    if (!(all || target === name) || !fs.existsSync(file)) continue;
-    const r = gate(file);
-    r.dropped = r.dropped.map((d) => `${name}: ${d}`);
+  for (const f of gatedFiles()) {
+    if (!selected(f) || !fs.existsSync(f)) continue;
+    const r = gate(f);
+    r.dropped = r.dropped.map((d) => `${label(f)}: ${d}`);
     result = result ? { kept: result.kept + r.kept, dropped: result.dropped.concat(r.dropped) } : r;
   }
-  for (const name of statusFiles()) {
-    const file = path.join(DATA, name);
-    if (!(all || target === name)) continue;
-    const r = gateStatus(file);
+  for (const f of statusFiles()) {
+    if (!selected(f)) continue;
+    const name = label(f);
+    const r = gateStatus(f);
     if (r.dropped.length) result = { kept: (result ? result.kept : 0) + r.kept, dropped: (result ? result.dropped : []).concat(r.dropped.map((d) => `${name}: ${d}`)) };
   }
   const stats = build();
